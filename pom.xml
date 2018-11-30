@@ -54,27 +54,6 @@
     </dependencies>
 
     <build>
-        <resources>
-            <resource>
-                <directory>${project.build.directory}/maven-shared-archive-resources</directory>
-                <targetPath>${project.build.directory}</targetPath>
-                <includes>
-                    <include>Dockerfile</include>
-                </includes>
-                <filtering>true</filtering>
-            </resource>
-            <resource>
-                <directory>${project.build.directory}/maven-shared-archive-resources</directory>
-                <filtering>true</filtering>
-                <excludes>
-                    <exclude>Dockerfile</exclude>
-                </excludes>
-            </resource>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
