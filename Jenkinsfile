@@ -4,6 +4,7 @@ build('analytics', 'java-maven') {
 
     def serviceName = env.REPO_NAME
     def mvnArgs = '-DjvmArgs="-Xmx256m"'
+    def javaHome = 'JAVA_HOME=/opt/openjdk-bin-11.0.1_p13'
 
     // Run mvn and generate docker file
     runStage('Maven package') {
@@ -12,9 +13,9 @@ build('analytics', 'java-maven') {
                     " -Dgit.branch=${env.BRANCH_NAME} " +
                     " ${mvnArgs}"
             if (env.BRANCH_NAME == 'master') {
-                sh 'mvn deploy' + mvn_command_arguments
+                sh '${javaHome} mvn deploy' + mvn_command_arguments
             } else {
-                sh 'mvn package' + mvn_command_arguments
+                sh '${javaHome} mvn package' + mvn_command_arguments
             }
         }
     }
