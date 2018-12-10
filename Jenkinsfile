@@ -13,9 +13,9 @@ build('analytics', 'java-maven') {
                     " -Dgit.branch=${env.BRANCH_NAME} " +
                     " ${mvnArgs}"
             if (env.BRANCH_NAME == 'master') {
-                sh '${javaHome} mvn deploy' + mvn_command_arguments
+                sh 'JAVA_HOME=/opt/openjdk-bin-11.0.1_p13 mvn deploy' + mvn_command_arguments
             } else {
-                sh '${javaHome} mvn package' + mvn_command_arguments
+                sh 'JAVA_HOME=/opt/openjdk-bin-11.0.1_p13 mvn package' + mvn_command_arguments
             }
         }
     }
