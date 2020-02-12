@@ -135,7 +135,8 @@ public class MgPaymentAggregatorListener {
             if (i > logCount || currentYear.get() != year) {
                 count.set(0);
                 if (currentYear.get() != year) {
-                    log.info("It's a new year {} -> {}", currentYear.get(), year);
+                    log.info("It's a new year {} -> {} partition: {} sumByCardType: {} countStatuses: {}",
+                            currentYear.get(), year, partition, sumByCardType.get(), countStatuses.get());
                 }
                 log.info("partition: {} sumByCardType: {}", partition, sumByCardType.get());
                 log.info("partition: {} countStatuses: {}", partition, countStatuses.get());
