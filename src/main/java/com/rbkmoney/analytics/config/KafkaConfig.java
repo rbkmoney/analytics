@@ -53,6 +53,9 @@ public class KafkaConfig {
     private String stateDir;
     @Value("${kafka.bootstrap.servers}")
     private String bootstrapServers;
+    @Value("${kafka.stat.group}")
+    private String group;
+
 
     @Value("${kafka.topic.event.sink.initial}")
     private String initialEventSink;
@@ -207,7 +210,7 @@ public class KafkaConfig {
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, MachineEvent> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, MachineEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        String consumerGroup = consumerGroupIdService.generateGroupId("event-sink-fast-statistic");
+        String consumerGroup = consumerGroupIdService.generateGroupId(group);
         initDefaultListenerProperties(factory, consumerGroup, new MachineEventDeserializer());
         return factory;
     }

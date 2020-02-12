@@ -29,6 +29,7 @@ clickhouse.db:
   compress: false
 
 kafka:
+  stat.group: event-sink-fast-statistic-v2
   bootstrap.servers: localhost:9092
   streams:
     event.sink.enable: true
