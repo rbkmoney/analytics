@@ -45,11 +45,14 @@ public class MgPaymentAggregatorListener {
 
     @Value("${log.count:10000000}")
     private int logCount;
+    @Value("${throttling.timeout:50}")
+    private int timeout;
 
     @KafkaListener(topics = "${kafka.topic.event.sink.initial}", containerFactory = "kafkaListenerContainerFactory")
     public void listen(@Payload List<MachineEvent> messages, @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition, Acknowledgment ack) {
         try {
             handle(messages, partition);
+            Thread.sleep(timeout);
         } catch (Exception e) {
             log.warn("Can't aggr some message: {}", messages);
         }
