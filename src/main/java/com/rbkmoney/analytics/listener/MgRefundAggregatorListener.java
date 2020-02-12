@@ -14,13 +14,13 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Component
+//@Component
 @RequiredArgsConstructor
 public class MgRefundAggregatorListener {
 
     private final MgRefundRepository mgRefundRepository;
 
-    @KafkaListener(topics = "${kafka.topic.event.sink.aggregatedRefund}", containerFactory = "kafkaListenerRefundContainerFactory")
+//    @KafkaListener(topics = "${kafka.topic.event.sink.aggregatedRefund}", containerFactory = "kafkaListenerRefundContainerFactory")
     public void listen(List<MgRefundRow> batch, Acknowledgment ack) {
         try {
             if (!CollectionUtils.isEmpty(batch)) {

@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Properties;
 
 @Slf4j
-@Component
+//@Component
 @RequiredArgsConstructor
 public class StartupListener implements ApplicationListener<ContextRefreshedEvent> {
 

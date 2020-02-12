@@ -45,7 +45,7 @@ kafka:
       aggregatedRefund: aggregated_event_sink_refund
   consumer:
       prefix: analytics
-      concurrency: 7
+      concurrency: 1
   ssl:
     enabled: false
   state:
