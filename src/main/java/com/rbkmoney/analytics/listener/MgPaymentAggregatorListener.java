@@ -43,7 +43,7 @@ public class MgPaymentAggregatorListener {
     private AtomicInteger count = new AtomicInteger();
     private AtomicInteger currentYear = new AtomicInteger();
 
-    @Value("${log.count:1000000}")
+    @Value("${log.count:10000000}")
     private int logCount;
 
     @KafkaListener(topics = "${kafka.topic.event.sink.initial}", containerFactory = "kafkaListenerContainerFactory")
@@ -134,14 +134,15 @@ public class MgPaymentAggregatorListener {
 
             if (i > logCount || currentYear.get() != year) {
                 count.set(0);
+                if (currentYear.get() != year) {
+                    log.info("It's a new year {} -> {}", currentYear.get(), year);
+                }
                 log.info("partition: {} sumByCardType: {}", partition, sumByCardType.get());
                 log.info("partition: {} countStatuses: {}", partition, countStatuses.get());
             }
 
             currentYear.set(year);
         }
-
-
     }
 
     private void calculateForKey(int year, InvoicePayment payment, long amount, String name, String currency) {
@@ -170,6 +171,5 @@ public class MgPaymentAggregatorListener {
 
         return statModel;
     }
-
 
 }
