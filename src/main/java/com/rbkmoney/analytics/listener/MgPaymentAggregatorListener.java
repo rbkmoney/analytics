@@ -103,24 +103,23 @@ public class MgPaymentAggregatorListener {
                 } else if (payer.isSetRecurrent()) {
                     RecurrentPayer recurrent = payer.getRecurrent();
                     paymentTool = recurrent.getPaymentTool();
-                } else {
-                    log.warn("Unkonwn payment tool in payer: {}", payer);
                 }
 
-                PaymentToolType paymentToolType = TBaseUtil.unionFieldToEnum(paymentTool, PaymentToolType.class);
-                BankCardPaymentSystem paymentSystem = null;
-
-                if (paymentTool.isSetBankCard()) {
-                    BankCard bankCard = paymentTool.getBankCard();
-                    calculateForKey(year, payment, amount, bankCard.getPaymentSystem().name(), currency);
-                } else if (paymentTool.isSetMobileCommerce()) {
-                    calculateForKey(year, payment, amount, MOBILE, currency);
-                } else if (paymentTool.isSetDigitalWallet()) {
-                    calculateForKey(year, payment, amount, PAYMENT_TERMINAL, currency);
-                } else if (paymentTool.isSetCryptoCurrency()) {
-                    calculateForKey(year, payment, amount, CRYPTO_CUR, currency);
-                } else if (paymentTool.isSetDigitalWallet()) {
-                    calculateForKey(year, payment, amount, DIGITAL_WALLET, currency);
+                if (paymentTool != null) {
+                    PaymentToolType paymentToolType = TBaseUtil.unionFieldToEnum(paymentTool, PaymentToolType.class);
+                    BankCardPaymentSystem paymentSystem = null;
+                    if (paymentTool.isSetBankCard()) {
+                        BankCard bankCard = paymentTool.getBankCard();
+                        calculateForKey(year, payment, amount, bankCard.getPaymentSystem().name(), currency);
+                    } else if (paymentTool.isSetMobileCommerce()) {
+                        calculateForKey(year, payment, amount, MOBILE, currency);
+                    } else if (paymentTool.isSetPaymentTerminal()) {
+                        calculateForKey(year, payment, amount, PAYMENT_TERMINAL, currency);
+                    } else if (paymentTool.isSetCryptoCurrency()) {
+                        calculateForKey(year, payment, amount, CRYPTO_CUR, currency);
+                    } else if (paymentTool.isSetDigitalWallet()) {
+                        calculateForKey(year, payment, amount, DIGITAL_WALLET, currency);
+                    }
                 }
 
             } else if (payload.isSetInvoicePaymentStatusChanged()) {
