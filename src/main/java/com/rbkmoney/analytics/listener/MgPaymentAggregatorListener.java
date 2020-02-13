@@ -95,8 +95,9 @@ public class MgPaymentAggregatorListener {
                 String currency = payment.getCost().getCurrency().getSymbolicCode();
 
                 Payer payer = payment.getPayer();
+                invoicePaymentStarted.get
+                payment.getShopId()
                 PaymentTool paymentTool = null;
-
                 if (payer.isSetPaymentResource()) {
                     DisposablePaymentResource resource = payer.getPaymentResource().getResource();
                     paymentTool = resource.getPaymentTool();
@@ -128,6 +129,7 @@ public class MgPaymentAggregatorListener {
             } else if (payload.isSetInvoicePaymentStatusChanged()) {
                 InvoicePaymentStatus status = payload.getInvoicePaymentStatusChanged().getStatus();
                 PaymentStatus paymentStatus = TBaseUtil.unionFieldToEnum(status, PaymentStatus.class);
+
                 StatModel statModel = countStatuses.get().get(generateKeyPSystem(year, paymentStatus.name()));
                 statModel = calculateBankCardData(0L, statModel);
                 countStatuses.get().put(generateKeyPSystem(year, paymentStatus.name()), statModel);
