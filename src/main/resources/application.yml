@@ -29,7 +29,6 @@ clickhouse.db:
   compress: false
 
 kafka:
-  stat.group: event-sink-fast-statistic-v2
   bootstrap.servers: localhost:9092
   streams:
     event.sink.enable: true
@@ -46,7 +45,7 @@ kafka:
       aggregatedRefund: aggregated_event_sink_refund
   consumer:
       prefix: analytics
-      concurrency: 1
+      concurrency: 7
   ssl:
     enabled: false
   state:

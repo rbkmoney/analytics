@@ -15,16 +15,16 @@ import javax.annotation.PreDestroy;
 @SpringBootApplication
 public class AnalyticsApplication extends SpringApplication {
 
-//    @Autowired
-//    private StartupListener startupListener;
+    @Autowired
+    private StartupListener startupListener;
 
     public static void main(String[] args) {
         SpringApplication.run(AnalyticsApplication.class, args);
     }
 
-//    @PreDestroy
-//    public void preDestroy() {
-//        log.info("AnalyticsApplication preDestroy!");
-//        startupListener.stop();
-//    }
+    @PreDestroy
+    public void preDestroy() {
+        log.info("AnalyticsApplication preDestroy!");
+        startupListener.stop();
+    }
 }

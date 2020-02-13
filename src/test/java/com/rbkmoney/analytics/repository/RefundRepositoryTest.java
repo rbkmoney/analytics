@@ -8,7 +8,6 @@ import com.rbkmoney.analytics.dao.model.NumberModel;
 import com.rbkmoney.analytics.dao.repository.MgRefundRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 
-@Ignore
 @Slf4j
 @RunWith(SpringRunner.class)
 @ContextConfiguration(initializers = RefundRepositoryTest.Initializer.class,

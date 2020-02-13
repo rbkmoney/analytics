@@ -6,7 +6,6 @@ import com.rbkmoney.analytics.utils.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
@@ -19,7 +18,6 @@ import ru.yandex.clickhouse.settings.ClickHouseProperties;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-@Ignore
 @Slf4j
 @ContextConfiguration(initializers = ClickhouseAbstractTest.Initializer.class,
         classes = {JdbcTemplateAutoConfiguration.class, ClickhouseDbProperties.class, ClickhouseConfig.class})

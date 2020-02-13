@@ -35,39 +35,39 @@ import java.util.Map;
 public class EventSinkListenerTest extends KafkaAbstractTest {
 
     public static final long MESSAGE_TIMEOUT = 4_000L;
-//    @ClassRule
-//    public static ClickHouseContainer clickHouseContainer = new ClickHouseContainer();
-//
-//    public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-//        @Override
-//        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-//            log.info("clickhouse.db.url={}", clickHouseContainer.getJdbcUrl());
-//            TestPropertyValues.of("clickhouse.db.url=" + clickHouseContainer.getJdbcUrl(),
-//                    "clickhouse.db.user=" + clickHouseContainer.getUsername(),
-//                    "clickhouse.db.password=" + clickHouseContainer.getPassword())
-//                    .applyTo(configurableApplicationContext.getEnvironment());
-//        }
-//    }
-//
-//    @Autowired
-//    private JdbcTemplate jdbcTemplate;
-//
-//    @Before
-//    public void init() throws SQLException {
-//        try (Connection connection = getSystemConn()) {
-//            String sql = FileUtil.getFile("sql/V1__db_init.sql");
-//            String[] split = sql.split(";");
-//            for (String exec : split) {
-//                connection.createStatement().execute(exec);
-//            }
-//        }
-//    }
-//
-//    private Connection getSystemConn() throws SQLException {
-//        ClickHouseProperties properties = new ClickHouseProperties();
-//        ClickHouseDataSource dataSource = new ClickHouseDataSource(clickHouseContainer.getJdbcUrl(), properties);
-//        return dataSource.getConnection();
-//    }
+    @ClassRule
+    public static ClickHouseContainer clickHouseContainer = new ClickHouseContainer();
+
+    public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+        @Override
+        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+            log.info("clickhouse.db.url={}", clickHouseContainer.getJdbcUrl());
+            TestPropertyValues.of("clickhouse.db.url=" + clickHouseContainer.getJdbcUrl(),
+                    "clickhouse.db.user=" + clickHouseContainer.getUsername(),
+                    "clickhouse.db.password=" + clickHouseContainer.getPassword())
+                    .applyTo(configurableApplicationContext.getEnvironment());
+        }
+    }
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Before
+    public void init() throws SQLException {
+        try (Connection connection = getSystemConn()) {
+            String sql = FileUtil.getFile("sql/V1__db_init.sql");
+            String[] split = sql.split(";");
+            for (String exec : split) {
+                connection.createStatement().execute(exec);
+            }
+        }
+    }
+
+    private Connection getSystemConn() throws SQLException {
+        ClickHouseProperties properties = new ClickHouseProperties();
+        ClickHouseDataSource dataSource = new ClickHouseDataSource(clickHouseContainer.getJdbcUrl(), properties);
+        return dataSource.getConnection();
+    }
 
     @Test
     public void testEventSink() throws InterruptedException {
@@ -84,75 +84,75 @@ public class EventSinkListenerTest extends KafkaAbstractTest {
 
         Thread.sleep(MESSAGE_TIMEOUT);
 
-//        //check sum for captured payment
-//        long sum = jdbcTemplate.queryForObject(
-//                "SELECT shopId, sum(amount) as sum " +
-//                        "from analytic.events_sink " +
-//                        "group by shopId, currency, status " +
-//                        "having shopId = '" + MgEventSinkFlowGenerator.SHOP_ID + "' and status = 'captured' and currency = 'RUB' AND sum(sign) > 0",
-//                (resultSet, i) -> resultSet.getLong("sum"));
-//
-//        Assert.assertEquals(123L, sum);
-//
-//        //statistic for paymentTool
-//        List<Map<String, Object>> list = jdbcTemplate.queryForList(
-//                "SELECT shopId, paymentTool," +
-//                        "( SELECT sum(sign) from analytic.events_sink " +
-//                        "group by shopId, currency " +
-//                        "having shopId = '" + MgEventSinkFlowGenerator.SHOP_ID + "' and currency = 'RUB' " +
-//                        "AND sum(sign) > 0) as total_count, " +
-//                        "sum(sign) * 100 / total_count as sum " +
-//                        "from analytic.events_sink " +
-//                        "group by shopId, currency, paymentTool " +
-//                        "having shopId = '" + MgEventSinkFlowGenerator.SHOP_ID + "' and currency = 'RUB' " +
-//                        "AND sum(sign) > 0");
-//
-//        list.forEach(stringObjectMap -> {
-//                    Object cnt = stringObjectMap.get("sum");
-//                    Assert.assertEquals(100.0, cnt);
-//                    System.out.println(stringObjectMap);
-//                }
-//        );
-//
-//        // test refund flow
-//        sinkEvents = MgEventSinkFlowGenerator.generateRefundedFlow("sourceID_refund_1");
-//        sinkEvents.forEach(this::produceMessageToEventSink);
-//
-//        Thread.sleep(MESSAGE_TIMEOUT);
-//
-//        //check sum for succeeded refund
-//        sum = jdbcTemplate.queryForObject(
-//                "SELECT shopId, sum(amount) as sum " +
-//                        "from analytic.events_sink_refund " +
-//                        "group by shopId, currency, status " +
-//                        "having shopId = '" + MgEventSinkFlowGenerator.SHOP_ID + "' and status = 'succeeded' and currency = 'RUB' AND sum(sign) > 0",
-//                (resultSet, i) -> resultSet.getLong("sum"));
-//
-//        Assert.assertEquals(24L, sum);
-//
-//        //check collapsing sum for pending refund
-//        List<Map<String, Object>> resultList = jdbcTemplate.queryForList(
-//                "SELECT shopId, sum(amount) as sum " +
-//                        "from analytic.events_sink_refund " +
-//                        "group by shopId, currency, status " +
-//                        "having shopId = '" + MgEventSinkFlowGenerator.SHOP_ID + "' and status = 'pending' and currency = 'RUB' AND sum(sign) > 0");
-//
-//        Assert.assertTrue(resultList.isEmpty());
+        //check sum for captured payment
+        long sum = jdbcTemplate.queryForObject(
+                "SELECT shopId, sum(amount) as sum " +
+                        "from analytic.events_sink " +
+                        "group by shopId, currency, status " +
+                        "having shopId = '" + MgEventSinkFlowGenerator.SHOP_ID + "' and status = 'captured' and currency = 'RUB' AND sum(sign) > 0",
+                (resultSet, i) -> resultSet.getLong("sum"));
+
+        Assert.assertEquals(123L, sum);
+
+        //statistic for paymentTool
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(
+                "SELECT shopId, paymentTool," +
+                        "( SELECT sum(sign) from analytic.events_sink " +
+                        "group by shopId, currency " +
+                        "having shopId = '" + MgEventSinkFlowGenerator.SHOP_ID + "' and currency = 'RUB' " +
+                        "AND sum(sign) > 0) as total_count, " +
+                        "sum(sign) * 100 / total_count as sum " +
+                        "from analytic.events_sink " +
+                        "group by shopId, currency, paymentTool " +
+                        "having shopId = '" + MgEventSinkFlowGenerator.SHOP_ID + "' and currency = 'RUB' " +
+                        "AND sum(sign) > 0");
+
+        list.forEach(stringObjectMap -> {
+                    Object cnt = stringObjectMap.get("sum");
+                    Assert.assertEquals(100.0, cnt);
+                    System.out.println(stringObjectMap);
+                }
+        );
+
+        // test refund flow
+        sinkEvents = MgEventSinkFlowGenerator.generateRefundedFlow("sourceID_refund_1");
+        sinkEvents.forEach(this::produceMessageToEventSink);
+
+        Thread.sleep(MESSAGE_TIMEOUT);
+
+        //check sum for succeeded refund
+        sum = jdbcTemplate.queryForObject(
+                "SELECT shopId, sum(amount) as sum " +
+                        "from analytic.events_sink_refund " +
+                        "group by shopId, currency, status " +
+                        "having shopId = '" + MgEventSinkFlowGenerator.SHOP_ID + "' and status = 'succeeded' and currency = 'RUB' AND sum(sign) > 0",
+                (resultSet, i) -> resultSet.getLong("sum"));
+
+        Assert.assertEquals(24L, sum);
+
+        //check collapsing sum for pending refund
+        List<Map<String, Object>> resultList = jdbcTemplate.queryForList(
+                "SELECT shopId, sum(amount) as sum " +
+                        "from analytic.events_sink_refund " +
+                        "group by shopId, currency, status " +
+                        "having shopId = '" + MgEventSinkFlowGenerator.SHOP_ID + "' and status = 'pending' and currency = 'RUB' AND sum(sign) > 0");
+
+        Assert.assertTrue(resultList.isEmpty());
     }
-//
-//    @AfterClass
-//    public static void clean() {
-//        listFilesForFolder(new File("tmp/state-store/"));
-//    }
-//
-//    public static void listFilesForFolder(final File folder) {
-//        for (final File fileEntry : folder.listFiles()) {
-//            if (fileEntry.isDirectory()) {
-//                listFilesForFolder(fileEntry);
-//            } else {
-//                fileEntry.delete();
-//            }
-//        }
-//        folder.delete();
-//    }
+
+    @AfterClass
+    public static void clean() {
+        listFilesForFolder(new File("tmp/state-store/"));
+    }
+
+    public static void listFilesForFolder(final File folder) {
+        for (final File fileEntry : folder.listFiles()) {
+            if (fileEntry.isDirectory()) {
+                listFilesForFolder(fileEntry);
+            } else {
+                fileEntry.delete();
+            }
+        }
+        folder.delete();
+    }
 }
