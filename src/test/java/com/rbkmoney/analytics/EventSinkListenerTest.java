@@ -84,6 +84,7 @@ public class EventSinkListenerTest extends KafkaAbstractTest {
 
         Thread.sleep(MESSAGE_TIMEOUT);
 
+
         //check sum for captured payment
         long sum = jdbcTemplate.queryForObject(
                 "SELECT shopId, sum(amount) as sum " +
