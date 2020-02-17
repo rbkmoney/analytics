@@ -9,7 +9,9 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 @Component
-@ConfigurationProperties(prefix = "kafka.streams.payout")
+@ConfigurationProperties(prefix = "kafka.streams.payment")
 public class PaymentStreamProperties extends CustomProperties {
+
+    private boolean enabled;
 
 }

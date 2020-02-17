@@ -12,4 +12,6 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "kafka.streams.refund")
 public class RefundStreamProperties extends CustomProperties {
 
+    private boolean enabled;
+
 }

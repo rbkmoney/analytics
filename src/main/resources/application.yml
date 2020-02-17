@@ -35,12 +35,14 @@ kafka:
     replication-factor: 1
     concurrency: 7
     refund:
+      enabled: true
       clean-install: true
       throttling-enabled: true
       throttling-timeout-ms: 1
       initial-event-sink: event_sink
       aggregated-sink-topic: aggregated_event_sink_refund
-    payout:
+    payment:
+      enabled: true
       clean-install: true
       throttling-enabled: true
       throttling-timeout-ms: 1
@@ -57,7 +59,7 @@ kafka:
   consumer:
       prefix: analytics
       concurrency: 7
-      throttle-timeout: 1000
+      throttling-timeout-ms: 1000
   ssl:
     enabled: false
   state:

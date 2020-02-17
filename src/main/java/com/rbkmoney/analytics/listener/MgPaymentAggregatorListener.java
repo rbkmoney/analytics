@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MgPaymentAggregatorListener {
 
-    @Value("${kafka.consumer.throttle-timeout}")
+    @Value("${kafka.consumer.throttling-timeout-ms}")
     private int throttleTimeout;
 
     private final MgPaymentRepository mgPaymentRepository;

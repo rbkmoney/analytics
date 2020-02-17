@@ -28,11 +28,6 @@ public class StartupListener implements ApplicationListener<ContextRefreshedEven
     @Value("${kafka.streams.event.sink.enable}")
     private boolean enableEventSinkStream;
 
-    @Value("${kafka.streams.refund-stream-enabled:true}")
-    private boolean refundStreamEnabled;
-    @Value("${kafka.streams.payment-stream-enabled:true}")
-    private boolean paymentStreamEnabled;
-
     private final Properties eventSinkPaymentStreamProperties;
     private final PaymentStreamProperties paymentStreamProperties;
     private final RefundStreamProperties refundStreamProperties;
@@ -50,12 +45,12 @@ public class StartupListener implements ApplicationListener<ContextRefreshedEven
 
     private void startEventStream(long startPreloadTime) {
         if (enableEventSinkStream) {
-            if (paymentStreamProperties.isCleanInstall()) {
+            if (paymentStreamProperties.isEnabled()) {
                 KafkaStreams eventSinkStream = eventSinkAggregationStreamFactory.create(eventSinkPaymentStreamProperties);
                 eventSinkStreams.add(eventSinkStream);
                 log.info("StartupListener start stream eventSinkStream: {}", eventSinkStream.allMetadata());
             }
-            if (refundStreamProperties.isCleanInstall()) {
+            if (refundStreamProperties.isEnabled()) {
                 KafkaStreams eventSinkStreamRefund = eventSinkRefundAggregationStreamFactory.create(eventSinkRefundStreamProperties);
                 eventSinkStreams.add(eventSinkStreamRefund);
                 log.info("StartupListener start stream eventSinkStreamRefund: {}", eventSinkStreamRefund.allMetadata());

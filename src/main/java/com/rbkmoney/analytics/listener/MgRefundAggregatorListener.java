@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MgRefundAggregatorListener {
 
-    @Value("${kafka.consumer.throttle-timeout}")
+    @Value("${kafka.consumer.throttling-timeout-ms}")
     private int throttleTimeout;
 
     private final MgRefundRepository mgRefundRepository;
