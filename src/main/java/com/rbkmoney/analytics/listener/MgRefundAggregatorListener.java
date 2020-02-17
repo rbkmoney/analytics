@@ -4,6 +4,7 @@ import com.rbkmoney.analytics.dao.model.MgRefundRow;
 import com.rbkmoney.analytics.dao.repository.MgRefundRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
@@ -18,10 +19,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MgRefundAggregatorListener {
 
+    @Value("${kafka.consumer.throttle-timeout}")
+    private int throttleTimeout;
+
     private final MgRefundRepository mgRefundRepository;
 
     @KafkaListener(topics = "${kafka.topic.event.sink.aggregatedRefund}", containerFactory = "kafkaListenerRefundContainerFactory")
-    public void listen(List<MgRefundRow> batch, Acknowledgment ack) {
+    public void listen(List<MgRefundRow> batch, Acknowledgment ack) throws InterruptedException {
         try {
             if (!CollectionUtils.isEmpty(batch)) {
                 log.info("MgRefundAggregatorListener listen batch.size: {}", batch.size());
@@ -35,7 +39,8 @@ public class MgRefundAggregatorListener {
                 mgRefundRepository.insertBatch(resultRaws);
             }
         } catch (Exception e) {
-            log.error("Exception when MgPaymentAggregatorListener e: ", e);
+            log.error("Exception when MgRefundAggregatorListener e: ", e);
+            Thread.sleep(throttleTimeout);
             throw e;
         }
         ack.acknowledge();

@@ -1,5 +1,7 @@
 package com.rbkmoney.analytics.listener;
 
+import com.rbkmoney.analytics.config.properties.PaymentStreamProperties;
+import com.rbkmoney.analytics.config.properties.RefundStreamProperties;
 import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
 import com.rbkmoney.analytics.dao.model.MgRefundRow;
 import com.rbkmoney.mg.event.sink.EventSinkAggregationStreamFactoryImpl;
@@ -25,8 +27,6 @@ public class StartupListener implements ApplicationListener<ContextRefreshedEven
 
     @Value("${kafka.streams.event.sink.enable}")
     private boolean enableEventSinkStream;
-    @Value("${kafka.streams.clean-install}")
-    private boolean cleanInstall;
 
     @Value("${kafka.streams.refund-stream-enabled:true}")
     private boolean refundStreamEnabled;
@@ -34,6 +34,8 @@ public class StartupListener implements ApplicationListener<ContextRefreshedEven
     private boolean paymentStreamEnabled;
 
     private final Properties eventSinkPaymentStreamProperties;
+    private final PaymentStreamProperties paymentStreamProperties;
+    private final RefundStreamProperties refundStreamProperties;
     private final Properties eventSinkRefundStreamProperties;
     private final EventSinkAggregationStreamFactoryImpl<String, MgPaymentSinkRow, MgPaymentSinkRow> eventSinkAggregationStreamFactory;
     private final EventSinkAggregationStreamFactoryImpl<String, MgRefundRow, MgRefundRow> eventSinkRefundAggregationStreamFactory;
@@ -48,12 +50,12 @@ public class StartupListener implements ApplicationListener<ContextRefreshedEven
 
     private void startEventStream(long startPreloadTime) {
         if (enableEventSinkStream) {
-            if (refundStreamEnabled) {
+            if (paymentStreamProperties.isCleanInstall()) {
                 KafkaStreams eventSinkStream = eventSinkAggregationStreamFactory.create(eventSinkPaymentStreamProperties);
                 eventSinkStreams.add(eventSinkStream);
                 log.info("StartupListener start stream eventSinkStream: {}", eventSinkStream.allMetadata());
             }
-            if (refundStreamEnabled) {
+            if (refundStreamProperties.isCleanInstall()) {
                 KafkaStreams eventSinkStreamRefund = eventSinkRefundAggregationStreamFactory.create(eventSinkRefundStreamProperties);
                 eventSinkStreams.add(eventSinkStreamRefund);
                 log.info("StartupListener start stream eventSinkStreamRefund: {}", eventSinkStreamRefund.allMetadata());

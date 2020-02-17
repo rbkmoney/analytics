@@ -1,6 +1,8 @@
 package com.rbkmoney.analytics.config;
 
 import com.rbkmoney.analytics.config.properties.KafkaSslProperties;
+import com.rbkmoney.analytics.config.properties.PaymentStreamProperties;
+import com.rbkmoney.analytics.config.properties.RefundStreamProperties;
 import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
 import com.rbkmoney.analytics.dao.model.MgRefundRow;
 import com.rbkmoney.analytics.serde.MgPaymentRowDeserializer;
@@ -75,8 +77,6 @@ public class KafkaConfig {
     private int replicationFactor;
     @Value("${kafka.streams.concurrency}")
     private int concurrencyStream;
-    @Value("${kafka.streams.clean-install}")
-    private boolean cleanInstall;
 
     @Value("${kafka.consumer.concurrency}")
     private int concurrencyListeners;
@@ -101,6 +101,8 @@ public class KafkaConfig {
     private final List<EventHandler<MgPaymentSinkRow>> eventHandlers;
     private final List<EventHandler<MgRefundRow>> eventRefundHandlers;
     private final KafkaSslProperties kafkaSslProperties;
+    private final PaymentStreamProperties paymentStreamProperties;
+    private final RefundStreamProperties refundStreamProperties;
 
     @Bean
     public Properties eventSinkPaymentStreamProperties() {
@@ -161,9 +163,7 @@ public class KafkaConfig {
             MgPaymentAggregator mgPaymentAggregator,
             MgEventSinkRowMapper<MgPaymentSinkRow> mgEventSinkRowMgEventSinkRowMapper) {
         return new EventSinkAggregationStreamFactoryImpl<>(
-                initialEventSink,
-                aggregatedSinkTopic,
-                cleanInstall,
+                paymentStreamProperties,
                 new SinkEventSerde(),
                 Serdes.String(),
                 new MgPaymentRowSerde(),
@@ -179,9 +179,7 @@ public class KafkaConfig {
             MgRefundAggregator mgRefundAggregator,
             MgEventSinkRowMapper<MgRefundRow> mgRefundRowRowMgEventSinkRowMapper) {
         return new EventSinkAggregationStreamFactoryImpl<>(
-                initialEventSink,
-                aggregatedSinkTopicRefund,
-                cleanInstall,
+                refundStreamProperties,
                 new SinkEventSerde(),
                 Serdes.String(),
                 new MgRefundRowSerde(),
