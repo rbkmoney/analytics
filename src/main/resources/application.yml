@@ -34,6 +34,7 @@ kafka:
     event.sink.enable: true
     replication-factor: 1
     concurrency: 7
+    standby-replicas: 1
     refund:
       enabled: true
       clean-install: true
@@ -50,7 +51,9 @@ kafka:
       aggregated-sink-topic: aggregated_event_sink
   max:
     retry.attempts: 3
-    poll.records: 100
+    poll:
+      records: 500
+      interval: 2000
   topic:
     event.sink:
       initial: event_sink

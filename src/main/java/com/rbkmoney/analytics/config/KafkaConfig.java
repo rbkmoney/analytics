@@ -61,6 +61,8 @@ public class KafkaConfig {
     private int cacheSizeStateStoreMb;
     @Value("${kafka.max.poll.records}")
     private String maxPollRecords;
+    @Value("${kafka.max.poll.interval}")
+    private String maxPollInterval;
     @Value("${kafka.state.dir}")
     private String stateDir;
     @Value("${kafka.bootstrap.servers}")
@@ -75,6 +77,8 @@ public class KafkaConfig {
 
     @Value("${kafka.streams.replication-factor}")
     private int replicationFactor;
+    @Value("${kafka.streams.standby-replicas}")
+    private int standByReplicas;
     @Value("${kafka.streams.concurrency}")
     private int concurrencyStream;
 
@@ -90,11 +94,11 @@ public class KafkaConfig {
     @Value("${kafka.streams.retry-backoff-ms:1000}")
     private int retryBackoffMs;
 
-    @Value("${kafka.streams.consumer.session-timout:60000}")
+    @Value("${kafka.streams.consumer.session-timout:120000}")
     private int consumerSessionTimout;
-    @Value("${kafka.streams.consumer.max-poll-interval:120000}")
+    @Value("${kafka.streams.consumer.max-poll-interval:20000}")
     private int consumerMaxPollInterval;
-    @Value("${kafka.streams.consumer.max-poll-records:300}")
+    @Value("${kafka.streams.consumer.max-poll-records:200}")
     private int consumerMaxPollRecords;
 
     private final ConsumerGroupIdService consumerGroupIdService;
@@ -129,7 +133,7 @@ public class KafkaConfig {
         props.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, cacheSizeStateStoreMb * 1024 * 1024L);
         props.put(StreamsConfig.STATE_DIR_CONFIG, stateDir);
         props.put(StreamsConfig.REPLICATION_FACTOR_CONFIG, replicationFactor);
-        props.put(StreamsConfig.NUM_STANDBY_REPLICAS_CONFIG, replicationFactor - 1);
+        props.put(StreamsConfig.NUM_STANDBY_REPLICAS_CONFIG, standByReplicas);
         props.put(StreamsConfig.NUM_STREAM_THREADS_CONFIG, concurrencyStream);
         props.put(StreamsConfig.ROCKSDB_CONFIG_SETTER_CLASS_CONFIG, RocksDBConfig.class);
 
@@ -222,9 +226,7 @@ public class KafkaConfig {
 
     private <T> void initDefaultListenerProperties(ConcurrentKafkaListenerContainerFactory<String, T> factory,
                                                    String consumerGroup, Deserializer<T> deserializer) {
-        final Map<String, Object> props = createDefaultProperties(consumerGroup);
-        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, maxPollRecords);
-        DefaultKafkaConsumerFactory<String, T> consumerFactory = new DefaultKafkaConsumerFactory<>(props,
+        DefaultKafkaConsumerFactory<String, T> consumerFactory = new DefaultKafkaConsumerFactory<>(createDefaultProperties(consumerGroup),
                 new StringDeserializer(), deserializer);
         factory.setConsumerFactory(consumerFactory);
         factory.setConcurrency(concurrencyListeners);
@@ -247,6 +249,8 @@ public class KafkaConfig {
         final Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, value);
+        props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, maxPollInterval);
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, maxPollRecords);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, EARLIEST);
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
         props.putAll(createSslConfig());
