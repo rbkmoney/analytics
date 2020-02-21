@@ -10,7 +10,7 @@ public class CashFlowComputer {
 
     public CashFlowResult compute(List<FinalCashFlowPosting> cashFlow) {
         long accountId = -1;
-        long payment = 0L;
+        long merchantAmount = 0L;
         long systemFee = 0L;
         long providerFee = 0L;
         long externalFee = 0L;
@@ -23,12 +23,12 @@ public class CashFlowComputer {
 
             if (isPayment(posting)) {
                 accountId = posting.getDestination().getAccountId();
-                payment += posting.getVolume().getAmount();
+                merchantAmount += posting.getVolume().getAmount();
             }
 
             if (isRefund(posting)) {
                 accountId = posting.getSource().getAccountId();
-                payment += posting.getVolume().getAmount();
+                merchantAmount += posting.getVolume().getAmount();
             }
 
             if (isSystemFee(posting)) {
@@ -52,8 +52,8 @@ public class CashFlowComputer {
 
         return CashFlowResult.builder()
                 .accountId(accountId)
-                .totalAmount(payment + systemFee)
-                .merchantAmount(payment)
+                .totalAmount(merchantAmount + systemFee)
+                .merchantAmount(merchantAmount)
                 .systemFee(systemFee)
                 .providerFee(providerFee)
                 .externalFee(externalFee)
