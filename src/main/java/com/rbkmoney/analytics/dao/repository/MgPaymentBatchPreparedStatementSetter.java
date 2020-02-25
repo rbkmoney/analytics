@@ -15,8 +15,8 @@ public class MgPaymentBatchPreparedStatementSetter implements BatchPreparedState
     public static final String INSERT = "INSERT INTO analytic.events_sink " +
             "(timestamp, eventTime, eventTimeHour, partyId, shopId, email, " +
             "amount, currency, providerName, status, errorReason,  invoiceId, " +
-            "paymentId, sequenceId, ip, bin, maskedPan, paymentTool, sign)" +
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "paymentId, sequenceId, ip, bin, maskedPan, paymentTool)" +
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private final List<MgPaymentSinkRow> batch;
 
@@ -33,7 +33,7 @@ public class MgPaymentBatchPreparedStatementSetter implements BatchPreparedState
 
         ps.setString(l++, mgPaymentSinkRow.getEmail());
 
-        ps.setLong(l++, mgPaymentSinkRow.getAmount());
+        ps.setLong(l++, mgPaymentSinkRow.getTotalAmount());
         ps.setString(l++, mgPaymentSinkRow.getCurrency());
 
         ps.setString(l++, mgPaymentSinkRow.getProvider());
@@ -51,7 +51,6 @@ public class MgPaymentBatchPreparedStatementSetter implements BatchPreparedState
         ps.setString(l++, mgPaymentSinkRow.getMaskedPan());
         ps.setString(l++, mgPaymentSinkRow.getPaymentTool() != null ? mgPaymentSinkRow.getPaymentTool().name() : ClickhouseUtilsValue.UNKNOWN);
 
-        ps.setInt(l, mgPaymentSinkRow.getSign());
     }
 
     @Override

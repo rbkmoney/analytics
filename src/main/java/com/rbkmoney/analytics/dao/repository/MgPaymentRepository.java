@@ -56,12 +56,11 @@ public class MgPaymentRepository {
         Date dateFrom = DateFilterUtils.parseDate(from);
         Date dateTo = DateFilterUtils.parseDate(to);
 
-        String selectSql = "SELECT currency, sum(amount * sign) / sum(sign) as num " +
+        String selectSql = "SELECT currency, sum(amount ) as num " +
                 "from analytic.events_sink ";
         String whereSql = "where timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ?";
         String groupedSql = " group by partyId, currency " +
-                " having partyId = ? " +
-                " AND sum(sign) > 0";
+                " having partyId = ? ";
 
         String sql = selectSql;
         List<Object> params = null;
@@ -88,12 +87,11 @@ public class MgPaymentRepository {
         Date dateFrom = DateFilterUtils.parseDate(from);
         Date dateTo = DateFilterUtils.parseDate(to);
 
-        String selectSql = "SELECT currency, sum(amount * sign) as num " +
+        String selectSql = "SELECT currency, sum(amount) as num " +
                 "from analytic.events_sink ";
         String whereSql = "where timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ?";
         String groupedSql = " group by partyId, currency " +
-                " having partyId = ? " +
-                " AND sum(sign) > 0";
+                " having partyId = ? ";
 
         String sql = selectSql;
         List<Object> params = null;
@@ -120,12 +118,11 @@ public class MgPaymentRepository {
         Date dateFrom = DateFilterUtils.parseDate(from);
         Date dateTo = DateFilterUtils.parseDate(to);
 
-        String selectSql = "SELECT currency, sum(sign) as num " +
+        String selectSql = "SELECT currency, count( concat(invoiceId, paymentId)) as num " +
                 "from analytic.events_sink ";
         String whereSql = "where timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ?";
         String groupedSql = " group by partyId, currency " +
-                " having partyId = ? " +
-                " AND sum(sign) > 0";
+                " having partyId = ? ";
 
         String sql = selectSql;
         List<Object> params = null;
@@ -152,12 +149,11 @@ public class MgPaymentRepository {
                                                          SplitUnit splitUnit) {
         String groupBy = SplitUtils.initGroupByFunction(splitUnit);
 
-        String selectSql = "SELECT " + groupBy + " , currency, sum(amount * sign) as num " +
+        String selectSql = "SELECT " + groupBy + " , currency, sum(amount) as num " +
                 "from analytic.events_sink ";
         String whereSql = "where timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ?";
         String groupedSql = " group by partyId, currency, " + groupBy +
-                " having partyId = ? " +
-                " AND sum(sign) > 0";
+                " having partyId = ? ";
 
         String sql = selectSql;
         List<Object> params = null;
@@ -186,12 +182,11 @@ public class MgPaymentRepository {
                                                   SplitUnit splitUnit) {
         String groupBy = SplitUtils.initGroupByFunction(splitUnit);
 
-        String selectSql = "SELECT " + groupBy + " , status, currency, count(sign) as num " +
+        String selectSql = "SELECT " + groupBy + " , status, currency, count(concat(invoiceId, paymentId)) as num " +
                 "from analytic.events_sink ";
         String whereSql = "where timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ?";
         String groupedSql = " group by partyId, currency, status, " + groupBy +
-                " having partyId = ? " +
-                " AND sum(sign) > 0";
+                " having partyId = ? ";
 
         String sql = selectSql;
         List<Object> params = null;
