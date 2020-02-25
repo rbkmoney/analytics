@@ -92,19 +92,9 @@ public class CashFlowComputer {
     }
 
     private boolean isSettlement(FinalCashFlowAccount account) {
-        if (account.getAccountType().isSetMerchant()) {
-            return account.getAccountType().getMerchant() == MerchantCashFlowAccount.settlement;
-        }
-
-        if (account.getAccountType().isSetProvider()) {
-            return account.getAccountType().getProvider() == ProviderCashFlowAccount.settlement;
-        }
-
-        if (account.getAccountType().isSetSystem()) {
-            return account.getAccountType().getSystem() == SystemCashFlowAccount.settlement;
-        }
-
-        throw new IllegalArgumentException("Incorrect accountType: " + account.getAccountType());
+        return (account.getAccountType().isSetMerchant() && account.getAccountType().getMerchant() == MerchantCashFlowAccount.settlement)
+                || (account.getAccountType().isSetProvider() && account.getAccountType().getProvider() == ProviderCashFlowAccount.settlement)
+                || (account.getAccountType().isSetSystem() && account.getAccountType().getSystem() == SystemCashFlowAccount.settlement);
     }
 
     private boolean isExternal(FinalCashFlowAccount account) {
