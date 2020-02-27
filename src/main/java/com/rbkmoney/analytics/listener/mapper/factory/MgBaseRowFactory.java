@@ -1,4 +1,4 @@
-package com.rbkmoney.analytics.listener.mapper.utils;
+package com.rbkmoney.analytics.listener.mapper.factory;
 
 import com.rbkmoney.analytics.computer.CashFlowComputer;
 import com.rbkmoney.analytics.dao.model.MgBaseRow;
@@ -19,14 +19,13 @@ import java.util.List;
 import static java.time.ZoneOffset.UTC;
 
 @Slf4j
-public abstract class MgBaseRowMapper<T extends MgBaseRow> implements RowMapper<T> {
+public abstract class MgBaseRowFactory<T extends MgBaseRow> implements RowFactory<T> {
 
     @Override
     public void initBaseRow(MachineEvent machineEvent, T row, InvoicePayment invoicePayment) {
         initTime(machineEvent, row);
         row.setCurrency(invoicePayment.getPayment().getCost().getCurrency().getSymbolicCode());
         row.setPaymentId(invoicePayment.getPayment().getId());
-
         Payer payer = invoicePayment.getPayment().getPayer();
         if (payer.isSetPaymentResource()) {
             DisposablePaymentResource resource = payer.getPaymentResource().getResource();

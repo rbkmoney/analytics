@@ -4,7 +4,7 @@ import com.rbkmoney.analytics.constant.AdjustmentStatus;
 import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.dao.model.MgAdjustmentRow;
 import com.rbkmoney.analytics.exception.RefundInfoNotFoundException;
-import com.rbkmoney.analytics.listener.mapper.utils.MgAdjustmentRowMapper;
+import com.rbkmoney.analytics.listener.mapper.factory.RowFactory;
 import com.rbkmoney.analytics.service.HgClientService;
 import com.rbkmoney.damsel.payment_processing.InvoiceChange;
 import com.rbkmoney.damsel.payment_processing.InvoicePaymentAdjustmentChange;
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 public class AdjustmentPaymentMapper implements Mapper<InvoiceChange, MachineEvent, MgAdjustmentRow> {
 
     private final HgClientService hgClientService;
-    private final MgAdjustmentRowMapper initInvoiceInfo;
+    private final RowFactory<MgAdjustmentRow> mgAdjustmentRowFactory;
 
     @Override
     public boolean accept(InvoiceChange change) {
@@ -43,11 +43,12 @@ public class AdjustmentPaymentMapper implements Mapper<InvoiceChange, MachineEve
 
         InvoicePaymentAdjustmentChangePayload payload = invoicePaymentAdjustmentChange.getPayload();
         String adjustmentChangeId = invoicePaymentAdjustmentChange.getId();
-        MgAdjustmentRow mgAdjustmentRow = initInvoiceInfo.initInfo(event, invoiceInfo, adjustmentChangeId);
+        MgAdjustmentRow mgAdjustmentRow = mgAdjustmentRowFactory.create(event, invoiceInfo, adjustmentChangeId);
 
         mgAdjustmentRow.setStatus(TBaseUtil.unionFieldToEnum(payload
                 .getInvoicePaymentAdjustmentStatusChanged()
                 .getStatus(), AdjustmentStatus.class));
+
         log.debug("RefundPaymentMapper mgAdjustmentRow: {}", mgAdjustmentRow);
         return mgAdjustmentRow;
     }

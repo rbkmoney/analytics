@@ -3,8 +3,10 @@ package com.rbkmoney.analytics.listener.mapper;
 import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.constant.PaymentStatus;
 import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
+import com.rbkmoney.analytics.dao.model.MgRefundRow;
 import com.rbkmoney.analytics.exception.PaymentInfoNotFoundException;
-import com.rbkmoney.analytics.listener.mapper.utils.MgPaymentSinkRowMapper;
+import com.rbkmoney.analytics.listener.mapper.factory.MgPaymentSinkRowFactory;
+import com.rbkmoney.analytics.listener.mapper.factory.RowFactory;
 import com.rbkmoney.analytics.service.HgClientService;
 import com.rbkmoney.damsel.domain.Failure;
 import com.rbkmoney.damsel.payment_processing.InvoiceChange;
@@ -25,7 +27,7 @@ public class InvoicePaymentMapper implements Mapper<InvoiceChange, MachineEvent,
     public static final String OPERATION_TIMEOUT = "operation_timeout";
 
     private final HgClientService hgClientService;
-    private final MgPaymentSinkRowMapper mgPaymentSinkRowMapper;
+    private final RowFactory<MgPaymentSinkRow> mgPaymentSinkRowFactory;
 
     @Override
     public boolean accept(InvoiceChange change) {
@@ -47,7 +49,7 @@ public class InvoicePaymentMapper implements Mapper<InvoiceChange, MachineEvent,
         InvoicePaymentStatusChanged invoicePaymentStatusChanged = payload.getInvoicePaymentStatusChanged();
 
         String paymentId = change.getInvoicePaymentChange().getId();
-        MgPaymentSinkRow mgPaymentSinkRow = mgPaymentSinkRowMapper.initInvoiceInfo(event, invoiceInfo, paymentId);
+        MgPaymentSinkRow mgPaymentSinkRow = mgPaymentSinkRowFactory.create(event, invoiceInfo, paymentId);
         mgPaymentSinkRow.setStatus(TBaseUtil.unionFieldToEnum(invoicePaymentStatusChanged.getStatus(), PaymentStatus.class));
 
         if (invoicePaymentStatusChanged.getStatus().isSetFailed()) {

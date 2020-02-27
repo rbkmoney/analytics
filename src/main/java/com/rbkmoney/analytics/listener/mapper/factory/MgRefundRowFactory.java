@@ -1,4 +1,4 @@
-package com.rbkmoney.analytics.listener.mapper.utils;
+package com.rbkmoney.analytics.listener.mapper.factory;
 
 import com.rbkmoney.analytics.dao.model.MgRefundRow;
 import com.rbkmoney.damsel.domain.FinalCashFlowPosting;
@@ -14,9 +14,10 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class MgRefundRowMapper extends MgBaseRowMapper<MgRefundRow> {
+public class MgRefundRowFactory extends MgBaseRowFactory<MgRefundRow> {
 
-    public MgRefundRow initInvoiceInfo(MachineEvent machineEvent, com.rbkmoney.damsel.payment_processing.Invoice invoiceInfo, String refundId) {
+    @Override
+    public MgRefundRow create(MachineEvent machineEvent, com.rbkmoney.damsel.payment_processing.Invoice invoiceInfo, String refundId) {
         MgRefundRow mgPaymentSinkRow = new MgRefundRow();
         Invoice invoice = invoiceInfo.getInvoice();
         mgPaymentSinkRow.setPartyId(invoice.getOwnerId());
@@ -27,9 +28,8 @@ public class MgRefundRowMapper extends MgBaseRowMapper<MgRefundRow> {
         return mgPaymentSinkRow;
     }
 
-    @Override
-    public void initInfo(MachineEvent machineEvent, MgRefundRow row,
-                         com.rbkmoney.damsel.payment_processing.Invoice invoiceInfo, String refundId) {
+    private void initInfo(MachineEvent machineEvent, MgRefundRow row,
+                          com.rbkmoney.damsel.payment_processing.Invoice invoiceInfo, String refundId) {
         for (InvoicePayment payment : invoiceInfo.getPayments()) {
             if (payment.isSetPayment() && payment.isSetRefunds()) {
                 for (com.rbkmoney.damsel.payment_processing.InvoicePaymentRefund refund : payment.getRefunds()) {

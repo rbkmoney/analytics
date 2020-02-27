@@ -2,29 +2,20 @@ package com.rbkmoney.analytics.listener.mapper;
 
 import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.constant.RefundStatus;
-import com.rbkmoney.analytics.dao.model.MgBaseRow;
 import com.rbkmoney.analytics.dao.model.MgRefundRow;
 import com.rbkmoney.analytics.exception.RefundInfoNotFoundException;
-import com.rbkmoney.analytics.listener.mapper.utils.MgRefundRowMapper;
+import com.rbkmoney.analytics.listener.mapper.factory.RowFactory;
 import com.rbkmoney.analytics.service.HgClientService;
-import com.rbkmoney.analytics.utils.TimeUtils;
 import com.rbkmoney.damsel.domain.Failure;
 import com.rbkmoney.damsel.payment_processing.InvoiceChange;
 import com.rbkmoney.damsel.payment_processing.InvoicePaymentRefundChange;
 import com.rbkmoney.damsel.payment_processing.InvoicePaymentRefundChangePayload;
 import com.rbkmoney.damsel.payment_processing.InvoicePaymentRefundStatusChanged;
 import com.rbkmoney.geck.common.util.TBaseUtil;
-import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-
-import static java.time.ZoneOffset.UTC;
 
 @Slf4j
 @Component
@@ -34,7 +25,7 @@ public class RefundPaymentMapper implements Mapper<InvoiceChange, MachineEvent, 
     public static final String OPERATION_TIMEOUT = "operation_timeout";
 
     private final HgClientService hgClientService;
-    private final MgRefundRowMapper mgRefundRowMapper;
+    private final RowFactory<MgRefundRow> mgRefundRowFactory;
 
     @Override
     public MgRefundRow map(InvoiceChange change, MachineEvent event) {
@@ -50,7 +41,8 @@ public class RefundPaymentMapper implements Mapper<InvoiceChange, MachineEvent, 
         InvoicePaymentRefundChangePayload payload = invoicePaymentChange.getPayload();
         InvoicePaymentRefundStatusChanged invoicePaymentRefundStatusChanged = payload.getInvoicePaymentRefundStatusChanged();
         String refundId = invoicePaymentChange.getId();
-        MgRefundRow refundRow = mgRefundRowMapper.initInvoiceInfo(event, invoiceInfo, refundId);
+
+        MgRefundRow refundRow = mgRefundRowFactory.create(event, invoiceInfo, refundId);
 
         refundRow.setStatus(TBaseUtil.unionFieldToEnum(payload
                 .getInvoicePaymentRefundStatusChanged()

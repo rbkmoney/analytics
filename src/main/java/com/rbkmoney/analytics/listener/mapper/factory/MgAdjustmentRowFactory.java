@@ -1,4 +1,4 @@
-package com.rbkmoney.analytics.listener.mapper.utils;
+package com.rbkmoney.analytics.listener.mapper.factory;
 
 import com.rbkmoney.analytics.dao.model.MgAdjustmentRow;
 import com.rbkmoney.damsel.domain.FinalCashFlowPosting;
@@ -15,22 +15,22 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class MgAdjustmentRowMapper extends MgBaseRowMapper<MgAdjustmentRow> {
+public class MgAdjustmentRowFactory extends MgBaseRowFactory<MgAdjustmentRow> {
 
-    public MgAdjustmentRow initInfo(MachineEvent machineEvent, com.rbkmoney.damsel.payment_processing.Invoice invoiceInfo, String adjustmentId) {
+    @Override
+    public MgAdjustmentRow create(MachineEvent machineEvent, com.rbkmoney.damsel.payment_processing.Invoice invoiceInfo,
+                                  String adjustmentId) {
         MgAdjustmentRow mgAdjustmentRow = new MgAdjustmentRow();
         Invoice invoice = invoiceInfo.getInvoice();
         mgAdjustmentRow.setPartyId(invoice.getOwnerId());
         mgAdjustmentRow.setShopId(invoice.getShopId());
         mgAdjustmentRow.setInvoiceId(machineEvent.getSourceId());
         mgAdjustmentRow.setSequenceId((machineEvent.getEventId()));
-
         initInfo(machineEvent, mgAdjustmentRow, invoiceInfo, adjustmentId);
         return mgAdjustmentRow;
     }
 
-    @Override
-    public void initInfo(MachineEvent machineEvent, MgAdjustmentRow row, com.rbkmoney.damsel.payment_processing.Invoice invoiceInfo, String id) {
+    private void initInfo(MachineEvent machineEvent, MgAdjustmentRow row, com.rbkmoney.damsel.payment_processing.Invoice invoiceInfo, String id) {
         for (InvoicePayment payment : invoiceInfo.getPayments()) {
             if (payment.isSetPayment() && payment.isSetRefunds()) {
                 for (InvoicePaymentAdjustment adjustment : payment.getAdjustments()) {
@@ -45,4 +45,5 @@ public class MgAdjustmentRowMapper extends MgBaseRowMapper<MgAdjustmentRow> {
             }
         }
     }
+
 }
