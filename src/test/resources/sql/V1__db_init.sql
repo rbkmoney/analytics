@@ -74,7 +74,7 @@ create table analytic.events_sink_refund
 
 ) ENGINE = MergeTree()
 PARTITION BY toYYYYMM (timestamp)
-ORDER BY (eventTimeHour, partyId, shopId, status, currency, providerName, invoiceId, refundId, paymentId, sequenceId);
+ORDER BY (eventTimeHour, partyId, shopId, status, currency, providerName, invoiceId, paymentId, refundId, sequenceId);
 
 DROP TABLE IF EXISTS analytic.events_sink_adjustment;
 
@@ -104,7 +104,7 @@ create table analytic.events_sink_adjustment
     errorReason      String,
 
     invoiceId        String,
-    refundId         String,
+    adjustmentId     String,
     paymentId        String,
     sequenceId       UInt64,
 
@@ -112,4 +112,4 @@ create table analytic.events_sink_adjustment
 
 ) ENGINE = MergeTree()
 PARTITION BY toYYYYMM (timestamp)
-ORDER BY (eventTimeHour, partyId, shopId, status, currency, providerName, invoiceId, refundId, paymentId, sequenceId);
+ORDER BY (eventTimeHour, partyId, shopId, status, currency, providerName, invoiceId, paymentId, adjustmentId, sequenceId);

@@ -1,9 +1,8 @@
 package com.rbkmoney.analytics.constant;
 
-public enum PaymentStatus {
+public enum AdjustmentStatus {
 
     captured,
-    cancelled,
-    failed
+    cancelled
 
 }

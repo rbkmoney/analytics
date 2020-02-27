@@ -2,10 +2,11 @@ package com.rbkmoney.analytics.listener.mapper;
 
 import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.constant.RefundStatus;
+import com.rbkmoney.analytics.dao.model.MgBaseRow;
 import com.rbkmoney.analytics.dao.model.MgRefundRow;
 import com.rbkmoney.analytics.exception.RefundInfoNotFoundException;
+import com.rbkmoney.analytics.listener.mapper.utils.MgRefundRowMapper;
 import com.rbkmoney.analytics.service.HgClientService;
-import com.rbkmoney.analytics.utils.MgRefundRowUtils;
 import com.rbkmoney.analytics.utils.TimeUtils;
 import com.rbkmoney.damsel.domain.Failure;
 import com.rbkmoney.damsel.payment_processing.InvoiceChange;
@@ -33,6 +34,7 @@ public class RefundPaymentMapper implements Mapper<InvoiceChange, MachineEvent, 
     public static final String OPERATION_TIMEOUT = "operation_timeout";
 
     private final HgClientService hgClientService;
+    private final MgRefundRowMapper mgRefundRowMapper;
 
     @Override
     public MgRefundRow map(InvoiceChange change, MachineEvent event) {
@@ -48,15 +50,11 @@ public class RefundPaymentMapper implements Mapper<InvoiceChange, MachineEvent, 
         InvoicePaymentRefundChangePayload payload = invoicePaymentChange.getPayload();
         InvoicePaymentRefundStatusChanged invoicePaymentRefundStatusChanged = payload.getInvoicePaymentRefundStatusChanged();
         String refundId = invoicePaymentChange.getId();
-        MgRefundRow refundRow = MgRefundRowUtils.initInvoiceInfo(invoiceInfo, refundId);
-        initTime(event, refundRow);
+        MgRefundRow refundRow = mgRefundRowMapper.initInvoiceInfo(event, invoiceInfo, refundId);
+
         refundRow.setStatus(TBaseUtil.unionFieldToEnum(payload
                 .getInvoicePaymentRefundStatusChanged()
                 .getStatus(), RefundStatus.class));
-        refundRow.setInvoiceId(event.getSourceId());
-        refundRow.setPaymentId(refundId);
-        refundRow.setSequenceId((event.getEventId()));
-
         if (invoicePaymentRefundStatusChanged.getStatus().isSetFailed()) {
             if (invoicePaymentRefundStatusChanged.getStatus().getFailed().getFailure().isSetFailure()) {
                 Failure failure = invoicePaymentRefundStatusChanged.getStatus().getFailed().getFailure().getFailure();
@@ -70,16 +68,16 @@ public class RefundPaymentMapper implements Mapper<InvoiceChange, MachineEvent, 
         return refundRow;
     }
 
-    private void initTime(MachineEvent event, MgRefundRow refundRow) {
+    private <T extends MgBaseRow> void initTime(MachineEvent event, T row) {
         LocalDateTime localDateTime = TypeUtil.stringToLocalDateTime(event.getCreatedAt());
         long timestamp = localDateTime.atZone(ZoneOffset.UTC).toInstant().toEpochMilli();
-        refundRow.setTimestamp(java.sql.Date.valueOf(
+        row.setTimestamp(java.sql.Date.valueOf(
                 Instant.ofEpochMilli(timestamp)
                         .atZone(UTC)
                         .toLocalDate())
         );
-        refundRow.setEventTime(timestamp);
-        refundRow.setEventTimeHour(TimeUtils.parseEventTimeHour(timestamp));
+        row.setEventTime(timestamp);
+        row.setEventTimeHour(TimeUtils.parseEventTimeHour(timestamp));
     }
 
     @Override

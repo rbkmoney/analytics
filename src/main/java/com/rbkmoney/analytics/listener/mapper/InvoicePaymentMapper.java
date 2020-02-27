@@ -4,11 +4,13 @@ import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.constant.PaymentStatus;
 import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
 import com.rbkmoney.analytics.exception.PaymentInfoNotFoundException;
-import com.rbkmoney.analytics.exception.RefundInfoNotFoundException;
+import com.rbkmoney.analytics.listener.mapper.utils.MgPaymentSinkRowMapper;
 import com.rbkmoney.analytics.service.HgClientService;
-import com.rbkmoney.analytics.utils.MgPaymentSinkRowUtils;
 import com.rbkmoney.damsel.domain.Failure;
-import com.rbkmoney.damsel.payment_processing.*;
+import com.rbkmoney.damsel.payment_processing.InvoiceChange;
+import com.rbkmoney.damsel.payment_processing.InvoicePaymentChange;
+import com.rbkmoney.damsel.payment_processing.InvoicePaymentChangePayload;
+import com.rbkmoney.damsel.payment_processing.InvoicePaymentStatusChanged;
 import com.rbkmoney.geck.common.util.TBaseUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ public class InvoicePaymentMapper implements Mapper<InvoiceChange, MachineEvent,
     public static final String OPERATION_TIMEOUT = "operation_timeout";
 
     private final HgClientService hgClientService;
+    private final MgPaymentSinkRowMapper mgPaymentSinkRowMapper;
 
     @Override
     public boolean accept(InvoiceChange change) {
@@ -35,7 +38,6 @@ public class InvoicePaymentMapper implements Mapper<InvoiceChange, MachineEvent,
     @Override
     public MgPaymentSinkRow map(InvoiceChange change, MachineEvent event) {
         com.rbkmoney.damsel.payment_processing.Invoice invoiceInfo = hgClientService.getInvoiceInfo(event);
-
         if (invoiceInfo == null) {
             throw new PaymentInfoNotFoundException("Not found payment info in hg!");
         }
@@ -45,11 +47,8 @@ public class InvoicePaymentMapper implements Mapper<InvoiceChange, MachineEvent,
         InvoicePaymentStatusChanged invoicePaymentStatusChanged = payload.getInvoicePaymentStatusChanged();
 
         String paymentId = change.getInvoicePaymentChange().getId();
-        MgPaymentSinkRow mgPaymentSinkRow = MgPaymentSinkRowUtils.initInvoiceInfo(invoiceInfo, paymentId);
+        MgPaymentSinkRow mgPaymentSinkRow = mgPaymentSinkRowMapper.initInvoiceInfo(event, invoiceInfo, paymentId);
         mgPaymentSinkRow.setStatus(TBaseUtil.unionFieldToEnum(invoicePaymentStatusChanged.getStatus(), PaymentStatus.class));
-        mgPaymentSinkRow.setInvoiceId(event.getSourceId());
-        mgPaymentSinkRow.setPaymentId(paymentId);
-        mgPaymentSinkRow.setSequenceId((event.getEventId()));
 
         if (invoicePaymentStatusChanged.getStatus().isSetFailed()) {
             if (invoicePaymentStatusChanged.getStatus().getFailed().getFailure().isSetFailure()) {
