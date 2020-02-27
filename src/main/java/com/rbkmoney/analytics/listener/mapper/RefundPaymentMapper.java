@@ -55,6 +55,7 @@ public class RefundPaymentMapper implements Mapper<InvoiceChange, MachineEvent, 
         refundRow.setStatus(TBaseUtil.unionFieldToEnum(payload
                 .getInvoicePaymentRefundStatusChanged()
                 .getStatus(), RefundStatus.class));
+
         if (invoicePaymentRefundStatusChanged.getStatus().isSetFailed()) {
             if (invoicePaymentRefundStatusChanged.getStatus().getFailed().getFailure().isSetFailure()) {
                 Failure failure = invoicePaymentRefundStatusChanged.getStatus().getFailed().getFailure().getFailure();
@@ -66,18 +67,6 @@ public class RefundPaymentMapper implements Mapper<InvoiceChange, MachineEvent, 
 
         log.debug("RefundPaymentMapper refundRow: {}", refundRow);
         return refundRow;
-    }
-
-    private <T extends MgBaseRow> void initTime(MachineEvent event, T row) {
-        LocalDateTime localDateTime = TypeUtil.stringToLocalDateTime(event.getCreatedAt());
-        long timestamp = localDateTime.atZone(ZoneOffset.UTC).toInstant().toEpochMilli();
-        row.setTimestamp(java.sql.Date.valueOf(
-                Instant.ofEpochMilli(timestamp)
-                        .atZone(UTC)
-                        .toLocalDate())
-        );
-        row.setEventTime(timestamp);
-        row.setEventTimeHour(TimeUtils.parseEventTimeHour(timestamp));
     }
 
     @Override
