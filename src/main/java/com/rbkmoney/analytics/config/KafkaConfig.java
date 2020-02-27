@@ -3,7 +3,8 @@ package com.rbkmoney.analytics.config;
 import com.rbkmoney.analytics.config.properties.KafkaSslProperties;
 import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
 import com.rbkmoney.analytics.dao.model.MgRefundRow;
-import com.rbkmoney.analytics.serde.MgPaymentRowDeserializer;
+import com.rbkmoney.analytics.serde.MachineEventDeserializer;
+import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import com.rbkmoney.mg.event.sink.handler.flow.EventHandler;
 import com.rbkmoney.mg.event.sink.service.ConsumerGroupIdService;
 import com.rbkmoney.mg.event.sink.utils.SslKafkaUtils;
@@ -66,10 +67,10 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, MgPaymentSinkRow> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, MgPaymentSinkRow> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    public ConcurrentKafkaListenerContainerFactory<String, MachineEvent> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, MachineEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
         String consumerGroup = consumerGroupIdService.generateGroupId(RESULT_ANALYTICS);
-        initDefaultListenerProperties(factory, consumerGroup, new MgPaymentRowDeserializer());
+        initDefaultListenerProperties(factory, consumerGroup, new MachineEventDeserializer());
         return factory;
     }
 
@@ -92,7 +93,7 @@ public class KafkaConfig {
         final Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, value);
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, EARLIEST);
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, EARLIEST.name().toLowerCase());
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
         props.putAll(createSslConfig());
         return props;

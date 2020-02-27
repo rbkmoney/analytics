@@ -41,6 +41,7 @@ public class MgPaymentSinkRow {
     private String bankCountry;
     private String maskedPan;
     private String provider;
+
     private PaymentToolType paymentTool;
 
     private String invoiceId;

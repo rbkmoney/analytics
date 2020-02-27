@@ -30,24 +30,6 @@ clickhouse.db:
 
 kafka:
   bootstrap.servers: localhost:9092
-  streams:
-    event.sink.enable: true
-    replication-factor: 1
-    concurrency: 7
-    refund:
-      enabled: true
-      clean-install: true
-      throttling-enabled: true
-      throttling-timeout-ms: 1
-      initial-event-sink: event_sink
-      aggregated-sink-topic: aggregated_event_sink_refund
-    payment:
-      enabled: true
-      clean-install: true
-      throttling-enabled: true
-      throttling-timeout-ms: 1
-      initial-event-sink: event_sink
-      aggregated-sink-topic: aggregated_event_sink
   max:
     retry.attempts: 3
     poll.records: 100
@@ -65,3 +47,8 @@ kafka:
   state:
     dir: tmp/state-store/
   block.cache.size: 10
+
+service:
+  invoicing:
+    url: http://hellgate:8022/v1/processing/invoicing
+    networkTimeout: 5000

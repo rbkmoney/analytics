@@ -10,5 +10,6 @@
     <logger name="org.springframework.jdbc.core.JdbcTemplate" level="debug"/>
     <logger name="org.apache.kafka.clients.consumer.ConsumerConfig" level="INFO"/>
     <logger name="org.apache.kafka.clients.producer.ProducerConfig" level="INFO"/>
+    <logger name="com.rbkmoney.analytics.listener.mapper" level="ALL"/>
 
 </configuration>

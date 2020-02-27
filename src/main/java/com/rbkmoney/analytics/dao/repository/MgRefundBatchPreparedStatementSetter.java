@@ -1,6 +1,5 @@
 package com.rbkmoney.analytics.dao.repository;
 
-import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
 import com.rbkmoney.analytics.dao.model.MgRefundRow;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -14,42 +13,46 @@ public class MgRefundBatchPreparedStatementSetter implements BatchPreparedStatem
 
     public static final String INSERT = "INSERT INTO analytic.events_sink_refund " +
             "(timestamp, eventTime, eventTimeHour, partyId, shopId, email, " +
-            "amount, currency, providerName, status, errorReason,  invoiceId, " +
-            "paymentId, refundId, sequenceId, ip, sign)" +
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "totalAmount, merchantAmount, guaranteeDeposit, systemFee, providerFee, externalFee, currency, providerName, " +
+            "status, errorReason,  invoiceId, " +
+            "paymentId, refundId, sequenceId, ip)" +
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private final List<MgRefundRow> batch;
 
     @Override
     public void setValues(PreparedStatement ps, int i) throws SQLException {
-        MgRefundRow mgPaymentSinkRow = batch.get(i);
+        MgRefundRow mgRefundRow = batch.get(i);
         int l = 1;
-        ps.setDate(l++, mgPaymentSinkRow.getTimestamp());
-        ps.setLong(l++, mgPaymentSinkRow.getEventTime());
-        ps.setLong(l++, mgPaymentSinkRow.getEventTimeHour());
+        ps.setDate(l++, mgRefundRow.getTimestamp());
+        ps.setLong(l++, mgRefundRow.getEventTime());
+        ps.setLong(l++, mgRefundRow.getEventTimeHour());
 
-        ps.setString(l++, mgPaymentSinkRow.getPartyId());
-        ps.setString(l++, mgPaymentSinkRow.getShopId());
+        ps.setString(l++, mgRefundRow.getPartyId());
+        ps.setString(l++, mgRefundRow.getShopId());
 
-        ps.setString(l++, mgPaymentSinkRow.getEmail());
+        ps.setString(l++, mgRefundRow.getEmail());
 
-        ps.setLong(l++, mgPaymentSinkRow.getAmount());
-        ps.setString(l++, mgPaymentSinkRow.getCurrency());
+        ps.setLong(l++, mgRefundRow.getTotalAmount());
+        ps.setLong(l++, mgRefundRow.getMerchantAmount());
+        ps.setLong(l++, mgRefundRow.getGuaranteeDeposit());
+        ps.setLong(l++, mgRefundRow.getSystemFee());
+        ps.setLong(l++, mgRefundRow.getExternalFee());
+        ps.setLong(l++, mgRefundRow.getProviderFee());
+        ps.setString(l++, mgRefundRow.getCurrency());
 
-        ps.setString(l++, mgPaymentSinkRow.getProvider());
+        ps.setString(l++, mgRefundRow.getProvider());
 
-        ps.setString(l++, mgPaymentSinkRow.getStatus().name());
+        ps.setString(l++, mgRefundRow.getStatus().name());
 
-        ps.setString(l++, mgPaymentSinkRow.getErrorCode());
+        ps.setString(l++, mgRefundRow.getErrorCode());
 
-        ps.setString(l++, mgPaymentSinkRow.getInvoiceId());
-        ps.setString(l++, mgPaymentSinkRow.getPaymentId());
-        ps.setString(l++, mgPaymentSinkRow.getRefundId());
-        ps.setLong(l++, mgPaymentSinkRow.getSequenceId());
+        ps.setString(l++, mgRefundRow.getInvoiceId());
+        ps.setString(l++, mgRefundRow.getPaymentId());
+        ps.setString(l++, mgRefundRow.getRefundId());
+        ps.setLong(l++, mgRefundRow.getSequenceId());
 
-        ps.setString(l++, mgPaymentSinkRow.getIp());
-
-        ps.setInt(l, mgPaymentSinkRow.getSign());
+        ps.setString(l, mgRefundRow.getIp());
     }
 
     @Override

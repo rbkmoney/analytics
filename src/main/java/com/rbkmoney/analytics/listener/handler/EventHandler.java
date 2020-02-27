@@ -1,4 +1,4 @@
-package com.rbkmoney.analytics.listener;
+package com.rbkmoney.analytics.listener.handler;
 
 import com.rbkmoney.damsel.payment_processing.InvoiceChange;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;

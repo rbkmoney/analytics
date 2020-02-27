@@ -56,7 +56,7 @@ public class MgPaymentRepository {
         Date dateFrom = DateFilterUtils.parseDate(from);
         Date dateTo = DateFilterUtils.parseDate(to);
 
-        String selectSql = "SELECT currency, sum(amount ) as num " +
+        String selectSql = "SELECT currency, avg(totalAmount) as num " +
                 "from analytic.events_sink ";
         String whereSql = "where timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ?";
         String groupedSql = " group by partyId, currency " +
@@ -87,7 +87,7 @@ public class MgPaymentRepository {
         Date dateFrom = DateFilterUtils.parseDate(from);
         Date dateTo = DateFilterUtils.parseDate(to);
 
-        String selectSql = "SELECT currency, sum(amount) as num " +
+        String selectSql = "SELECT currency, sum(totalAmount) as num " +
                 "from analytic.events_sink ";
         String whereSql = "where timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ?";
         String groupedSql = " group by partyId, currency " +
@@ -118,7 +118,7 @@ public class MgPaymentRepository {
         Date dateFrom = DateFilterUtils.parseDate(from);
         Date dateTo = DateFilterUtils.parseDate(to);
 
-        String selectSql = "SELECT currency, count( concat(invoiceId, paymentId)) as num " +
+        String selectSql = "SELECT currency, count() as num " +
                 "from analytic.events_sink ";
         String whereSql = "where timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ?";
         String groupedSql = " group by partyId, currency " +
@@ -149,7 +149,7 @@ public class MgPaymentRepository {
                                                          SplitUnit splitUnit) {
         String groupBy = SplitUtils.initGroupByFunction(splitUnit);
 
-        String selectSql = "SELECT " + groupBy + " , currency, sum(amount) as num " +
+        String selectSql = "SELECT " + groupBy + " , currency, sum(totalAmount) as num " +
                 "from analytic.events_sink ";
         String whereSql = "where timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ?";
         String groupedSql = " group by partyId, currency, " + groupBy +
@@ -210,27 +210,23 @@ public class MgPaymentRepository {
 
     public List<NamingDistribution> getPaymentsToolDistribution(String partyId, List<String> shopIds, Long from, Long to) {
         String sql = "SELECT %1$s, %3$s as naming_result," +
-                "(SELECT sum(sign) from analytic.events_sink " +
+                "(SELECT count() from analytic.events_sink " +
                 "where timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ? AND %1$s %2$s " +
-                "group by partyId " +
-                "having sum(sign) > 0) as total_count, sum(sign) * 100 / total_count as percent " +
+                "group by partyId) as total_count, count() * 100 / total_count as percent " +
                 "from analytic.events_sink " +
                 "where timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ? AND %1$s %2$s " +
-                "group by %1$s, %3$s " +
-                "having sum(sign) > 0";
+                "group by %1$s, %3$s";
         return queryNamingDistributions(sql, partyId, shopIds, from, to, PAYMENT_TOOL);
     }
 
     public List<NamingDistribution> getPaymentsErrorDistribution(String partyId, List<String> shopIds, Long from, Long to) {
         String sql = "SELECT %1$s, %3$s as naming_result," +
-                "(SELECT sum(sign) from analytic.events_sink " +
+                "(SELECT count() from analytic.events_sink " +
                 "where status='failed' and timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ? AND %1$s %2$s " +
-                "group by partyId " +
-                "having sum(sign) > 0) as total_count, sum(sign) * 100 / total_count as percent " +
+                "group by partyId) as total_count, count() * 100 / total_count as percent " +
                 "from analytic.events_sink " +
                 "where status='failed' and timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ? AND %1$s %2$s " +
-                "group by %1$s, %3$s " +
-                "having sum(sign) > 0";
+                "group by %1$s, %3$s ";
         return queryNamingDistributions(sql, partyId, shopIds, from, to, ERROR_REASON);
     }
 

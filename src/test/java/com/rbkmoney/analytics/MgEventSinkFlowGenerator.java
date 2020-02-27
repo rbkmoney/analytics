@@ -65,7 +65,7 @@ public class MgEventSinkFlowGenerator {
         sinkEvents.add(createSinkEvent(createMessagePaymentProcessed(sourceId, sequenceId++)));
         sinkEvents.add(createSinkEvent(createMessageInvoiceCaptured(sourceId, sequenceId++)));
         sinkEvents.add(createSinkEvent(createRefundMessageCreateInvoice(sourceId, sequenceId++)));
-        sinkEvents.add(createSinkEvent(statusChangeRefundMessageCreateInvoice(sourceId, sequenceId)));
+        sinkEvents.add(createSinkEvent(statusChangeRefundMessageCreateInvoice(sourceId, sequenceId++)));
 
         String refundId_2 = "2";
         sinkEvents.add(createSinkEvent(createRefundMessageCreateInvoice(sourceId, sequenceId++, refundId_2)));

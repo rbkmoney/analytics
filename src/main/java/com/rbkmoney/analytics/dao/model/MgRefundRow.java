@@ -22,7 +22,15 @@ public class MgRefundRow {
     private RefundStatus status;
     private String errorCode;
 
-    private Long amount;
+    private Long accountId;
+
+    private long totalAmount;
+    private long merchantAmount;
+    private long guaranteeDeposit;
+    private long systemFee;
+    private long providerFee;
+    private long externalFee;
+
     private String currency;
 
     private String shopId;
@@ -36,37 +44,4 @@ public class MgRefundRow {
     private String paymentId;
     private Long sequenceId;
 
-    private String lastRefundId;
-
-    private short sign = 1;
-
-    private Map<String, MgRefundRow> refunds;
-
-    public MgRefundRow(MgRefundRow mgRefundRow) {
-        this.timestamp = mgRefundRow.getTimestamp();
-        this.eventTime = mgRefundRow.getEventTime();
-        this.eventTimeHour = mgRefundRow.getEventTimeHour();
-
-        this.ip = mgRefundRow.getIp();
-        this.email = mgRefundRow.getEmail();
-        this.fingerprint = mgRefundRow.getFingerprint();
-
-        this.shopId = mgRefundRow.getShopId();
-        this.partyId = mgRefundRow.getPartyId();
-
-        this.status = mgRefundRow.getStatus();
-        this.errorCode = mgRefundRow.getErrorCode();
-
-        this.amount = mgRefundRow.getAmount();
-        this.currency = mgRefundRow.getCurrency();
-
-        this.provider = mgRefundRow.getProvider();
-
-        this.invoiceId = mgRefundRow.getInvoiceId();
-        this.refundId = mgRefundRow.getRefundId();
-        this.paymentId = mgRefundRow.getPaymentId();
-        this.sequenceId = mgRefundRow.getSequenceId();
-
-        this.sign = -1;
-    }
 }

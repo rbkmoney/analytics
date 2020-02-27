@@ -1,15 +1,23 @@
 package com.rbkmoney.analytics;
 
 import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
-import com.rbkmoney.analytics.serde.MgPaymentRowDeserializer;
+import com.rbkmoney.analytics.serde.MachineEventDeserializer;
+import com.rbkmoney.analytics.service.HgClientService;
+import com.rbkmoney.analytics.utils.BuildUtils;
+import com.rbkmoney.analytics.utils.EventRangeFactory;
 import com.rbkmoney.analytics.utils.FileUtil;
+import com.rbkmoney.damsel.domain.*;
+import com.rbkmoney.damsel.payment_processing.InvoicingSrv;
 import com.rbkmoney.machinegun.eventsink.SinkEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.thrift.TException;
 import org.junit.*;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -21,6 +29,7 @@ import ru.yandex.clickhouse.ClickHouseDataSource;
 import ru.yandex.clickhouse.settings.ClickHouseProperties;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -35,6 +44,8 @@ import java.util.Map;
 public class EventSinkListenerTest extends KafkaAbstractTest {
 
     public static final long MESSAGE_TIMEOUT = 4_000L;
+    public static final String SOURCE_ID = "sourceID";
+
     @ClassRule
     public static ClickHouseContainer clickHouseContainer = new ClickHouseContainer();
 
@@ -49,11 +60,17 @@ public class EventSinkListenerTest extends KafkaAbstractTest {
         }
     }
 
+    @MockBean
+    InvoicingSrv.Iface invoicingClient;
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    private EventRangeFactory eventRangeFactory;
+
     @Before
-    public void init() throws SQLException {
+    public void init() throws SQLException, IOException, TException {
         try (Connection connection = getSystemConn()) {
             String sql = FileUtil.getFile("sql/V1__db_init.sql");
             String[] split = sql.split(";");
@@ -70,8 +87,11 @@ public class EventSinkListenerTest extends KafkaAbstractTest {
     }
 
     @Test
-    public void testEventSink() throws InterruptedException {
-        List<SinkEvent> sinkEvents = MgEventSinkFlowGenerator.generateSuccessFlow("sourceID");
+    public void testEventSink() throws InterruptedException, IOException, TException {
+        List<SinkEvent> sinkEvents = MgEventSinkFlowGenerator.generateSuccessFlow(SOURCE_ID);
+
+        mockPayment(SOURCE_ID);
+
         sinkEvents.forEach(this::produceMessageToEventSink);
 
         sinkEvents = MgEventSinkFlowGenerator.generateSuccessNotFullFlow("sourceID_2");
@@ -79,33 +99,26 @@ public class EventSinkListenerTest extends KafkaAbstractTest {
 
         Thread.sleep(MESSAGE_TIMEOUT);
 
-        Consumer<String, MgPaymentSinkRow> consumer = createConsumer(MgPaymentRowDeserializer.class);
-        consumer.subscribe(Arrays.asList(AGGREGATED_EVENT_SINK));
-
-        Thread.sleep(MESSAGE_TIMEOUT);
-
         //check sum for captured payment
         long sum = jdbcTemplate.queryForObject(
-                "SELECT shopId, sum(amount) as sum " +
+                "SELECT shopId, sum(totalAmount) as sum " +
                         "from analytic.events_sink " +
                         "group by shopId, currency, status " +
-                        "having shopId = '" + MgEventSinkFlowGenerator.SHOP_ID + "' and status = 'captured' and currency = 'RUB' AND sum(sign) > 0",
+                        "having shopId = '" + MgEventSinkFlowGenerator.SHOP_ID + "' and status = 'captured' and currency = 'RUB'",
                 (resultSet, i) -> resultSet.getLong("sum"));
 
-        Assert.assertEquals(123L, sum);
+        Assert.assertEquals(1100L, sum);
 
         //statistic for paymentTool
         List<Map<String, Object>> list = jdbcTemplate.queryForList(
                 "SELECT shopId, paymentTool," +
-                        "( SELECT sum(sign) from analytic.events_sink " +
+                        "( SELECT count() from analytic.events_sink " +
                         "group by shopId, currency " +
-                        "having shopId = '" + MgEventSinkFlowGenerator.SHOP_ID + "' and currency = 'RUB' " +
-                        "AND sum(sign) > 0) as total_count, " +
-                        "sum(sign) * 100 / total_count as sum " +
+                        "having shopId = '" + MgEventSinkFlowGenerator.SHOP_ID + "' and currency = 'RUB') as total_count, " +
+                        "count() * 100 / total_count as sum " +
                         "from analytic.events_sink " +
                         "group by shopId, currency, paymentTool " +
-                        "having shopId = '" + MgEventSinkFlowGenerator.SHOP_ID + "' and currency = 'RUB' " +
-                        "AND sum(sign) > 0");
+                        "having shopId = '" + MgEventSinkFlowGenerator.SHOP_ID + "' and currency = 'RUB'");
 
         list.forEach(stringObjectMap -> {
                     Object cnt = stringObjectMap.get("sum");
@@ -114,45 +127,47 @@ public class EventSinkListenerTest extends KafkaAbstractTest {
                 }
         );
 
+        String sourceID_refund_1 = "sourceID_refund_1";
+        mockPayment(sourceID_refund_1);
+        mockRefund(sourceID_refund_1, 8, "1");
+        mockRefund(sourceID_refund_1, 10, "2");
+
         // test refund flow
-        sinkEvents = MgEventSinkFlowGenerator.generateRefundedFlow("sourceID_refund_1");
+        sinkEvents = MgEventSinkFlowGenerator.generateRefundedFlow(sourceID_refund_1);
         sinkEvents.forEach(this::produceMessageToEventSink);
 
         Thread.sleep(MESSAGE_TIMEOUT);
 
         //check sum for succeeded refund
         sum = jdbcTemplate.queryForObject(
-                "SELECT shopId, sum(amount) as sum " +
+                "SELECT shopId, sum(totalAmount) as sum " +
                         "from analytic.events_sink_refund " +
                         "group by shopId, currency, status " +
-                        "having shopId = '" + MgEventSinkFlowGenerator.SHOP_ID + "' and status = 'succeeded' and currency = 'RUB' AND sum(sign) > 0",
+                        "having shopId = '" + MgEventSinkFlowGenerator.SHOP_ID + "' and status = 'succeeded' and currency = 'RUB'",
                 (resultSet, i) -> resultSet.getLong("sum"));
 
-        Assert.assertEquals(24L, sum);
+        Assert.assertEquals(446L, sum);
 
         //check collapsing sum for pending refund
         List<Map<String, Object>> resultList = jdbcTemplate.queryForList(
-                "SELECT shopId, sum(amount) as sum " +
+                "SELECT shopId, sum(totalAmount) as sum " +
                         "from analytic.events_sink_refund " +
                         "group by shopId, currency, status " +
-                        "having shopId = '" + MgEventSinkFlowGenerator.SHOP_ID + "' and status = 'pending' and currency = 'RUB' AND sum(sign) > 0");
+                        "having shopId = '" + MgEventSinkFlowGenerator.SHOP_ID + "' and status = 'pending' and currency = 'RUB'");
 
         Assert.assertTrue(resultList.isEmpty());
     }
 
-    @AfterClass
-    public static void clean() {
-        listFilesForFolder(new File("tmp/state-store/"));
+    private void mockPayment(String sourceID_refund_1) throws TException, IOException {
+        Mockito.when(invoicingClient.get(HgClientService.USER_INFO, sourceID_refund_1, eventRangeFactory.create(6)))
+                .thenReturn(BuildUtils.buildInvoice(MgEventSinkFlowGenerator.PARTY_ID, MgEventSinkFlowGenerator.SHOP_ID, sourceID_refund_1, "1", "1",
+                        InvoiceStatus.paid(new InvoicePaid()), InvoicePaymentStatus.pending(new InvoicePaymentPending())));
     }
 
-    public static void listFilesForFolder(final File folder) {
-        for (final File fileEntry : folder.listFiles()) {
-            if (fileEntry.isDirectory()) {
-                listFilesForFolder(fileEntry);
-            } else {
-                fileEntry.delete();
-            }
-        }
-        folder.delete();
+    private void mockRefund(String sourceID_refund_1, int sequenceId, String refundId) throws TException, IOException {
+        Mockito.when(invoicingClient.get(HgClientService.USER_INFO, sourceID_refund_1, eventRangeFactory.create(sequenceId)))
+                .thenReturn(BuildUtils.buildInvoice(MgEventSinkFlowGenerator.PARTY_ID, MgEventSinkFlowGenerator.SHOP_ID, sourceID_refund_1, "1", refundId,
+                        InvoiceStatus.paid(new InvoicePaid()), InvoicePaymentStatus.refunded(new InvoicePaymentRefunded())));
     }
+
 }
