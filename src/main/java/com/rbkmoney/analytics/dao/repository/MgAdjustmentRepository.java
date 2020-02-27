@@ -19,7 +19,7 @@ public class MgAdjustmentRepository {
         if (adjustmentRows != null && !adjustmentRows.isEmpty()) {
             log.info("Batch start insert adjustmentRows: {} firstElement: {}", adjustmentRows.size(),
                     adjustmentRows.get(0).getInvoiceId());
-            jdbcTemplate.batchUpdate(MgPaymentBatchPreparedStatementSetter.INSERT,
+            jdbcTemplate.batchUpdate(MgAdjustmentBatchPreparedStatementSetter.INSERT,
                     new MgAdjustmentBatchPreparedStatementSetter(adjustmentRows));
             log.info("Batch inserted adjustmentRows: {} firstElement: {}", adjustmentRows.size(),
                     adjustmentRows.get(0).getInvoiceId());

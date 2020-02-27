@@ -100,7 +100,7 @@ create table analytic.events_sink_adjustment
     providerName     String,
     reason           String,
 
-    status           Enum8('pending' = 1, 'succeeded' = 2, 'failed' = 3),
+    status           Enum8('captured' = 1, 'cancelled' = 2),
     errorReason      String,
 
     invoiceId        String,

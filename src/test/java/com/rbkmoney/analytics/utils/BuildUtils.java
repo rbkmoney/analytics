@@ -12,17 +12,20 @@ import com.rbkmoney.geck.serializer.kit.tbase.TBaseHandler;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.time.Instant;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class BuildUtils {
     private static int messageId = 1;
 
-    public static com.rbkmoney.damsel.payment_processing.Invoice buildInvoice(String partyId, String shopId, String invoiceId, String paymentId, String refundId,
+    public static com.rbkmoney.damsel.payment_processing.Invoice buildInvoice(String partyId, String shopId, String invoiceId, String paymentId, String refundId, String adjustmentId,
                                                                               InvoiceStatus invoiceStatus, InvoicePaymentStatus paymentStatus) throws IOException {
         MockTBaseProcessor tBaseProcessor = new MockTBaseProcessor(MockMode.RANDOM, 15, 1);
         com.rbkmoney.damsel.payment_processing.Invoice invoice = new com.rbkmoney.damsel.payment_processing.Invoice()
                 .setInvoice(buildInvoice(partyId, shopId, invoiceId, invoiceStatus, tBaseProcessor))
-                .setPayments(buildPayments(partyId, shopId, paymentId, refundId, paymentStatus, tBaseProcessor));
+                .setPayments(buildPayments(partyId, shopId, paymentId, refundId, adjustmentId, paymentStatus, tBaseProcessor));
         if (invoice.getPayments().get(0).getPayment().getPayer().isSetPaymentResource()) {
             invoice.getPayments().get(0).getPayment().getPayer().getPaymentResource().getResource()
                     .setPaymentTool(PaymentTool.bank_card(tBaseProcessor.process(new BankCard(), new TBaseHandler<>(BankCard.class))));
@@ -44,10 +47,10 @@ public class BuildUtils {
                 .setStatus(invoiceStatus);
     }
 
-    private static List<InvoicePayment> buildPayments(String partyId, String shopId, String paymentId, String refundId, InvoicePaymentStatus paymentStatus, MockTBaseProcessor tBaseProcessor) throws IOException {
+    private static List<InvoicePayment> buildPayments(String partyId, String shopId, String paymentId, String refundId, String adjustmentId, InvoicePaymentStatus paymentStatus, MockTBaseProcessor tBaseProcessor) throws IOException {
         return Collections.singletonList(
                 new InvoicePayment()
-                        .setAdjustments(Collections.emptyList())
+                        .setAdjustments(List.of(buildAdjustment(adjustmentId, tBaseProcessor)))
                         .setPayment(buildPayment(partyId, shopId, paymentId, paymentStatus, tBaseProcessor))
                         .setRefunds(buildRefunds(refundId, tBaseProcessor))
                         .setCashFlow(List.of(
@@ -60,6 +63,7 @@ public class BuildUtils {
                         .setSessions(Collections.emptyList())
         );
     }
+
 
     private static FinalCashFlowPosting payment(long amount) {
         return new FinalCashFlowPosting()
@@ -230,6 +234,31 @@ public class BuildUtils {
                 .setReason("keksik")
                 .setCreatedAt(TypeUtil.temporalToString(Instant.now()))
                 .setId(refundId);
+    }
+
+
+    private static InvoicePaymentAdjustment buildAdjustment(String adjustmentId, MockTBaseProcessor tBaseProcessor) throws IOException {
+        return tBaseProcessor.process(
+                new InvoicePaymentAdjustment(),
+                new TBaseHandler<>(InvoicePaymentAdjustment.class)
+        )
+                .setReason("keksik")
+                .setCreatedAt(TypeUtil.temporalToString(Instant.now()))
+                .setNewCashFlow(List.of(
+                        payment(23L),
+                        systemFee(100L),
+                        providerFee(20L),
+                        externalFee(10L),
+                        guaranteeDeposit(100L),
+                        incorrectPosting(99_999L)))
+                .setOldCashFlowInverse(List.of(
+                        payment(123L),
+                        systemFee(100L),
+                        providerFee(20L),
+                        externalFee(10L),
+                        guaranteeDeposit(100L),
+                        incorrectPosting(99_999L)))
+                .setId(adjustmentId);
     }
 
     private static TransactionInfo getTransactionInfo() {

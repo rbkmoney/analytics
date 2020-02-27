@@ -73,6 +73,22 @@ public class MgEventSinkFlowGenerator {
         return sinkEvents;
     }
 
+    public static List<SinkEvent> generateSuccessAdjustment(String sourceId) {
+        List<SinkEvent> sinkEvents = new ArrayList<>();
+        Long sequenceId = 0L;
+        sinkEvents.add(createSinkEvent(createMessageCreateInvoice(sourceId, sequenceId++)));
+        sinkEvents.add(createSinkEvent(createMessagePaymentPending(sourceId, sequenceId++)));
+        sinkEvents.add(createSinkEvent(createMessagePaymentPending(sourceId, sequenceId++)));
+        sinkEvents.add(createSinkEvent(createMessagePaymentPending(sourceId, sequenceId++)));
+        sinkEvents.add(createSinkEvent(createMessagePaymentProcessed(sourceId, sequenceId++)));
+        sinkEvents.add(createSinkEvent(createMessagePaymentProcessed(sourceId, sequenceId++)));
+        sinkEvents.add(createSinkEvent(createMessageInvoiceCaptured(sourceId, sequenceId++)));
+
+        sinkEvents.add(createSinkEvent(createMessageInvoiceAdjustment(sourceId, sequenceId++)));
+
+        return sinkEvents;
+    }
+
     private static SinkEvent createSinkEvent(MachineEvent machineEvent) {
         SinkEvent sinkEvent = new SinkEvent();
         sinkEvent.setEvent(machineEvent);
@@ -134,6 +150,12 @@ public class MgEventSinkFlowGenerator {
 
     private static MachineEvent createMessageInvoiceCaptured(String sourceId, Long sequenceId) {
         InvoiceChange invoiceCaptured = createInvoiceCaptured();
+        return createMachineEvent(invoiceCaptured, sourceId, sequenceId);
+    }
+
+
+    private static MachineEvent createMessageInvoiceAdjustment(String sourceId, Long sequenceId) {
+        InvoiceChange invoiceCaptured = createInvoiceAdjustment();
         return createMachineEvent(invoiceCaptured, sourceId, sequenceId);
     }
 
@@ -206,6 +228,24 @@ public class MgEventSinkFlowGenerator {
         InvoicePaymentStatusChanged invoicePaymentStatusChanged = new InvoicePaymentStatusChanged()
                 .setStatus(InvoicePaymentStatus.captured(new InvoicePaymentCaptured()));
         payload.setInvoicePaymentStatusChanged(invoicePaymentStatusChanged);
+        invoiceChange.setInvoicePaymentChange(new InvoicePaymentChange()
+                .setId("1")
+                .setPayload(payload));
+        return invoiceChange;
+    }
+
+    private static InvoiceChange createInvoiceAdjustment() {
+        InvoiceChange invoiceChange = new InvoiceChange();
+        InvoicePaymentChangePayload payload = new InvoicePaymentChangePayload();
+        InvoicePaymentAdjustmentStatusChanged invoicePaymentStatusChanged = new InvoicePaymentAdjustmentStatusChanged()
+                .setStatus(InvoicePaymentAdjustmentStatus.captured(new InvoicePaymentAdjustmentCaptured()
+                        .setAt(TypeUtil.temporalToString(Instant.now()))));
+        InvoicePaymentAdjustmentChangePayload invoicePaymentAdjustmentChangePayload = new InvoicePaymentAdjustmentChangePayload();
+        invoicePaymentAdjustmentChangePayload.setInvoicePaymentAdjustmentStatusChanged(invoicePaymentStatusChanged);
+
+        payload.setInvoicePaymentAdjustmentChange(new InvoicePaymentAdjustmentChange()
+                .setId("1")
+                .setPayload(invoicePaymentAdjustmentChangePayload));
         invoiceChange.setInvoicePaymentChange(new InvoicePaymentChange()
                 .setId("1")
                 .setPayload(payload));

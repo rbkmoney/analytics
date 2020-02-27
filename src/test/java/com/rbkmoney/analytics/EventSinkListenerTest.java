@@ -1,7 +1,5 @@
 package com.rbkmoney.analytics;
 
-import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
-import com.rbkmoney.analytics.serde.MachineEventDeserializer;
 import com.rbkmoney.analytics.service.HgClientService;
 import com.rbkmoney.analytics.utils.BuildUtils;
 import com.rbkmoney.analytics.utils.EventRangeFactory;
@@ -10,9 +8,11 @@ import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.payment_processing.InvoicingSrv;
 import com.rbkmoney.machinegun.eventsink.SinkEvent;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.thrift.TException;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +28,9 @@ import org.testcontainers.containers.ClickHouseContainer;
 import ru.yandex.clickhouse.ClickHouseDataSource;
 import ru.yandex.clickhouse.settings.ClickHouseProperties;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -45,6 +43,7 @@ public class EventSinkListenerTest extends KafkaAbstractTest {
 
     public static final long MESSAGE_TIMEOUT = 4_000L;
     public static final String SOURCE_ID = "sourceID";
+    public static final String FIRST_ADJUSTMENT = "1";
 
     @ClassRule
     public static ClickHouseContainer clickHouseContainer = new ClickHouseContainer();
@@ -156,18 +155,46 @@ public class EventSinkListenerTest extends KafkaAbstractTest {
                         "having shopId = '" + MgEventSinkFlowGenerator.SHOP_ID + "' and status = 'pending' and currency = 'RUB'");
 
         Assert.assertTrue(resultList.isEmpty());
+
+        String source_adjustment = "source_adjustment";
+        mockPayment(source_adjustment);
+        mockAdjustment(source_adjustment, 7, FIRST_ADJUSTMENT);
+
+        sinkEvents = MgEventSinkFlowGenerator.generateSuccessAdjustment(source_adjustment);
+        sinkEvents.forEach(this::produceMessageToEventSink);
+
+        Thread.sleep(MESSAGE_TIMEOUT);
+
+        //check sum for succeeded refund
+        sum = jdbcTemplate.queryForObject(
+                "SELECT shopId, sum(totalAmount) as sum " +
+                        "from analytic.events_sink_adjustment " +
+                        "group by shopId, currency, status " +
+                        "having shopId = '" + MgEventSinkFlowGenerator.SHOP_ID + "' and status = 'captured' and currency = 'RUB'",
+                (resultSet, i) -> resultSet.getLong("sum"));
+
+        Assert.assertEquals(123L, sum);
     }
 
-    private void mockPayment(String sourceID_refund_1) throws TException, IOException {
-        Mockito.when(invoicingClient.get(HgClientService.USER_INFO, sourceID_refund_1, eventRangeFactory.create(6)))
-                .thenReturn(BuildUtils.buildInvoice(MgEventSinkFlowGenerator.PARTY_ID, MgEventSinkFlowGenerator.SHOP_ID, sourceID_refund_1, "1", "1",
+    private void mockPayment(String sourceId) throws TException, IOException {
+        Mockito.when(invoicingClient.get(HgClientService.USER_INFO, sourceId, eventRangeFactory.create(6)))
+                .thenReturn(BuildUtils.buildInvoice(MgEventSinkFlowGenerator.PARTY_ID, MgEventSinkFlowGenerator.SHOP_ID,
+                        sourceId, "1", "1", FIRST_ADJUSTMENT,
                         InvoiceStatus.paid(new InvoicePaid()), InvoicePaymentStatus.pending(new InvoicePaymentPending())));
     }
 
-    private void mockRefund(String sourceID_refund_1, int sequenceId, String refundId) throws TException, IOException {
-        Mockito.when(invoicingClient.get(HgClientService.USER_INFO, sourceID_refund_1, eventRangeFactory.create(sequenceId)))
-                .thenReturn(BuildUtils.buildInvoice(MgEventSinkFlowGenerator.PARTY_ID, MgEventSinkFlowGenerator.SHOP_ID, sourceID_refund_1, "1", refundId,
+    private void mockRefund(String sourceId, int sequenceId, String refundId) throws TException, IOException {
+        Mockito.when(invoicingClient.get(HgClientService.USER_INFO, sourceId, eventRangeFactory.create(sequenceId)))
+                .thenReturn(BuildUtils.buildInvoice(MgEventSinkFlowGenerator.PARTY_ID, MgEventSinkFlowGenerator.SHOP_ID,
+                        sourceId, "1", refundId, FIRST_ADJUSTMENT,
                         InvoiceStatus.paid(new InvoicePaid()), InvoicePaymentStatus.refunded(new InvoicePaymentRefunded())));
+    }
+
+    private void mockAdjustment(String sourceId, int sequenceId, String adjustmentId) throws TException, IOException {
+        Mockito.when(invoicingClient.get(HgClientService.USER_INFO, sourceId, eventRangeFactory.create(sequenceId)))
+                .thenReturn(BuildUtils.buildInvoice(MgEventSinkFlowGenerator.PARTY_ID, MgEventSinkFlowGenerator.SHOP_ID,
+                        sourceId, "1", adjustmentId, FIRST_ADJUSTMENT,
+                        InvoiceStatus.paid(new InvoicePaid()), InvoicePaymentStatus.captured(new InvoicePaymentCaptured())));
     }
 
 }
