@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class MgInvoiceListener {
 
     @Value("${kafka.consumer.throttling-timeout-ms}")
-    private int throttleTimeout;
+    private int throttlingTimeout;
 
     private final SourceEventParser eventParser;
     private final HandlerManager<InvoiceChange, MachineEvent> handlerManager;
@@ -56,7 +56,7 @@ public class MgInvoiceListener {
             }
         } catch (Exception e) {
             log.error("Error when MgPaymentAggregatorListener listen e: ", e);
-            Thread.sleep(throttleTimeout);
+            Thread.sleep(throttlingTimeout);
             throw e;
         }
     }

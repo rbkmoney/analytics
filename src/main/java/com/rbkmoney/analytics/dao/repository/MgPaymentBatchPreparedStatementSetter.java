@@ -2,6 +2,7 @@ package com.rbkmoney.analytics.dao.repository;
 
 import com.rbkmoney.analytics.constant.ClickhouseUtilsValue;
 import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
+import com.rbkmoney.analytics.domain.CashFlowResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 
@@ -15,8 +16,7 @@ public class MgPaymentBatchPreparedStatementSetter implements BatchPreparedState
     public static final String INSERT = "INSERT INTO analytic.events_sink " +
             "(timestamp, eventTime, eventTimeHour, partyId, shopId, email," +
             "totalAmount, merchantAmount, guaranteeDeposit, systemFee, providerFee, externalFee, currency, providerName, " +
-            "status, errorReason,  invoiceId, " +
-            "paymentId, sequenceId, ip, bin, maskedPan, paymentTool, " +
+            "status, errorReason,  invoiceId, paymentId, sequenceId, ip, bin, maskedPan, paymentTool, " +
             "fingerprint,cardToken, paymentSystem, digitalWalletProvider, digitalWalletToken, cryptoCurrency, mobileOperator)" +
             " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -35,12 +35,15 @@ public class MgPaymentBatchPreparedStatementSetter implements BatchPreparedState
 
         ps.setString(l++, row.getEmail());
 
-        ps.setLong(l++, row.getTotalAmount());
-        ps.setLong(l++, row.getMerchantAmount());
-        ps.setLong(l++, row.getGuaranteeDeposit());
-        ps.setLong(l++, row.getSystemFee());
-        ps.setLong(l++, row.getExternalFee());
-        ps.setLong(l++, row.getProviderFee());
+        CashFlowResult cashFlowResult = row.getCashFlowResult();
+        if (cashFlowResult != null) {
+            ps.setLong(l++, cashFlowResult.getTotalAmount());
+            ps.setLong(l++, cashFlowResult.getMerchantAmount());
+            ps.setLong(l++, cashFlowResult.getGuaranteeDeposit());
+            ps.setLong(l++, cashFlowResult.getSystemFee());
+            ps.setLong(l++, cashFlowResult.getExternalFee());
+            ps.setLong(l++, cashFlowResult.getProviderFee());
+        }
         ps.setString(l++, row.getCurrency());
 
         ps.setString(l++, row.getProvider());

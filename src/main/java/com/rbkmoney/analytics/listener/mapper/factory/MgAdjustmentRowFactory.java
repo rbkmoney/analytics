@@ -1,6 +1,8 @@
 package com.rbkmoney.analytics.listener.mapper.factory;
 
+import com.rbkmoney.analytics.computer.CashFlowComputer;
 import com.rbkmoney.analytics.dao.model.MgAdjustmentRow;
+import com.rbkmoney.analytics.domain.CashFlowResult;
 import com.rbkmoney.damsel.domain.FinalCashFlowPosting;
 import com.rbkmoney.damsel.domain.Invoice;
 import com.rbkmoney.damsel.domain.InvoicePaymentAdjustment;
@@ -9,6 +11,7 @@ import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -32,7 +35,7 @@ public class MgAdjustmentRowFactory extends MgBaseRowFactory<MgAdjustmentRow> {
 
     private void initInfo(MachineEvent machineEvent, MgAdjustmentRow row, com.rbkmoney.damsel.payment_processing.Invoice invoiceInfo, String id) {
         for (InvoicePayment payment : invoiceInfo.getPayments()) {
-            if (payment.isSetPayment() && payment.isSetRefunds()) {
+            if (payment.isSetPayment() && payment.isSetAdjustments()) {
                 for (InvoicePaymentAdjustment adjustment : payment.getAdjustments()) {
                     if (adjustment.getId().equals(id)) {
                         List<FinalCashFlowPosting> cashFlow = adjustment.getNewCashFlow();
@@ -40,6 +43,12 @@ public class MgAdjustmentRowFactory extends MgBaseRowFactory<MgAdjustmentRow> {
                         row.setPaymentId(payment.getPayment().getId());
                         initCashFlowInfo(row, cashFlow);
                         initBaseRow(machineEvent, row, payment);
+
+                        List<FinalCashFlowPosting> oldCashFlow = adjustment.getNewCashFlow();
+                        if (!CollectionUtils.isEmpty(oldCashFlow)) {
+                            CashFlowResult compute = CashFlowComputer.compute(oldCashFlow);
+                            row.setOldCashFlowResult(compute);
+                        }
                     }
                 }
             }

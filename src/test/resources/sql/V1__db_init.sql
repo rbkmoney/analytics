@@ -110,6 +110,14 @@ create table analytic.events_sink_adjustment
     systemFee             UInt64,
     providerFee           UInt64,
     externalFee           UInt64,
+
+    oldTotalAmount        UInt64,
+    oldMerchantAmount     UInt64,
+    oldGuaranteeDeposit   UInt64,
+    oldSystemFee          UInt64,
+    oldProviderFee        UInt64,
+    oldExternalFee        UInt64,
+
     currency              String,
 
     reason                String,

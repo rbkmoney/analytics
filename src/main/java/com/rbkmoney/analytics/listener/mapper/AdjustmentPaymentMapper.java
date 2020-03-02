@@ -25,9 +25,7 @@ public class AdjustmentPaymentMapper implements Mapper<InvoiceChange, MachineEve
 
     @Override
     public boolean accept(InvoiceChange change) {
-        return getChangeType().getFilter().match(change)
-                && change.getInvoicePaymentChange().getPayload().getInvoicePaymentAdjustmentChange().getPayload().
-                getInvoicePaymentAdjustmentStatusChanged().getStatus().isSetCaptured();
+        return getChangeType().getFilter().match(change);
     }
 
     @Override

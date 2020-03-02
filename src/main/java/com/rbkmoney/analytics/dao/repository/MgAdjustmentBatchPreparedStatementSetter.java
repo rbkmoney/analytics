@@ -1,6 +1,7 @@
 package com.rbkmoney.analytics.dao.repository;
 
 import com.rbkmoney.analytics.dao.model.MgAdjustmentRow;
+import com.rbkmoney.analytics.domain.CashFlowResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 
@@ -13,11 +14,11 @@ public class MgAdjustmentBatchPreparedStatementSetter implements BatchPreparedSt
 
     public static final String INSERT = "INSERT INTO analytic.events_sink_adjustment " +
             "(timestamp, eventTime, eventTimeHour, partyId, shopId, email, " +
-            "totalAmount, merchantAmount, guaranteeDeposit, systemFee, providerFee, externalFee, currency, providerName, " +
-            "status, errorReason,  invoiceId, " +
-            "paymentId, adjustmentId, sequenceId, ip, " +
+            "totalAmount, merchantAmount, guaranteeDeposit, systemFee, providerFee, externalFee, " +
+            "oldTotalAmount, oldMerchantAmount, oldGuaranteeDeposit, oldSystemFee, oldProviderFee, oldExternalFee, " +
+            "currency, providerName, status, errorReason,  invoiceId, paymentId, adjustmentId, sequenceId, ip, " +
             "fingerprint, cardToken, paymentSystem, digitalWalletProvider, digitalWalletToken, cryptoCurrency, mobileOperator)" +
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private final List<MgAdjustmentRow> batch;
 
@@ -34,12 +35,9 @@ public class MgAdjustmentBatchPreparedStatementSetter implements BatchPreparedSt
 
         ps.setString(l++, row.getEmail());
 
-        ps.setLong(l++, row.getTotalAmount());
-        ps.setLong(l++, row.getMerchantAmount());
-        ps.setLong(l++, row.getGuaranteeDeposit());
-        ps.setLong(l++, row.getSystemFee());
-        ps.setLong(l++, row.getExternalFee());
-        ps.setLong(l++, row.getProviderFee());
+        l = initCashFlow(ps, l, row.getCashFlowResult());
+        l = initCashFlow(ps, l, row.getOldCashFlowResult());
+
         ps.setString(l++, row.getCurrency());
 
         ps.setString(l++, row.getProvider());
@@ -63,6 +61,16 @@ public class MgAdjustmentBatchPreparedStatementSetter implements BatchPreparedSt
         ps.setString(l++, row.getCryptoCurrency());
         ps.setString(l, row.getMobileOperator());
 
+    }
+
+    private int initCashFlow(PreparedStatement ps, int l, CashFlowResult cashFlowResult) throws SQLException {
+        ps.setLong(l++, cashFlowResult != null ? cashFlowResult.getTotalAmount() : 0);
+        ps.setLong(l++, cashFlowResult != null ? cashFlowResult.getMerchantAmount() : 0);
+        ps.setLong(l++, cashFlowResult != null ? cashFlowResult.getGuaranteeDeposit() : 0);
+        ps.setLong(l++, cashFlowResult != null ? cashFlowResult.getSystemFee() : 0);
+        ps.setLong(l++, cashFlowResult != null ? cashFlowResult.getExternalFee() : 0);
+        ps.setLong(l++, cashFlowResult != null ? cashFlowResult.getProviderFee() : 0);
+        return l;
     }
 
     @Override

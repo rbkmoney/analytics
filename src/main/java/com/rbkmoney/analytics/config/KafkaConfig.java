@@ -38,8 +38,6 @@ public class KafkaConfig {
 
     private static final String RESULT_ANALYTICS = "result-analytics";
 
-    @Value("${kafka.state.cache.size:10}")
-    private int cacheSizeStateStoreMb;
     @Value("${kafka.max.poll.records}")
     private String maxPollRecords;
     @Value("${kafka.state.dir}")

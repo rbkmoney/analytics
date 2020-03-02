@@ -1,5 +1,6 @@
 package com.rbkmoney.analytics.dao.model;
 
+import com.rbkmoney.analytics.domain.CashFlowResult;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -23,15 +24,7 @@ public class MgBaseRow {
     private String cryptoCurrency;
     private String mobileOperator;
 
-    private Long accountId;
-
-    private long totalAmount;
-    private long merchantAmount;
-    private long guaranteeDeposit;
-    private long systemFee;
-    private long providerFee;
-    private long externalFee;
-
+    private CashFlowResult cashFlowResult;
     private String currency;
 
     private String shopId;

@@ -27,17 +27,15 @@ public abstract class MgBaseRowFactory<T extends MgBaseRow> implements RowFactor
         row.setCurrency(invoicePayment.getPayment().getCost().getCurrency().getSymbolicCode());
         row.setPaymentId(invoicePayment.getPayment().getId());
         Payer payer = invoicePayment.getPayment().getPayer();
-        if (payer.isSetPaymentResource()) {
+        if (payer.isSetPaymentResource() && payer.getPaymentResource().isSetResource()) {
             DisposablePaymentResource resource = payer.getPaymentResource().getResource();
             PaymentTool paymentTool = resource.getPaymentTool();
-            if (payer.getPaymentResource().isSetResource()) {
-                if (resource.isSetClientInfo()) {
-                    ClientInfo clientInfo = resource.getClientInfo();
-                    row.setIp(clientInfo.getIpAddress());
-                    row.setFingerprint(clientInfo.getFingerprint());
-                }
-                initCardData(row, paymentTool);
+            if (resource.isSetClientInfo()) {
+                ClientInfo clientInfo = resource.getClientInfo();
+                row.setIp(clientInfo.getIpAddress());
+                row.setFingerprint(clientInfo.getFingerprint());
             }
+            initCardData(row, paymentTool);
             initContactInfo(row, payer.getPaymentResource().getContactInfo());
         } else if (payer.isSetCustomer()) {
             CustomerPayer customer = payer.getCustomer();
@@ -57,13 +55,7 @@ public abstract class MgBaseRowFactory<T extends MgBaseRow> implements RowFactor
     protected void initCashFlowInfo(T row, List<FinalCashFlowPosting> cashFlow) {
         if (!CollectionUtils.isEmpty(cashFlow)) {
             CashFlowResult compute = CashFlowComputer.compute(cashFlow);
-            row.setTotalAmount(compute.getTotalAmount());
-            row.setMerchantAmount(compute.getMerchantAmount());
-            row.setExternalFee(compute.getExternalFee());
-            row.setGuaranteeDeposit(compute.getGuaranteeDeposit());
-            row.setProviderFee(compute.getProviderFee());
-            row.setSystemFee(compute.getSystemFee());
-            row.setAccountId(compute.getAccountId());
+            row.setCashFlowResult(compute);
         }
     }
 
