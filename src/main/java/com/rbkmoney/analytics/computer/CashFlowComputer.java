@@ -4,12 +4,13 @@ import com.rbkmoney.analytics.domain.CashFlowResult;
 import com.rbkmoney.damsel.domain.*;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.msgpack.core.Preconditions.checkState;
 
 public class CashFlowComputer {
 
-    public static CashFlowResult compute(List<FinalCashFlowPosting> cashFlow) {
+    public static Optional<CashFlowResult> compute(List<FinalCashFlowPosting> cashFlow) {
         long accountId = -1;
         long merchantAmount = 0L;
         long systemFee = 0L;
@@ -17,20 +18,23 @@ public class CashFlowComputer {
         long externalFee = 0L;
         long guaranteeDeposit = 0L;
 
-        if (cashFlow != null) {
-            for (FinalCashFlowPosting posting : cashFlow) {
-                if (!posting.isSetSource() || !posting.isSetDestination()) {
-                    continue;
-                }
+        if (cashFlow == null) {
+            return Optional.empty();
+        }
 
-                if (isPayment(posting)) {
-                    accountId = posting.getDestination().getAccountId();
-                    merchantAmount += posting.getVolume().getAmount();
-                }
+        for (FinalCashFlowPosting posting : cashFlow) {
+            if (!posting.isSetSource() || !posting.isSetDestination()) {
+                continue;
+            }
 
-                if (isRefund(posting)) {
-                    accountId = posting.getSource().getAccountId();
-                    merchantAmount += posting.getVolume().getAmount();
+            if (isPayment(posting)) {
+                accountId = posting.getDestination().getAccountId();
+                merchantAmount += posting.getVolume().getAmount();
+            }
+
+            if (isRefund(posting)) {
+                accountId = posting.getSource().getAccountId();
+                merchantAmount += posting.getVolume().getAmount();
                 }
 
                 if (isSystemFee(posting)) {
@@ -48,11 +52,10 @@ public class CashFlowComputer {
                 if (isGuaranteeDeposit(posting)) {
                     guaranteeDeposit += posting.getVolume().getAmount();
                 }
-            }
 
             checkState(accountId > 0, "Unable to get correct accountId");
         }
-        return CashFlowResult.builder()
+        return Optional.ofNullable(CashFlowResult.builder()
                 .accountId(accountId)
                 .totalAmount(merchantAmount + systemFee)
                 .merchantAmount(merchantAmount)
@@ -60,7 +63,7 @@ public class CashFlowComputer {
                 .providerFee(providerFee)
                 .externalFee(externalFee)
                 .guaranteeDeposit(guaranteeDeposit)
-                .build();
+                .build());
     }
 
     private static boolean isPayment(FinalCashFlowPosting posting) {

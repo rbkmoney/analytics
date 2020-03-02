@@ -35,13 +35,11 @@ import static org.apache.kafka.clients.consumer.OffsetResetStrategy.EARLIEST;
 @EnableConfigurationProperties(KafkaSslProperties.class)
 public class KafkaConfig {
 
-
     private static final String RESULT_ANALYTICS = "result-analytics";
 
     @Value("${kafka.max.poll.records}")
     private String maxPollRecords;
-    @Value("${kafka.state.dir}")
-    private String stateDir;
+
     @Value("${kafka.bootstrap.servers}")
     private String bootstrapServers;
 

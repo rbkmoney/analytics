@@ -2,7 +2,6 @@ package com.rbkmoney.analytics.listener.mapper.factory;
 
 import com.rbkmoney.analytics.computer.CashFlowComputer;
 import com.rbkmoney.analytics.dao.model.MgBaseRow;
-import com.rbkmoney.analytics.domain.CashFlowResult;
 import com.rbkmoney.analytics.utils.TimeUtils;
 import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.payment_processing.InvoicePayment;
@@ -48,14 +47,7 @@ public abstract class MgBaseRowFactory<T extends MgBaseRow> implements RowFactor
             initCardData(row, paymentTool);
             initContactInfo(row, recurrent.getContactInfo());
         } else {
-            log.warn("Unkonwn payment tool in payer: {}", payer);
-        }
-    }
-
-    protected void initCashFlowInfo(T row, List<FinalCashFlowPosting> cashFlow) {
-        if (!CollectionUtils.isEmpty(cashFlow)) {
-            CashFlowResult compute = CashFlowComputer.compute(cashFlow);
-            row.setCashFlowResult(compute);
+            log.warn("Unknown payment tool in payer: {}", payer);
         }
     }
 

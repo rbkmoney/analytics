@@ -2,7 +2,6 @@ package com.rbkmoney.analytics.listener.mapper.factory;
 
 import com.rbkmoney.analytics.computer.CashFlowComputer;
 import com.rbkmoney.analytics.dao.model.MgAdjustmentRow;
-import com.rbkmoney.analytics.domain.CashFlowResult;
 import com.rbkmoney.damsel.domain.FinalCashFlowPosting;
 import com.rbkmoney.damsel.domain.Invoice;
 import com.rbkmoney.damsel.domain.InvoicePaymentAdjustment;
@@ -41,13 +40,13 @@ public class MgAdjustmentRowFactory extends MgBaseRowFactory<MgAdjustmentRow> {
                         List<FinalCashFlowPosting> cashFlow = adjustment.getNewCashFlow();
                         row.setAdjustmentId(id);
                         row.setPaymentId(payment.getPayment().getId());
-                        initCashFlowInfo(row, cashFlow);
+                        CashFlowComputer.compute(cashFlow)
+                                .ifPresent(row::setCashFlowResult);
                         initBaseRow(machineEvent, row, payment);
-
                         List<FinalCashFlowPosting> oldCashFlow = adjustment.getNewCashFlow();
                         if (!CollectionUtils.isEmpty(oldCashFlow)) {
-                            CashFlowResult compute = CashFlowComputer.compute(oldCashFlow);
-                            row.setOldCashFlowResult(compute);
+                            CashFlowComputer.compute(oldCashFlow)
+                                    .ifPresent(row::setOldCashFlowResult);
                         }
                     }
                 }

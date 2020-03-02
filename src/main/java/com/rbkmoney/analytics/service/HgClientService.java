@@ -5,9 +5,11 @@ import com.rbkmoney.analytics.utils.EventRangeFactory;
 import com.rbkmoney.damsel.payment_processing.*;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class HgClientService {
@@ -19,13 +21,12 @@ public class HgClientService {
     private final EventRangeFactory eventRangeFactory;
 
     public Invoice getInvoiceInfo(MachineEvent event) {
-        Invoice invoiceInfo = null;
         try {
-            invoiceInfo = invoicingClient.get(USER_INFO, event.getSourceId(), eventRangeFactory.create(event.getEventId()));
+            return invoicingClient.get(USER_INFO, event.getSourceId(), eventRangeFactory.create(event.getEventId()));
         } catch (TException e) {
+            log.error("Error when HgClientService getInvoiceInfo e: ", e);
             throw new PaymentInfoRequestException(e);
         }
-        return invoiceInfo;
     }
 
 }

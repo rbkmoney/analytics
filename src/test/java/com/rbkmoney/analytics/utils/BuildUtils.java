@@ -8,6 +8,7 @@ import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.geck.serializer.kit.mock.MockMode;
 import com.rbkmoney.geck.serializer.kit.mock.MockTBaseProcessor;
 import com.rbkmoney.geck.serializer.kit.tbase.TBaseHandler;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -53,15 +54,20 @@ public class BuildUtils {
                         .setAdjustments(List.of(buildAdjustment(adjustmentId, tBaseProcessor)))
                         .setPayment(buildPayment(partyId, shopId, paymentId, paymentStatus, tBaseProcessor))
                         .setRefunds(buildRefunds(refundId, tBaseProcessor))
-                        .setCashFlow(List.of(
-                                payment(1000L),
-                                systemFee(100L),
-                                providerFee(20L),
-                                externalFee(10L),
-                                guaranteeDeposit(300L),
-                                incorrectPosting(99_999L)))
+                        .setCashFlow(createCashFlow(1000L, 300L))
                         .setSessions(Collections.emptyList())
         );
+    }
+
+    @NotNull
+    public static List<FinalCashFlowPosting> createCashFlow(long l, long l2) {
+        return List.of(
+                payment(l),
+                systemFee(100L),
+                providerFee(20L),
+                externalFee(10L),
+                guaranteeDeposit(l2),
+                incorrectPosting(99_999L));
     }
 
 
@@ -214,13 +220,7 @@ public class BuildUtils {
                 buildRefund(refundId, tBaseProcessor),
                 Collections.singletonList(new InvoiceRefundSession().setTransactionInfo(getTransactionInfo()))
         );
-        invoicePaymentRefund.setCashFlow(List.of(
-                payment(123L),
-                systemFee(100L),
-                providerFee(20L),
-                externalFee(10L),
-                guaranteeDeposit(100L),
-                incorrectPosting(99_999L)));
+        invoicePaymentRefund.setCashFlow(createCashFlow(123L, 100L));
         return Collections.singletonList(
                 invoicePaymentRefund
         );
@@ -244,20 +244,8 @@ public class BuildUtils {
         )
                 .setReason("keksik")
                 .setCreatedAt(TypeUtil.temporalToString(Instant.now()))
-                .setNewCashFlow(List.of(
-                        payment(23L),
-                        systemFee(100L),
-                        providerFee(20L),
-                        externalFee(10L),
-                        guaranteeDeposit(100L),
-                        incorrectPosting(99_999L)))
-                .setOldCashFlowInverse(List.of(
-                        payment(123L),
-                        systemFee(100L),
-                        providerFee(20L),
-                        externalFee(10L),
-                        guaranteeDeposit(100L),
-                        incorrectPosting(99_999L)))
+                .setNewCashFlow(createCashFlow(23L, 100L))
+                .setOldCashFlowInverse(createCashFlow(123L, 100L))
                 .setId(adjustmentId);
     }
 

@@ -36,17 +36,12 @@ kafka:
   topic:
     event.sink:
       initial: event_sink
-      aggregated: aggregated_event_sink
-      aggregatedRefund: aggregated_event_sink_refund
   consumer:
       prefix: analytics
       concurrency: 7
       throttling-timeout-ms: 1000
   ssl:
     enabled: false
-  state:
-    dir: tmp/state-store/
-  block.cache.size: 10
 
 service:
   invoicing:

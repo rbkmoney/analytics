@@ -1,11 +1,12 @@
 package com.rbkmoney.analytics.computer;
 
 import com.rbkmoney.analytics.domain.CashFlowResult;
+import com.rbkmoney.analytics.utils.BuildUtils;
 import com.rbkmoney.damsel.domain.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -23,27 +24,19 @@ public class CashFlowComputerTest {
 
     @Test
     public void shouldComputeCashFlowResult() {
-        // Given
-        List<FinalCashFlowPosting> cashFlow = List.of(
-                payment(1000L),
-                payment(1000L),
-                systemFee(100L),
-                providerFee(20L),
-                externalFee(10L),
-                guaranteeDeposit(300L),
-                incorrectPosting(99_999L));
 
         // When
-        CashFlowResult result = cashFlowComputer.compute(cashFlow);
+        Optional<CashFlowResult> compute = cashFlowComputer.compute(BuildUtils.createCashFlow(1000L, 100L));
 
+        CashFlowResult result = compute.get();
         // Then
         assertThat(result.getAccountId(), is(1L));
-        assertThat(result.getTotalAmount(), is(2100L));
-        assertThat(result.getMerchantAmount(), is(2000L));
+        assertThat(result.getTotalAmount(), is(1100L));
+        assertThat(result.getMerchantAmount(), is(1000L));
         assertThat(result.getSystemFee(), is(100L));
         assertThat(result.getProviderFee(), is(20L));
         assertThat(result.getExternalFee(), is(10L));
-        assertThat(result.getGuaranteeDeposit(), is(300L));
+        assertThat(result.getGuaranteeDeposit(), is(100L));
     }
 
     private FinalCashFlowPosting payment(long amount) {

@@ -1,5 +1,6 @@
 package com.rbkmoney.analytics.listener.mapper.factory;
 
+import com.rbkmoney.analytics.computer.CashFlowComputer;
 import com.rbkmoney.analytics.dao.model.MgRefundRow;
 import com.rbkmoney.damsel.domain.FinalCashFlowPosting;
 import com.rbkmoney.damsel.domain.Invoice;
@@ -37,7 +38,8 @@ public class MgRefundRowFactory extends MgBaseRowFactory<MgRefundRow> {
                         List<FinalCashFlowPosting> cashFlow = refund.isSetCashFlow() ? refund.getCashFlow() : payment.getCashFlow();
                         row.setRefundId(refundId);
                         row.setPaymentId(payment.getPayment().getId());
-                        initCashFlowInfo(row, cashFlow);
+                        CashFlowComputer.compute(cashFlow)
+                                .ifPresent(row::setCashFlowResult);
                         initBaseRow(machineEvent, row, payment);
                     }
                 }

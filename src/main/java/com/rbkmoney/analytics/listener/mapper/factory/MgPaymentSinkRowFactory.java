@@ -1,5 +1,6 @@
 package com.rbkmoney.analytics.listener.mapper.factory;
 
+import com.rbkmoney.analytics.computer.CashFlowComputer;
 import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
 import com.rbkmoney.damsel.domain.FinalCashFlowPosting;
 import com.rbkmoney.damsel.domain.Invoice;
@@ -34,7 +35,8 @@ public class MgPaymentSinkRowFactory extends MgBaseRowFactory<MgPaymentSinkRow> 
         for (InvoicePayment payment : invoiceInfo.getPayments()) {
             if (payment.isSetPayment() && payment.getPayment().getId().equals(paymentId)) {
                 List<FinalCashFlowPosting> cashFlow = payment.getCashFlow();
-                initCashFlowInfo(row, cashFlow);
+                CashFlowComputer.compute(cashFlow)
+                        .ifPresent(row::setCashFlowResult);
                 initBaseRow(machineEvent, row, payment);
             }
         }

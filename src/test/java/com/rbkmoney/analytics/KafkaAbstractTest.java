@@ -34,16 +34,12 @@ public abstract class KafkaAbstractTest {
     private static final String AGGR = "aggr";
 
     public static final String EVENT_SINK = "event_sink";
-    public static final String AGGREGATED_EVENT_SINK = "aggregated_event_sink";
-    public static final String AGGREGATED_EVENT_SINK_REFUND = "aggregated_event_sink_refund";
 
     @ClassRule
     public static KafkaContainer kafka = new KafkaContainer(CONFLUENT_PLATFORM_VERSION).withEmbeddedZookeeper();
 
     @Value("${kafka.topic.event.sink.initial}")
     public String eventSinkTopic;
-    @Value("${kafka.topic.event.sink.aggregated}")
-    public String aggregatedEventSink;
 
     public static Producer<String, SinkEvent> createProducerAggr() {
         Properties props = new Properties();
