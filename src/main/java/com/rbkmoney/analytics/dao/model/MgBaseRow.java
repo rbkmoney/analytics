@@ -16,6 +16,12 @@ public class MgBaseRow {
     private String ip;
     private String email;
     private String fingerprint;
+    private String cardToken;
+    private String paymentSystem;
+    private String digitalWalletProvider;
+    private String digitalWalletToken;
+    private String cryptoCurrency;
+    private String mobileOperator;
 
     private Long accountId;
 

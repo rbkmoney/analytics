@@ -7,13 +7,11 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.sql.Date;
-
 @Data
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-public class MgPaymentSinkRow extends MgBaseRow{
+public class MgPaymentSinkRow extends MgBaseRow {
 
     private PaymentStatus status;
     private String errorCode;

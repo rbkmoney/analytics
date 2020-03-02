@@ -13,49 +13,58 @@ import java.util.List;
 public class MgPaymentBatchPreparedStatementSetter implements BatchPreparedStatementSetter {
 
     public static final String INSERT = "INSERT INTO analytic.events_sink " +
-            "(timestamp, eventTime, eventTimeHour, partyId, shopId, email, " +
+            "(timestamp, eventTime, eventTimeHour, partyId, shopId, email," +
             "totalAmount, merchantAmount, guaranteeDeposit, systemFee, providerFee, externalFee, currency, providerName, " +
             "status, errorReason,  invoiceId, " +
-            "paymentId, sequenceId, ip, bin, maskedPan, paymentTool)" +
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "paymentId, sequenceId, ip, bin, maskedPan, paymentTool, " +
+            "fingerprint,cardToken, paymentSystem, digitalWalletProvider, digitalWalletToken, cryptoCurrency, mobileOperator)" +
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private final List<MgPaymentSinkRow> batch;
 
     @Override
     public void setValues(PreparedStatement ps, int i) throws SQLException {
-        MgPaymentSinkRow mgPaymentSinkRow = batch.get(i);
+        MgPaymentSinkRow row = batch.get(i);
         int l = 1;
-        ps.setDate(l++, mgPaymentSinkRow.getTimestamp());
-        ps.setLong(l++, mgPaymentSinkRow.getEventTime());
-        ps.setLong(l++, mgPaymentSinkRow.getEventTimeHour());
+        ps.setDate(l++, row.getTimestamp());
+        ps.setLong(l++, row.getEventTime());
+        ps.setLong(l++, row.getEventTimeHour());
 
-        ps.setString(l++, mgPaymentSinkRow.getPartyId());
-        ps.setString(l++, mgPaymentSinkRow.getShopId());
+        ps.setString(l++, row.getPartyId());
+        ps.setString(l++, row.getShopId());
 
-        ps.setString(l++, mgPaymentSinkRow.getEmail());
+        ps.setString(l++, row.getEmail());
 
-        ps.setLong(l++, mgPaymentSinkRow.getTotalAmount());
-        ps.setLong(l++, mgPaymentSinkRow.getMerchantAmount());
-        ps.setLong(l++, mgPaymentSinkRow.getGuaranteeDeposit());
-        ps.setLong(l++, mgPaymentSinkRow.getSystemFee());
-        ps.setLong(l++, mgPaymentSinkRow.getExternalFee());
-        ps.setLong(l++, mgPaymentSinkRow.getProviderFee());
-        ps.setString(l++, mgPaymentSinkRow.getCurrency());
+        ps.setLong(l++, row.getTotalAmount());
+        ps.setLong(l++, row.getMerchantAmount());
+        ps.setLong(l++, row.getGuaranteeDeposit());
+        ps.setLong(l++, row.getSystemFee());
+        ps.setLong(l++, row.getExternalFee());
+        ps.setLong(l++, row.getProviderFee());
+        ps.setString(l++, row.getCurrency());
 
-        ps.setString(l++, mgPaymentSinkRow.getProvider());
+        ps.setString(l++, row.getProvider());
 
-        ps.setString(l++, mgPaymentSinkRow.getStatus().name());
+        ps.setString(l++, row.getStatus().name());
 
-        ps.setString(l++, mgPaymentSinkRow.getErrorCode());
+        ps.setString(l++, row.getErrorCode());
 
-        ps.setString(l++, mgPaymentSinkRow.getInvoiceId());
-        ps.setString(l++, mgPaymentSinkRow.getPaymentId());
-        ps.setLong(l++, mgPaymentSinkRow.getSequenceId());
+        ps.setString(l++, row.getInvoiceId());
+        ps.setString(l++, row.getPaymentId());
+        ps.setLong(l++, row.getSequenceId());
 
-        ps.setString(l++, mgPaymentSinkRow.getIp());
-        ps.setString(l++, mgPaymentSinkRow.getBin());
-        ps.setString(l++, mgPaymentSinkRow.getMaskedPan());
-        ps.setString(l, mgPaymentSinkRow.getPaymentTool() != null ? mgPaymentSinkRow.getPaymentTool().name() : ClickhouseUtilsValue.UNKNOWN);
+        ps.setString(l++, row.getIp());
+        ps.setString(l++, row.getBin());
+        ps.setString(l++, row.getMaskedPan());
+        ps.setString(l++, row.getPaymentTool() != null ? row.getPaymentTool().name() : ClickhouseUtilsValue.UNKNOWN);
+
+        ps.setString(l++, row.getFingerprint());
+        ps.setString(l++, row.getCardToken());
+        ps.setString(l++, row.getPaymentSystem());
+        ps.setString(l++, row.getDigitalWalletProvider());
+        ps.setString(l++, row.getDigitalWalletToken());
+        ps.setString(l++, row.getCryptoCurrency());
+        ps.setString(l, row.getMobileOperator());
 
     }
 

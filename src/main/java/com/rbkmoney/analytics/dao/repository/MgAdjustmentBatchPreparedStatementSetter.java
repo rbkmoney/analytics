@@ -15,44 +15,54 @@ public class MgAdjustmentBatchPreparedStatementSetter implements BatchPreparedSt
             "(timestamp, eventTime, eventTimeHour, partyId, shopId, email, " +
             "totalAmount, merchantAmount, guaranteeDeposit, systemFee, providerFee, externalFee, currency, providerName, " +
             "status, errorReason,  invoiceId, " +
-            "paymentId, adjustmentId, sequenceId, ip)" +
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "paymentId, adjustmentId, sequenceId, ip, " +
+            "fingerprint, cardToken, paymentSystem, digitalWalletProvider, digitalWalletToken, cryptoCurrency, mobileOperator)" +
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private final List<MgAdjustmentRow> batch;
 
     @Override
     public void setValues(PreparedStatement ps, int i) throws SQLException {
-        MgAdjustmentRow mgAdjustmentRow = batch.get(i);
+        MgAdjustmentRow row = batch.get(i);
         int l = 1;
-        ps.setDate(l++, mgAdjustmentRow.getTimestamp());
-        ps.setLong(l++, mgAdjustmentRow.getEventTime());
-        ps.setLong(l++, mgAdjustmentRow.getEventTimeHour());
+        ps.setDate(l++, row.getTimestamp());
+        ps.setLong(l++, row.getEventTime());
+        ps.setLong(l++, row.getEventTimeHour());
 
-        ps.setString(l++, mgAdjustmentRow.getPartyId());
-        ps.setString(l++, mgAdjustmentRow.getShopId());
+        ps.setString(l++, row.getPartyId());
+        ps.setString(l++, row.getShopId());
 
-        ps.setString(l++, mgAdjustmentRow.getEmail());
+        ps.setString(l++, row.getEmail());
 
-        ps.setLong(l++, mgAdjustmentRow.getTotalAmount());
-        ps.setLong(l++, mgAdjustmentRow.getMerchantAmount());
-        ps.setLong(l++, mgAdjustmentRow.getGuaranteeDeposit());
-        ps.setLong(l++, mgAdjustmentRow.getSystemFee());
-        ps.setLong(l++, mgAdjustmentRow.getExternalFee());
-        ps.setLong(l++, mgAdjustmentRow.getProviderFee());
-        ps.setString(l++, mgAdjustmentRow.getCurrency());
+        ps.setLong(l++, row.getTotalAmount());
+        ps.setLong(l++, row.getMerchantAmount());
+        ps.setLong(l++, row.getGuaranteeDeposit());
+        ps.setLong(l++, row.getSystemFee());
+        ps.setLong(l++, row.getExternalFee());
+        ps.setLong(l++, row.getProviderFee());
+        ps.setString(l++, row.getCurrency());
 
-        ps.setString(l++, mgAdjustmentRow.getProvider());
+        ps.setString(l++, row.getProvider());
 
-        ps.setString(l++, mgAdjustmentRow.getStatus().name());
+        ps.setString(l++, row.getStatus().name());
 
-        ps.setString(l++, mgAdjustmentRow.getErrorCode());
+        ps.setString(l++, row.getErrorCode());
 
-        ps.setString(l++, mgAdjustmentRow.getInvoiceId());
-        ps.setString(l++, mgAdjustmentRow.getPaymentId());
-        ps.setString(l++, mgAdjustmentRow.getAdjustmentId());
-        ps.setLong(l++, mgAdjustmentRow.getSequenceId());
+        ps.setString(l++, row.getInvoiceId());
+        ps.setString(l++, row.getPaymentId());
+        ps.setString(l++, row.getAdjustmentId());
+        ps.setLong(l++, row.getSequenceId());
 
-        ps.setString(l, mgAdjustmentRow.getIp());
+        ps.setString(l++, row.getIp());
+
+        ps.setString(l++, row.getFingerprint());
+        ps.setString(l++, row.getCardToken());
+        ps.setString(l++, row.getPaymentSystem());
+        ps.setString(l++, row.getDigitalWalletProvider());
+        ps.setString(l++, row.getDigitalWalletToken());
+        ps.setString(l++, row.getCryptoCurrency());
+        ps.setString(l, row.getMobileOperator());
+
     }
 
     @Override

@@ -15,44 +15,54 @@ public class MgRefundBatchPreparedStatementSetter implements BatchPreparedStatem
             "(timestamp, eventTime, eventTimeHour, partyId, shopId, email, " +
             "totalAmount, merchantAmount, guaranteeDeposit, systemFee, providerFee, externalFee, currency, providerName, " +
             "status, errorReason,  invoiceId, " +
-            "paymentId, refundId, sequenceId, ip)" +
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "paymentId, refundId, sequenceId, ip, " +
+            "fingerprint,cardToken, paymentSystem, digitalWalletProvider, digitalWalletToken, cryptoCurrency, mobileOperator)" +
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private final List<MgRefundRow> batch;
 
     @Override
     public void setValues(PreparedStatement ps, int i) throws SQLException {
-        MgRefundRow mgRefundRow = batch.get(i);
+        MgRefundRow row = batch.get(i);
         int l = 1;
-        ps.setDate(l++, mgRefundRow.getTimestamp());
-        ps.setLong(l++, mgRefundRow.getEventTime());
-        ps.setLong(l++, mgRefundRow.getEventTimeHour());
+        ps.setDate(l++, row.getTimestamp());
+        ps.setLong(l++, row.getEventTime());
+        ps.setLong(l++, row.getEventTimeHour());
 
-        ps.setString(l++, mgRefundRow.getPartyId());
-        ps.setString(l++, mgRefundRow.getShopId());
+        ps.setString(l++, row.getPartyId());
+        ps.setString(l++, row.getShopId());
 
-        ps.setString(l++, mgRefundRow.getEmail());
+        ps.setString(l++, row.getEmail());
 
-        ps.setLong(l++, mgRefundRow.getTotalAmount());
-        ps.setLong(l++, mgRefundRow.getMerchantAmount());
-        ps.setLong(l++, mgRefundRow.getGuaranteeDeposit());
-        ps.setLong(l++, mgRefundRow.getSystemFee());
-        ps.setLong(l++, mgRefundRow.getExternalFee());
-        ps.setLong(l++, mgRefundRow.getProviderFee());
-        ps.setString(l++, mgRefundRow.getCurrency());
+        ps.setLong(l++, row.getTotalAmount());
+        ps.setLong(l++, row.getMerchantAmount());
+        ps.setLong(l++, row.getGuaranteeDeposit());
+        ps.setLong(l++, row.getSystemFee());
+        ps.setLong(l++, row.getExternalFee());
+        ps.setLong(l++, row.getProviderFee());
+        ps.setString(l++, row.getCurrency());
 
-        ps.setString(l++, mgRefundRow.getProvider());
+        ps.setString(l++, row.getProvider());
 
-        ps.setString(l++, mgRefundRow.getStatus().name());
+        ps.setString(l++, row.getStatus().name());
 
-        ps.setString(l++, mgRefundRow.getErrorCode());
+        ps.setString(l++, row.getErrorCode());
 
-        ps.setString(l++, mgRefundRow.getInvoiceId());
-        ps.setString(l++, mgRefundRow.getPaymentId());
-        ps.setString(l++, mgRefundRow.getRefundId());
-        ps.setLong(l++, mgRefundRow.getSequenceId());
+        ps.setString(l++, row.getInvoiceId());
+        ps.setString(l++, row.getPaymentId());
+        ps.setString(l++, row.getRefundId());
+        ps.setLong(l++, row.getSequenceId());
 
-        ps.setString(l, mgRefundRow.getIp());
+        ps.setString(l++, row.getIp());
+
+        ps.setString(l++, row.getFingerprint());
+        ps.setString(l++, row.getCardToken());
+        ps.setString(l++, row.getPaymentSystem());
+        ps.setString(l++, row.getDigitalWalletProvider());
+        ps.setString(l++, row.getDigitalWalletToken());
+        ps.setString(l++, row.getCryptoCurrency());
+        ps.setString(l, row.getMobileOperator());
+
     }
 
     @Override

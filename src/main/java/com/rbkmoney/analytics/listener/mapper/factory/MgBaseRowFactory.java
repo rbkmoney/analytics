@@ -77,6 +77,15 @@ public abstract class MgBaseRowFactory<T extends MgBaseRow> implements RowFactor
         if (paymentTool.isSetBankCard()) {
             BankCard bankCard = paymentTool.getBankCard();
             mgRefundRow.setProvider(bankCard.getBankName());
+            mgRefundRow.setCardToken(bankCard.getToken());
+            mgRefundRow.setPartyId(bankCard.getPaymentSystem().name());
+        } else if (paymentTool.isSetDigitalWallet()) {
+            mgRefundRow.setDigitalWalletProvider(paymentTool.getDigitalWallet().getProvider().name());
+            mgRefundRow.setDigitalWalletToken(paymentTool.getDigitalWallet().getToken());
+        } else if (paymentTool.isSetCryptoCurrency()) {
+            mgRefundRow.setCryptoCurrency(paymentTool.getCryptoCurrency().name());
+        } else if (paymentTool.isSetMobileCommerce()) {
+            mgRefundRow.setMobileOperator(paymentTool.getMobileCommerce().getOperator().name());
         }
     }
 
