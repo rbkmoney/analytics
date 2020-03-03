@@ -3,9 +3,11 @@ package com.rbkmoney.analytics.flowresolver;
 import com.fasterxml.jackson.databind.util.LRUMap;
 import com.rbkmoney.damsel.payment_processing.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 @Slf4j
@@ -20,8 +22,18 @@ public class FlowResolver {
     //Предположение, что флоу ~ 15 => 15*55 > 1000, в случае если больше будут удаляться на LRUMap
     private PrintableLruMap<String, String> flows = new PrintableLruMap<>(1000, 1000);
 
+    @Value("${kafka.event-flow.resolver.count-between-print:1000000}")
+    public int countBetweenPrint;
+
+    private AtomicInteger counter = new AtomicInteger();
+
     public void checkFlow(InvoiceChange invoiceChange, String invoiceId) {
         if (invoiceChange.isSetInvoicePaymentChange()) {
+            int i = counter.incrementAndGet();
+            if (i > countBetweenPrint) {
+                print();
+                counter.set(0);
+            }
             InvoicePaymentChange invoicePaymentChange = invoiceChange.getInvoicePaymentChange();
             InvoicePaymentChangePayload payload = invoicePaymentChange.getPayload();
 
