@@ -1,6 +1,7 @@
 package com.rbkmoney.analytics.listener;
 
 import com.rbkmoney.analytics.converter.SourceEventParser;
+import com.rbkmoney.analytics.flowresolver.FlowResolver;
 import com.rbkmoney.analytics.listener.handler.HandlerManager;
 import com.rbkmoney.damsel.payment_processing.InvoiceChange;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
@@ -25,7 +26,11 @@ public class MgInvoiceListener {
     @Value("${kafka.consumer.throttling-timeout-ms}")
     private int throttlingTimeout;
 
+    @Value("${kafka.event-flow.resolver.enabled}")
+    private boolean eventFlowResolverEnabled;
+
     private final SourceEventParser eventParser;
+    private final FlowResolver flowResolver;
     private final HandlerManager<InvoiceChange, MachineEvent> handlerManager;
 
     @KafkaListener(topics = "${kafka.topic.event.sink.initial}", containerFactory = "kafkaListenerContainerFactory")
@@ -45,6 +50,10 @@ public class MgInvoiceListener {
                                 .map(invoiceChange -> Map.entry(entry.getKey(), invoiceChange))
                                 .collect(Collectors.toList()))
                         .flatMap(List::stream)
+                        .peek(machineEventInvoiceChangeEntry -> {
+                            if (eventFlowResolverEnabled)
+                                flowResolver.checkFlow(machineEventInvoiceChangeEntry.getValue(), machineEventInvoiceChangeEntry.getKey().getSourceId());
+                        })
                         .collect(
                                 Collectors.groupingBy(
                                         entry -> Optional.ofNullable(handlerManager.getHandler(entry.getValue())),

@@ -42,6 +42,9 @@ kafka:
       throttling-timeout-ms: 1000
   ssl:
     enabled: false
+  event-flow:
+    resolver:
+      enabled: true
 
 service:
   invoicing:
