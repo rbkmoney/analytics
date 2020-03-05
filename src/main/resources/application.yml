@@ -17,6 +17,11 @@ spring:
   output:
     ansi:
       enabled: always
+  flyway:
+    url: "jdbc:postgresql://localhost:5432/analytics"
+    user: "user"
+    password: "password"
+
 info:
   version: @project.version@
   stage: dev
@@ -29,10 +34,10 @@ clickhouse.db:
   compress: false
 
 postgres.db:
-  url: @postgres.db.url@
-  user: @postgres.db.user@
-  password: @postgres.db.password@
-  schema: @postgres.db.schema@
+  url: "jdbc:postgresql://localhost:5432/analytics"
+  user: "user"
+  password: "password"
+  schema: "analytics"
 
 kafka:
   bootstrap.servers: localhost:9092
