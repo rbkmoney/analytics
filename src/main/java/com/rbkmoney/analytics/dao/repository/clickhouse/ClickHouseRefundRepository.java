@@ -8,8 +8,11 @@ import com.rbkmoney.analytics.dao.utils.QueryUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import ru.yandex.clickhouse.except.ClickHouseException;
 
 import java.sql.Date;
 import java.util.ArrayList;
@@ -25,6 +28,7 @@ public class ClickHouseRefundRepository {
     private final JdbcTemplate clickHouseJdbcTemplate;
     private final CommonRowsMapper<NumberModel> costCommonRowsMapper;
 
+    @Retryable(value = ClickHouseException.class, backoff = @Backoff(delay = 5000))
     public void insertBatch(List<MgRefundRow> mgRefundRows) {
         if (mgRefundRows != null && !mgRefundRows.isEmpty()) {
             clickHouseJdbcTemplate.batchUpdate(ClickHouseRefundBatchPreparedStatementSetter.INSERT, new ClickHouseRefundBatchPreparedStatementSetter(mgRefundRows));

@@ -2,6 +2,7 @@ package com.rbkmoney.analytics.listener.mapper.factory;
 
 import com.rbkmoney.analytics.computer.CashFlowComputer;
 import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
+import com.rbkmoney.analytics.service.GeoProvider;
 import com.rbkmoney.damsel.domain.FinalCashFlowPosting;
 import com.rbkmoney.damsel.domain.Invoice;
 import com.rbkmoney.damsel.payment_processing.InvoicePayment;
@@ -14,10 +15,14 @@ import java.util.List;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class MgPaymentSinkRowFactory extends MgBaseRowFactory<MgPaymentSinkRow> {
 
     private final CashFlowComputer cashFlowComputer;
+
+    public MgPaymentSinkRowFactory(GeoProvider geoProvider, CashFlowComputer cashFlowComputer) {
+        super(geoProvider);
+        this.cashFlowComputer = cashFlowComputer;
+    }
 
     @Override
     public MgPaymentSinkRow create(MachineEvent machineEvent, com.rbkmoney.damsel.payment_processing.Invoice invoiceInfo, String paymentId) {

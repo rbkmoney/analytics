@@ -39,10 +39,12 @@ public class KafkaConfig {
 
     @Value("${kafka.max.poll.records}")
     private String maxPollRecords;
-
+    @Value("${kafka.max.poll.interval.ms}")
+    private int maxPollInterval;
+    @Value("${kafka.max.session.timeout.ms}")
+    private int sessionTimeout;
     @Value("${kafka.bootstrap.servers}")
     private String bootstrapServers;
-
     @Value("${kafka.consumer.concurrency}")
     private int concurrencyListeners;
 
@@ -91,6 +93,8 @@ public class KafkaConfig {
         props.put(ConsumerConfig.GROUP_ID_CONFIG, value);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, EARLIEST.name().toLowerCase());
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, sessionTimeout);
+        props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, maxPollInterval);
         props.putAll(createSslConfig());
         return props;
     }

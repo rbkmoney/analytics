@@ -10,11 +10,16 @@ import com.rbkmoney.analytics.dao.utils.SplitUtils;
 import com.rbkmoney.damsel.analytics.SplitUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import ru.yandex.clickhouse.except.ClickHouseException;
 
 import java.sql.Date;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -38,6 +43,7 @@ public class ClickHousePaymentRepository {
     private final SplitRowsMapper splitCostCommonRowsMapper;
     private final SplitStatusRowsMapper splitStatusRowsMapper;
 
+    @Retryable(value = ClickHouseException.class, backoff = @Backoff(delay = 5000))
     public void insertBatch(List<MgPaymentSinkRow> mgPaymentSinkRows) {
         if (mgPaymentSinkRows != null && !mgPaymentSinkRows.isEmpty()) {
             log.info("Batch start insert mgPaymentSinkRows: {} firstElement: {}", mgPaymentSinkRows.size(),

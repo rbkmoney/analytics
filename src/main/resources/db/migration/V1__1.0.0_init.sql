@@ -13,4 +13,4 @@ CREATE TABLE IF NOT EXISTS analytics.balance_change
 
 CREATE INDEX IF NOT EXISTS balance_change_timestamp on analytics.balance_change (timestamp);
 CREATE INDEX IF NOT EXISTS balance_change_party_id on analytics.balance_change (party_id);
-CREATE INDEX IF NOT EXISTS balance_change_party_id on analytics.balance_change (shop_id);
+CREATE INDEX IF NOT EXISTS balance_change_shop_id on analytics.balance_change (shop_id);

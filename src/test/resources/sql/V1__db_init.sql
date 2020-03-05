@@ -38,7 +38,10 @@ create table analytic.events_sink
     digitalWalletProvider String,
     digitalWalletToken    String,
     cryptoCurrency        String,
-    mobileOperator        String
+    mobileOperator        String,
+
+    paymentCountry        String,
+    bankCountry           String
 
 ) ENGINE = MergeTree()
 PARTITION BY toYYYYMM (timestamp)
@@ -82,7 +85,10 @@ create table analytic.events_sink_refund
     digitalWalletProvider String,
     digitalWalletToken    String,
     cryptoCurrency        String,
-    mobileOperator        String
+    mobileOperator        String,
+
+    paymentCountry        String,
+    bankCountry           String
 
 ) ENGINE = MergeTree()
 PARTITION BY toYYYYMM (timestamp)
@@ -133,7 +139,10 @@ create table analytic.events_sink_adjustment
     digitalWalletProvider String,
     digitalWalletToken    String,
     cryptoCurrency        String,
-    mobileOperator        String
+    mobileOperator        String,
+
+    paymentCountry        String,
+    bankCountry           String
 
 ) ENGINE = MergeTree()
 PARTITION BY toYYYYMM (timestamp)

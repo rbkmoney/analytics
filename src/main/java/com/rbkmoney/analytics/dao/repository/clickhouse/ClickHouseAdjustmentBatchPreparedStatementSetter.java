@@ -17,8 +17,9 @@ public class ClickHouseAdjustmentBatchPreparedStatementSetter implements BatchPr
             "amount, guaranteeDeposit, systemFee, providerFee, externalFee, " +
             "oldAmount, oldGuaranteeDeposit, oldSystemFee, oldProviderFee, oldExternalFee, " +
             "currency, providerName, status, errorReason,  invoiceId, paymentId, adjustmentId, sequenceId, ip, " +
-            "fingerprint, cardToken, paymentSystem, digitalWalletProvider, digitalWalletToken, cryptoCurrency, mobileOperator)" +
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "fingerprint, cardToken, paymentSystem, digitalWalletProvider, digitalWalletToken, cryptoCurrency, mobileOperator," +
+            "paymentCountry, bankCountry)" +
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private final List<MgAdjustmentRow> batch;
 
@@ -59,7 +60,9 @@ public class ClickHouseAdjustmentBatchPreparedStatementSetter implements BatchPr
         ps.setString(l++, row.getDigitalWalletProvider());
         ps.setString(l++, row.getDigitalWalletToken());
         ps.setString(l++, row.getCryptoCurrency());
-        ps.setString(l, row.getMobileOperator());
+        ps.setString(l++, row.getMobileOperator());
+        ps.setString(l++, row.getPaymentCountry());
+        ps.setString(l, row.getBankCountry());
 
     }
 

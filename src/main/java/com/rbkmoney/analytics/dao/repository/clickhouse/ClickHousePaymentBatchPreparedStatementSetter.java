@@ -17,8 +17,9 @@ public class ClickHousePaymentBatchPreparedStatementSetter implements BatchPrepa
             "(timestamp, eventTime, eventTimeHour, partyId, shopId, email," +
             "amount, guaranteeDeposit, systemFee, providerFee, externalFee, currency, providerName, " +
             "status, errorReason,  invoiceId, paymentId, sequenceId, ip, bin, maskedPan, paymentTool, " +
-            "fingerprint,cardToken, paymentSystem, digitalWalletProvider, digitalWalletToken, cryptoCurrency, mobileOperator)" +
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "fingerprint,cardToken, paymentSystem, digitalWalletProvider, digitalWalletToken, cryptoCurrency, mobileOperator," +
+            "paymentCountry, bankCountry)" +
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private final List<MgPaymentSinkRow> batch;
 
@@ -66,8 +67,10 @@ public class ClickHousePaymentBatchPreparedStatementSetter implements BatchPrepa
         ps.setString(l++, row.getDigitalWalletProvider());
         ps.setString(l++, row.getDigitalWalletToken());
         ps.setString(l++, row.getCryptoCurrency());
-        ps.setString(l, row.getMobileOperator());
+        ps.setString(l++, row.getMobileOperator());
 
+        ps.setString(l++, row.getPaymentCountry());
+        ps.setString(l, row.getBankCountry());
     }
 
     @Override

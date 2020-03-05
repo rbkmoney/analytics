@@ -16,8 +16,9 @@ public class ClickHouseRefundBatchPreparedStatementSetter implements BatchPrepar
             "(timestamp, eventTime, eventTimeHour, partyId, shopId, email, " +
             "amount, guaranteeDeposit, systemFee, providerFee, externalFee, currency, providerName, " +
             "status, errorReason,  invoiceId, paymentId, refundId, sequenceId, ip, " +
-            "fingerprint,cardToken, paymentSystem, digitalWalletProvider, digitalWalletToken, cryptoCurrency, mobileOperator)" +
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "fingerprint,cardToken, paymentSystem, digitalWalletProvider, digitalWalletToken, cryptoCurrency, mobileOperator," +
+            "paymentCountry, bankCountry)" +
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private final List<MgRefundRow> batch;
 
@@ -63,7 +64,10 @@ public class ClickHouseRefundBatchPreparedStatementSetter implements BatchPrepar
         ps.setString(l++, row.getDigitalWalletProvider());
         ps.setString(l++, row.getDigitalWalletToken());
         ps.setString(l++, row.getCryptoCurrency());
-        ps.setString(l, row.getMobileOperator());
+        ps.setString(l++, row.getMobileOperator());
+
+        ps.setString(l++, row.getPaymentCountry());
+        ps.setString(l, row.getBankCountry());
 
     }
 

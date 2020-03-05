@@ -1,11 +1,15 @@
 package com.rbkmoney.analytics.listener.mapper.factory;
 
+import com.rbkmoney.analytics.constant.ClickHouseUtilsValue;
 import com.rbkmoney.analytics.dao.model.MgBaseRow;
+import com.rbkmoney.analytics.service.GeoProvider;
 import com.rbkmoney.analytics.utils.TimeUtils;
 import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.payment_processing.InvoicePayment;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
@@ -15,7 +19,11 @@ import java.time.ZoneOffset;
 import static java.time.ZoneOffset.UTC;
 
 @Slf4j
+@RequiredArgsConstructor
 public abstract class MgBaseRowFactory<T extends MgBaseRow> implements RowFactory<T> {
+
+    public static final String UNKNOWN = "UNKNOWN";
+    private final GeoProvider geoProvider;
 
     @Override
     public void initBaseRow(MachineEvent machineEvent, T row, InvoicePayment invoicePayment) {
@@ -28,7 +36,9 @@ public abstract class MgBaseRowFactory<T extends MgBaseRow> implements RowFactor
             PaymentTool paymentTool = resource.getPaymentTool();
             if (resource.isSetClientInfo()) {
                 ClientInfo clientInfo = resource.getClientInfo();
-                row.setIp(clientInfo.getIpAddress());
+                String ipAddress = clientInfo.getIpAddress();
+                row.setIp(ipAddress);
+                row.setPaymentCountry(geoProvider.getLocationIsoCode(ipAddress));
                 row.setFingerprint(clientInfo.getFingerprint());
             }
             initCardData(row, paymentTool);
@@ -54,19 +64,20 @@ public abstract class MgBaseRowFactory<T extends MgBaseRow> implements RowFactor
         }
     }
 
-    private void initCardData(T mgRefundRow, PaymentTool paymentTool) {
+    private void initCardData(T row, PaymentTool paymentTool) {
         if (paymentTool.isSetBankCard()) {
             BankCard bankCard = paymentTool.getBankCard();
-            mgRefundRow.setProvider(bankCard.getBankName());
-            mgRefundRow.setCardToken(bankCard.getToken());
-            mgRefundRow.setPartyId(bankCard.getPaymentSystem().name());
+            row.setBankCountry(bankCard.getIssuerCountry() != null ? bankCard.getIssuerCountry().name() : ClickHouseUtilsValue.UNKNOWN);
+            row.setProvider(bankCard.getBankName());
+            row.setCardToken(bankCard.getToken());
+            row.setPartyId(bankCard.getPaymentSystem().name());
         } else if (paymentTool.isSetDigitalWallet()) {
-            mgRefundRow.setDigitalWalletProvider(paymentTool.getDigitalWallet().getProvider().name());
-            mgRefundRow.setDigitalWalletToken(paymentTool.getDigitalWallet().getToken());
+            row.setDigitalWalletProvider(paymentTool.getDigitalWallet().getProvider().name());
+            row.setDigitalWalletToken(paymentTool.getDigitalWallet().getToken());
         } else if (paymentTool.isSetCryptoCurrency()) {
-            mgRefundRow.setCryptoCurrency(paymentTool.getCryptoCurrency().name());
+            row.setCryptoCurrency(paymentTool.getCryptoCurrency().name());
         } else if (paymentTool.isSetMobileCommerce()) {
-            mgRefundRow.setMobileOperator(paymentTool.getMobileCommerce().getOperator().name());
+            row.setMobileOperator(paymentTool.getMobileCommerce().getOperator().name());
         }
     }
 

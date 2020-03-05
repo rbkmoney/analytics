@@ -38,4 +38,7 @@ public class MgBaseRow {
 
     private Long sequenceId;
 
+    private String paymentCountry;
+    private String bankCountry;
+
 }
