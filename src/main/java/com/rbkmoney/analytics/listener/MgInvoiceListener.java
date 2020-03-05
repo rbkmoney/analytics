@@ -33,7 +33,7 @@ public class MgInvoiceListener {
     private final FlowResolver flowResolver;
     private final HandlerManager<InvoiceChange, MachineEvent> handlerManager;
 
-    @KafkaListener(topics = "${kafka.topic.event.sink.initial}", containerFactory = "kafkaListenerContainerFactory")
+    @KafkaListener(autoStartup = "${kafka.listener.event.sink.enabled}", topics = "${kafka.topic.event.sink.initial}", containerFactory = "kafkaListenerContainerFactory")
     public void listen(List<MachineEvent> batch, Acknowledgment ack) throws InterruptedException {
         handleMessages(batch);
         ack.acknowledge();

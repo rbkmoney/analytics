@@ -48,11 +48,9 @@ kafka:
       prefix: analytics
       concurrency: 7
       throttling-timeout-ms: 1000
-  ssl:
-    enabled: false
-  event-flow:
-    resolver:
-      enabled: true
+  ssl.enabled: false
+  event-flow.resolver.enabled: true
+  listener.event.sink.enabled: true
 
 service:
   invoicing:
@@ -60,3 +58,4 @@ service:
     networkTimeout: 5000
 
 columbus.url: http://columbus:8022/repo
+repository.insert.enabled: true

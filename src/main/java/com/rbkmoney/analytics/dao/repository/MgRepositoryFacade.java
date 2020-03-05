@@ -8,10 +8,13 @@ import com.rbkmoney.analytics.dao.repository.clickhouse.ClickHousePaymentReposit
 import com.rbkmoney.analytics.dao.repository.clickhouse.ClickHouseRefundRepository;
 import com.rbkmoney.analytics.dao.repository.postgres.PostgresBalanceChangesRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MgRepositoryFacade {
@@ -22,18 +25,47 @@ public class MgRepositoryFacade {
     private final ClickHouseRefundRepository clickHouseRefundRepository;
     private final ClickHouseAdjustmentRepository clickHouseAdjustmentRepository;
 
+    @Value("${repository.insert.enabled}")
+    private boolean repositoryInsertEnabled;
+    @Value("${repository.insert.logging.timeout:1000}")
+    private int repositoryInsertLoggingTimeout;
+
     public void insertPayments(List<MgPaymentSinkRow> mgPaymentSinkRows) {
-        postgresBalanceChangesRepository.insertPayments(mgPaymentSinkRows);
-        clickHousePaymentRepository.insertBatch(mgPaymentSinkRows);
+        if (repositoryInsertEnabled) {
+            postgresBalanceChangesRepository.insertPayments(mgPaymentSinkRows);
+            clickHousePaymentRepository.insertBatch(mgPaymentSinkRows);
+        } else {
+            log.info("mgPaymentSinkRows: {}", mgPaymentSinkRows);
+            safeSleep();
+        }
     }
 
     public void insertRefunds(List<MgRefundRow> mgRefundRows) {
-        postgresBalanceChangesRepository.insertRefunds(mgRefundRows);
-        clickHouseRefundRepository.insertBatch(mgRefundRows);
+        if (repositoryInsertEnabled) {
+            postgresBalanceChangesRepository.insertRefunds(mgRefundRows);
+            clickHouseRefundRepository.insertBatch(mgRefundRows);
+        } else {
+            log.info("mgRefundRows: {}", mgRefundRows);
+            safeSleep();
+        }
     }
 
     public void insertAdjustments(List<MgAdjustmentRow> mgAdjustmentRows) {
-        postgresBalanceChangesRepository.insertAdjustments(mgAdjustmentRows);
-        clickHouseAdjustmentRepository.insertBatch(mgAdjustmentRows);
+        if (repositoryInsertEnabled) {
+            postgresBalanceChangesRepository.insertAdjustments(mgAdjustmentRows);
+            clickHouseAdjustmentRepository.insertBatch(mgAdjustmentRows);
+        } else {
+            log.info("mgPaymentSinkRows: {}", mgAdjustmentRows);
+            safeSleep();
+        }
+    }
+
+    private void safeSleep() {
+        try {
+            Thread.sleep(repositoryInsertLoggingTimeout);
+        } catch (InterruptedException e) {
+            log.error("Exception when sleep e: ", e);
+            Thread.currentThread().interrupt();
+        }
     }
 }
