@@ -37,12 +37,13 @@ public class MgInvoiceListener {
     public void listen(List<MachineEvent> batch, Acknowledgment ack) throws InterruptedException {
         handleMessages(batch);
         ack.acknowledge();
+        Thread.sleep(throttlingTimeout);
     }
 
     private void handleMessages(List<MachineEvent> batch) throws InterruptedException {
         try {
             if (!CollectionUtils.isEmpty(batch)) {
-                log.info("MgPaymentAggregatorListener listen batch.size: {}", batch.size());
+                log.debug("MgPaymentAggregatorListener listen batch.size: {}", batch.size());
                 batch.stream()
                         .map(machineEvent -> Map.entry(machineEvent, eventParser.parseEvent(machineEvent)))
                         .filter(entry -> entry.getValue().isSetInvoiceChanges())
@@ -58,8 +59,7 @@ public class MgInvoiceListener {
                                 Collectors.groupingBy(
                                         entry -> Optional.ofNullable(handlerManager.getHandler(entry.getValue())),
                                         Collectors.toList()
-                                )
-                        )
+                                ))
                         .forEach((handler, entries) -> handler
                                 .ifPresent(eventBatchHandler -> eventBatchHandler.handle(entries).execute()));
             }

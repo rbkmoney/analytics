@@ -2,6 +2,7 @@ package com.rbkmoney.analytics.computer;
 
 import com.rbkmoney.analytics.domain.CashFlowResult;
 import com.rbkmoney.damsel.domain.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Optional;
 
 import static org.msgpack.core.Preconditions.checkState;
 
+@Slf4j
 @Service
 public class CashFlowComputer {
 
@@ -68,11 +70,13 @@ public class CashFlowComputer {
     }
 
     private boolean isPayment(FinalCashFlowPosting posting) {
+        log.debug("CashFlowComputer isPayment posting: {}", posting);
         return posting.getSource().getAccountType().isSetProvider() && isSettlement(posting.getSource())
                 && posting.getDestination().getAccountType().isSetMerchant() && isSettlement(posting.getDestination());
     }
 
     private boolean isRefund(FinalCashFlowPosting posting) {
+        log.debug("CashFlowComputer isRefund posting: {}", posting);
         return posting.getSource().getAccountType().isSetMerchant() && isSettlement(posting.getSource())
                 && posting.getDestination().getAccountType().isSetProvider() && isSettlement(posting.getDestination());
     }

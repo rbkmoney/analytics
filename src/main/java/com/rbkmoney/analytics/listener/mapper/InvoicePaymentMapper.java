@@ -3,9 +3,7 @@ package com.rbkmoney.analytics.listener.mapper;
 import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.constant.PaymentStatus;
 import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
-import com.rbkmoney.analytics.dao.model.MgRefundRow;
 import com.rbkmoney.analytics.exception.PaymentInfoNotFoundException;
-import com.rbkmoney.analytics.listener.mapper.factory.MgPaymentSinkRowFactory;
 import com.rbkmoney.analytics.listener.mapper.factory.RowFactory;
 import com.rbkmoney.analytics.service.HgClientService;
 import com.rbkmoney.damsel.domain.Failure;
@@ -39,10 +37,14 @@ public class InvoicePaymentMapper implements Mapper<InvoiceChange, MachineEvent,
 
     @Override
     public MgPaymentSinkRow map(InvoiceChange change, MachineEvent event) {
+        log.debug("InvoicePaymentMapper change: {} event: {}", change, event);
+
         com.rbkmoney.damsel.payment_processing.Invoice invoiceInfo = hgClientService.getInvoiceInfo(event);
         if (invoiceInfo == null) {
             throw new PaymentInfoNotFoundException("Not found payment info in hg!");
         }
+
+        log.debug("InvoicePaymentMapper invoiceInfo: {}", invoiceInfo);
 
         InvoicePaymentChange invoicePaymentChange = change.getInvoicePaymentChange();
         InvoicePaymentChangePayload payload = invoicePaymentChange.getPayload();
@@ -61,6 +63,7 @@ public class InvoicePaymentMapper implements Mapper<InvoiceChange, MachineEvent,
             }
         }
 
+        log.debug("InvoicePaymentMapper mgPaymentSinkRow: {}", mgPaymentSinkRow);
         return mgPaymentSinkRow;
     }
 
