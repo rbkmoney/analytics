@@ -1,16 +1,18 @@
 package com.rbkmoney.analytics.listener.mapper.factory;
 
 import com.rbkmoney.analytics.constant.ClickHouseUtilsValue;
+import com.rbkmoney.analytics.constant.PaymentToolType;
 import com.rbkmoney.analytics.dao.model.MgBaseRow;
 import com.rbkmoney.analytics.service.GeoProvider;
 import com.rbkmoney.analytics.utils.TimeUtils;
 import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.payment_processing.InvoicePayment;
+import com.rbkmoney.geck.common.util.TBaseUtil;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.thrift.TUnion;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -65,12 +67,15 @@ public abstract class MgBaseRowFactory<T extends MgBaseRow> implements RowFactor
     }
 
     private void initCardData(T row, PaymentTool paymentTool) {
+        TBaseUtil.unionFieldToEnum(paymentTool, PaymentToolType.class);
         if (paymentTool.isSetBankCard()) {
             BankCard bankCard = paymentTool.getBankCard();
-            row.setBankCountry(bankCard.getIssuerCountry() != null ? bankCard.getIssuerCountry().name() : ClickHouseUtilsValue.UNKNOWN);
+            row.setBankCountry(bankCard.isSetIssuerCountry() ? bankCard.getIssuerCountry().name() : ClickHouseUtilsValue.UNKNOWN);
             row.setProvider(bankCard.getBankName());
             row.setCardToken(bankCard.getToken());
-            row.setPartyId(bankCard.getPaymentSystem().name());
+            row.setBin(bankCard.getBin());
+            row.setMaskedPan(bankCard.getLastDigits());
+            row.setPaymentSystem(bankCard.getPaymentSystem().name());
         } else if (paymentTool.isSetDigitalWallet()) {
             row.setDigitalWalletProvider(paymentTool.getDigitalWallet().getProvider().name());
             row.setDigitalWalletToken(paymentTool.getDigitalWallet().getToken());

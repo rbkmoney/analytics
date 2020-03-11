@@ -15,10 +15,10 @@ public class ClickHouseRefundBatchPreparedStatementSetter implements BatchPrepar
     public static final String INSERT = "INSERT INTO analytic.events_sink_refund " +
             "(timestamp, eventTime, eventTimeHour, partyId, shopId, email, " +
             "amount, guaranteeDeposit, systemFee, providerFee, externalFee, currency, providerName, " +
-            "status, errorReason,  invoiceId, paymentId, refundId, sequenceId, ip, " +
+            "status, errorCode, errorReason,  invoiceId, paymentId, refundId, sequenceId, ip, " +
             "fingerprint,cardToken, paymentSystem, digitalWalletProvider, digitalWalletToken, cryptoCurrency, mobileOperator," +
             "paymentCountry, bankCountry)" +
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private final List<MgRefundRow> batch;
 
@@ -50,6 +50,7 @@ public class ClickHouseRefundBatchPreparedStatementSetter implements BatchPrepar
         ps.setString(l++, row.getStatus().name());
 
         ps.setString(l++, row.getErrorCode());
+        ps.setString(l++, row.getErrorReason());
 
         ps.setString(l++, row.getInvoiceId());
         ps.setString(l++, row.getPaymentId());

@@ -13,9 +13,7 @@ import lombok.ToString;
 public class MgRefundRow extends MgBaseRow {
 
     private RefundStatus status;
-    private String errorCode;
 
-    private String provider;
     private String reason;
     private String refundId;
 

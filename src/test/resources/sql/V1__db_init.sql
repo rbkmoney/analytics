@@ -23,6 +23,7 @@ create table analytic.events_sink
 
     status                Enum8('pending' = 1, 'processed' = 2, 'captured' = 3, 'cancelled' = 4, 'failed' = 5),
     errorReason           String,
+    errorCode             String,
 
     invoiceId             String,
     paymentId             String,
@@ -72,6 +73,7 @@ create table analytic.events_sink_refund
 
     status                Enum8('pending' = 1, 'succeeded' = 2, 'failed' = 3),
     errorReason           String,
+    errorCode             String,
 
     invoiceId             String,
     refundId              String,
@@ -125,6 +127,7 @@ create table analytic.events_sink_adjustment
     reason                String,
 
     status                Enum8('captured' = 1, 'cancelled' = 2),
+    errorCode             String,
     errorReason           String,
 
     invoiceId             String,

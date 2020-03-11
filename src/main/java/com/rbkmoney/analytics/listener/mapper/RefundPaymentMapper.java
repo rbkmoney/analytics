@@ -7,11 +7,13 @@ import com.rbkmoney.analytics.exception.RefundInfoNotFoundException;
 import com.rbkmoney.analytics.listener.mapper.factory.RowFactory;
 import com.rbkmoney.analytics.service.HgClientService;
 import com.rbkmoney.damsel.domain.Failure;
+import com.rbkmoney.damsel.domain.OperationFailure;
 import com.rbkmoney.damsel.payment_processing.InvoiceChange;
 import com.rbkmoney.damsel.payment_processing.InvoicePaymentRefundChange;
 import com.rbkmoney.damsel.payment_processing.InvoicePaymentRefundChangePayload;
 import com.rbkmoney.damsel.payment_processing.InvoicePaymentRefundStatusChanged;
 import com.rbkmoney.geck.common.util.TBaseUtil;
+import com.rbkmoney.geck.serializer.kit.tbase.TErrorUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,7 +53,8 @@ public class RefundPaymentMapper implements Mapper<InvoiceChange, MachineEvent, 
         if (invoicePaymentRefundStatusChanged.getStatus().isSetFailed()) {
             if (invoicePaymentRefundStatusChanged.getStatus().getFailed().getFailure().isSetFailure()) {
                 Failure failure = invoicePaymentRefundStatusChanged.getStatus().getFailed().getFailure().getFailure();
-                refundRow.setErrorCode(failure.getCode());
+                refundRow.setErrorCode(TErrorUtil.toStringVal(failure));
+                refundRow.setErrorReason(failure.getReason());
             } else if (invoicePaymentRefundStatusChanged.getStatus().getFailed().getFailure().isSetOperationTimeout()) {
                 refundRow.setErrorCode(OPERATION_TIMEOUT);
             }

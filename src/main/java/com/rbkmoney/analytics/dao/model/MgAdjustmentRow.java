@@ -14,7 +14,6 @@ import lombok.ToString;
 public class MgAdjustmentRow extends MgBaseRow {
 
     private AdjustmentStatus status;
-    private String errorCode;
     private String adjustmentId;
     private String paymentId;
 
