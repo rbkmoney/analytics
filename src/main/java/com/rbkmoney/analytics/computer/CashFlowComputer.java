@@ -15,7 +15,7 @@ import static org.msgpack.core.Preconditions.checkState;
 public class CashFlowComputer {
 
     public Optional<CashFlowResult> compute(List<FinalCashFlowPosting> cashFlow) {
-        long accountId = -1;
+
         long amount = 0L;
         long systemFee = 0L;
         long providerFee = 0L;
@@ -32,12 +32,10 @@ public class CashFlowComputer {
             }
 
             if (isPayment(posting)) {
-                accountId = posting.getDestination().getAccountId();
                 amount += posting.getVolume().getAmount();
             }
 
             if (isRefund(posting)) {
-                accountId = posting.getSource().getAccountId();
                 amount += posting.getVolume().getAmount();
             }
 
@@ -57,10 +55,9 @@ public class CashFlowComputer {
                 guaranteeDeposit += posting.getVolume().getAmount();
             }
 
-            checkState(accountId > 0, "Unable to get correct accountId");
         }
+
         return Optional.ofNullable(CashFlowResult.builder()
-                .accountId(accountId)
                 .amount(amount)
                 .systemFee(systemFee)
                 .providerFee(providerFee)
@@ -71,7 +68,7 @@ public class CashFlowComputer {
 
     private boolean isPayment(FinalCashFlowPosting posting) {
         log.debug("CashFlowComputer isPayment posting: {}", posting);
-        return posting.getSource().getAccountType().isSetProvider() && isSettlement(posting.getSource())
+            return posting.getSource().getAccountType().isSetProvider() && isSettlement(posting.getSource())
                 && posting.getDestination().getAccountType().isSetMerchant() && isSettlement(posting.getDestination());
     }
 

@@ -30,12 +30,10 @@ public class ReversedCashFlowComputer {
             }
 
             if (isReversedPayment(posting)) {
-                accountId = posting.getSource().getAccountId();
                 amount += posting.getVolume().getAmount();
             }
 
             if (isReversedRefund(posting)) {
-                accountId = posting.getDestination().getAccountId();
                 amount += posting.getVolume().getAmount();
             }
 
@@ -55,11 +53,9 @@ public class ReversedCashFlowComputer {
                 guaranteeDeposit += posting.getVolume().getAmount();
             }
 
-            checkState(accountId > 0, "Unable to get correct accountId");
         }
 
         return Optional.ofNullable(CashFlowResult.builder()
-                .accountId(accountId)
                 .amount(amount)
                 .systemFee(systemFee)
                 .providerFee(providerFee)

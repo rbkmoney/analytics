@@ -7,10 +7,10 @@ import lombok.Data;
 @Builder
 public class CashFlowResult {
 
-    private final long accountId;
     private final long amount;
     private final long guaranteeDeposit;
     private final long systemFee;
     private final long providerFee;
     private final long externalFee;
+
 }

@@ -8,7 +8,8 @@ import org.junit.Test;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class ReversedCashFlowComputerTest {
 
@@ -28,7 +29,6 @@ public class ReversedCashFlowComputerTest {
         assertTrue(compute.isPresent());
         CashFlowResult result = compute.get();
 
-        assertThat(result.getAccountId(), is(1L));
         assertThat(result.getAmount(), is(1000L));
         assertThat(result.getSystemFee(), is(100L));
         assertThat(result.getProviderFee(), is(20L));
