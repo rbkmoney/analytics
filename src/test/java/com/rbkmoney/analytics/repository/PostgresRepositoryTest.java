@@ -24,6 +24,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.sql.Date;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -75,6 +76,7 @@ public class PostgresRepositoryTest {
         mgPaymentSinkRow.setInvoiceId("invoice_id");
         mgPaymentSinkRow.setSequenceId(1L);
         mgPaymentSinkRow.setTimestamp(Date.valueOf(LocalDate.EPOCH));
+        mgPaymentSinkRow.setEventTime(Instant.now().toEpochMilli());
         mgPaymentSinkRow.setCurrency("RUB");
         mgPaymentSinkRow.setPartyId("party_id");
         mgPaymentSinkRow.setShopId("shop_id");
@@ -91,6 +93,7 @@ public class PostgresRepositoryTest {
         mgRefundRow.setInvoiceId("invoice_id");
         mgRefundRow.setSequenceId(2L);
         mgRefundRow.setTimestamp(Date.valueOf(LocalDate.EPOCH));
+        mgRefundRow.setEventTime(Instant.now().toEpochMilli());
         mgRefundRow.setCurrency("RUB");
         mgRefundRow.setPartyId("party_id");
         mgRefundRow.setShopId("shop_id");
@@ -107,6 +110,7 @@ public class PostgresRepositoryTest {
         mgAdjustmentRow.setInvoiceId("invoice_id");
         mgAdjustmentRow.setSequenceId(3L);
         mgAdjustmentRow.setTimestamp(Date.valueOf(LocalDate.EPOCH));
+        mgAdjustmentRow.setEventTime(Instant.now().toEpochMilli());
         mgAdjustmentRow.setCurrency("RUB");
         mgAdjustmentRow.setPartyId("party_id");
         mgAdjustmentRow.setShopId("shop_id");

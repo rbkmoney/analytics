@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -19,7 +20,7 @@ public class PostgresPaymentBatchPreparedStatementSetter implements BatchPrepare
         MgPaymentSinkRow row = batch.get(i);
         int l = 1;
         ps.setString(l++, row.getInvoiceId() + "-" + row.getSequenceId());
-        ps.setDate(l++, row.getTimestamp());
+        ps.setTimestamp(l++, new Timestamp(row.getEventTime()));
         ps.setString(l++, row.getPartyId());
         ps.setString(l++, row.getShopId());
 

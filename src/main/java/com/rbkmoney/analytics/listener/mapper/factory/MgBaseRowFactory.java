@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 
 import static java.time.ZoneOffset.UTC;
 
@@ -87,11 +86,10 @@ public abstract class MgBaseRowFactory<T extends MgBaseRow> implements RowFactor
 
     private void initTime(MachineEvent event, T row) {
         LocalDateTime localDateTime = TypeUtil.stringToLocalDateTime(event.getCreatedAt());
-        long timestamp = localDateTime.atZone(ZoneOffset.UTC).toInstant().toEpochMilli();
-        row.setTimestamp(java.sql.Date.valueOf(
-                Instant.ofEpochMilli(timestamp)
-                        .atZone(UTC)
-                        .toLocalDate())
+        Instant instant = localDateTime.atZone(UTC).toInstant();
+        long timestamp = instant.toEpochMilli();
+        row.setTimestamp(java.sql.Date
+                .valueOf(instant.atZone(UTC).toLocalDate())
         );
         row.setEventTime(timestamp);
         row.setEventTimeHour(TimeUtils.parseEventTimeHour(timestamp));
