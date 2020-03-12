@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -34,7 +36,10 @@ public class MgInvoiceListener {
     private final HandlerManager<InvoiceChange, MachineEvent> handlerManager;
 
     @KafkaListener(autoStartup = "${kafka.listener.event.sink.enabled}", topics = "${kafka.topic.event.sink.initial}", containerFactory = "kafkaListenerContainerFactory")
-    public void listen(List<MachineEvent> batch, Acknowledgment ack) throws InterruptedException {
+    public void listen(List<MachineEvent> batch, @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition,
+                       @Header(KafkaHeaders.OFFSET) int offsets,
+                       Acknowledgment ack) throws InterruptedException {
+        log.info("MgPaymentAggregatorListener listen offsets: {} partition: {} batch.size: {}", offsets, partition, batch.size());
         handleMessages(batch);
         ack.acknowledge();
     }
@@ -42,7 +47,6 @@ public class MgInvoiceListener {
     private void handleMessages(List<MachineEvent> batch) throws InterruptedException {
         try {
             if (!CollectionUtils.isEmpty(batch)) {
-                log.info("MgPaymentAggregatorListener listen batch.size: {}", batch.size());
                 batch.stream()
                         .map(machineEvent -> Map.entry(machineEvent, eventParser.parseEvent(machineEvent)))
                         .filter(entry -> entry.getValue().isSetInvoiceChanges())
