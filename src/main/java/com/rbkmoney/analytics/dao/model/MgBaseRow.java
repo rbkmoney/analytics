@@ -32,7 +32,6 @@ public class MgBaseRow {
     private String partyId;
 
     private String provider;
-    private String reason;
 
     private String invoiceId;
     private String paymentId;

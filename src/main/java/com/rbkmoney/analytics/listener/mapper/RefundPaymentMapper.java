@@ -7,7 +7,6 @@ import com.rbkmoney.analytics.exception.RefundInfoNotFoundException;
 import com.rbkmoney.analytics.listener.mapper.factory.RowFactory;
 import com.rbkmoney.analytics.service.HgClientService;
 import com.rbkmoney.damsel.domain.Failure;
-import com.rbkmoney.damsel.domain.OperationFailure;
 import com.rbkmoney.damsel.payment_processing.InvoiceChange;
 import com.rbkmoney.damsel.payment_processing.InvoicePaymentRefundChange;
 import com.rbkmoney.damsel.payment_processing.InvoicePaymentRefundChangePayload;

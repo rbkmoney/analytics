@@ -44,7 +44,7 @@ create table analytic.events_sink
     paymentCountry        String,
     bankCountry           String
 
-) ENGINE = MergeTree()
+) ENGINE = ReplacingMergeTree()
 PARTITION BY toYYYYMM (timestamp)
 ORDER BY (eventTimeHour, partyId, shopId, paymentTool, status, currency, providerName, fingerprint, cardToken, invoiceId, paymentId, sequenceId);
 
@@ -92,7 +92,7 @@ create table analytic.events_sink_refund
     paymentCountry        String,
     bankCountry           String
 
-) ENGINE = MergeTree()
+) ENGINE = ReplacingMergeTree()
 PARTITION BY toYYYYMM (timestamp)
 ORDER BY (eventTimeHour, partyId, shopId, status, currency, providerName, fingerprint, cardToken, invoiceId, paymentId, refundId, sequenceId);
 
@@ -147,6 +147,6 @@ create table analytic.events_sink_adjustment
     paymentCountry        String,
     bankCountry           String
 
-) ENGINE = MergeTree()
+) ENGINE = ReplacingMergeTree()
 PARTITION BY toYYYYMM (timestamp)
 ORDER BY (eventTimeHour, partyId, shopId, status, currency, providerName, fingerprint, cardToken, invoiceId, paymentId, adjustmentId, sequenceId);

@@ -12,7 +12,6 @@ import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.thrift.TUnion;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -67,7 +66,7 @@ public abstract class MgBaseRowFactory<T extends MgBaseRow> implements RowFactor
     }
 
     private void initCardData(T row, PaymentTool paymentTool) {
-        TBaseUtil.unionFieldToEnum(paymentTool, PaymentToolType.class);
+        row.setPaymentTool(TBaseUtil.unionFieldToEnum(paymentTool, PaymentToolType.class));
         if (paymentTool.isSetBankCard()) {
             BankCard bankCard = paymentTool.getBankCard();
             row.setBankCountry(bankCard.isSetIssuerCountry() ? bankCard.getIssuerCountry().name() : ClickHouseUtilsValue.UNKNOWN);

@@ -21,8 +21,4 @@ public class AnalyticsApplication extends SpringApplication {
         SpringApplication.run(AnalyticsApplication.class, args);
     }
 
-    @PreDestroy
-    public void draw() {
-        flowResolver.print();
-    }
 }
