@@ -44,10 +44,9 @@ public class HgClientService {
             }
             invoicePaymentWrapper.setInvoice(invoiceInfo.getInvoice());
             findPaymentPredicate.apply(id, invoiceInfo)
-                    .ifPresentOrElse(invoicePaymentWrapper::setInvoicePayment,
-                            () -> {
-                                throw new PaymentInfoNotFoundException("Not found payment in invoice!");
-                            });
+                    .ifPresentOrElse(invoicePaymentWrapper::setInvoicePayment, () -> {
+                        throw new PaymentInfoNotFoundException("Not found payment in invoice!");
+                    });
             cache.put(generateKey(invoiceId, sequenceId), invoicePaymentWrapper);
         }
         return invoicePaymentWrapper;
