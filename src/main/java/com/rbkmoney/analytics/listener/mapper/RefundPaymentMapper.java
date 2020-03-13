@@ -30,14 +30,15 @@ public class RefundPaymentMapper implements Mapper<InvoiceChange, MachineEvent, 
 
     @Override
     public MgRefundRow map(InvoiceChange change, MachineEvent event) {
-        InvoicePaymentRefundChange invoicePaymentChange = change.getInvoicePaymentChange()
-                .getPayload()
-                .getInvoicePaymentRefundChange();
-        InvoicePaymentRefundChangePayload payload = invoicePaymentChange.getPayload();
+        InvoicePaymentChange invoicePaymentChange = change.getInvoicePaymentChange();
+        String paymentId = invoicePaymentChange.getId();
+        InvoicePaymentRefundChange invoicePaymentRefundChange = invoicePaymentChange.getPayload().getInvoicePaymentRefundChange();
+        InvoicePaymentRefundChangePayload payload = invoicePaymentRefundChange.getPayload();
         InvoicePaymentRefundStatusChanged invoicePaymentRefundStatusChanged = payload.getInvoicePaymentRefundStatusChanged();
-        String refundId = invoicePaymentChange.getId();
+        String refundId = invoicePaymentRefundChange.getId();
 
-        InvoicePaymentWrapper invoicePaymentWrapper = hgClientService.getInvoiceInfo(event.getSourceId(), findPayment(), refundId, event.getEventId());
+        InvoicePaymentWrapper invoicePaymentWrapper = hgClientService.getInvoiceInfo(
+                event.getSourceId(), findPayment(), paymentId, refundId, event.getEventId());
         MgRefundRow refundRow = mgRefundRowFactory.create(event, invoicePaymentWrapper, refundId);
 
         refundRow.setStatus(TBaseUtil.unionFieldToEnum(payload

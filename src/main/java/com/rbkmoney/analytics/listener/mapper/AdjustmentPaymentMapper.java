@@ -31,13 +31,16 @@ public class AdjustmentPaymentMapper implements Mapper<InvoiceChange, MachineEve
 
     @Override
     public MgAdjustmentRow map(InvoiceChange change, MachineEvent event) {
-        InvoicePaymentAdjustmentChange invoicePaymentAdjustmentChange = change.getInvoicePaymentChange()
+        InvoicePaymentChange invoicePaymentChange = change.getInvoicePaymentChange();
+        String paymentId = invoicePaymentChange.getId();
+        InvoicePaymentAdjustmentChange invoicePaymentAdjustmentChange = invoicePaymentChange
                 .getPayload()
                 .getInvoicePaymentAdjustmentChange();
         InvoicePaymentAdjustmentChangePayload payload = invoicePaymentAdjustmentChange.getPayload();
         String adjustmentChangeId = invoicePaymentAdjustmentChange.getId();
 
-        InvoicePaymentWrapper invoicePaymentWrapper = hgClientService.getInvoiceInfo(event.getSourceId(), findPayment(), adjustmentChangeId, event.getEventId());
+        InvoicePaymentWrapper invoicePaymentWrapper = hgClientService.getInvoiceInfo(
+                event.getSourceId(), findPayment(), paymentId, adjustmentChangeId, event.getEventId());
         MgAdjustmentRow mgAdjustmentRow = mgAdjustmentRowFactory.create(event, invoicePaymentWrapper, adjustmentChangeId);
 
         mgAdjustmentRow.setStatus(TBaseUtil.unionFieldToEnum(payload
