@@ -3,6 +3,8 @@ package com.rbkmoney.analytics.listener.mapper.factory;
 import com.rbkmoney.analytics.computer.CashFlowComputer;
 import com.rbkmoney.analytics.computer.ReversedCashFlowComputer;
 import com.rbkmoney.analytics.dao.model.MgAdjustmentRow;
+import com.rbkmoney.analytics.domain.InvoicePaymentWrapper;
+import com.rbkmoney.analytics.exception.AdjustmentInfoNotFoundException;
 import com.rbkmoney.analytics.service.GeoProvider;
 import com.rbkmoney.damsel.domain.FinalCashFlowPosting;
 import com.rbkmoney.damsel.domain.Invoice;
@@ -29,37 +31,40 @@ public class MgAdjustmentRowFactory extends MgBaseRowFactory<MgAdjustmentRow> {
     }
 
     @Override
-    public MgAdjustmentRow create(MachineEvent machineEvent, com.rbkmoney.damsel.payment_processing.Invoice invoiceInfo,
-                                  String adjustmentId) {
+    public MgAdjustmentRow create(MachineEvent machineEvent, InvoicePaymentWrapper invoicePaymentWrapper, String adjustmentId) {
         MgAdjustmentRow mgAdjustmentRow = new MgAdjustmentRow();
-        Invoice invoice = invoiceInfo.getInvoice();
+        Invoice invoice = invoicePaymentWrapper.getInvoice();
         mgAdjustmentRow.setPartyId(invoice.getOwnerId());
         mgAdjustmentRow.setShopId(invoice.getShopId());
         mgAdjustmentRow.setInvoiceId(machineEvent.getSourceId());
         mgAdjustmentRow.setSequenceId((machineEvent.getEventId()));
-        initInfo(machineEvent, mgAdjustmentRow, invoiceInfo, adjustmentId);
+        initInfo(machineEvent, mgAdjustmentRow, invoicePaymentWrapper.getInvoicePayment(), adjustmentId);
         return mgAdjustmentRow;
     }
 
-    private void initInfo(MachineEvent machineEvent, MgAdjustmentRow row, com.rbkmoney.damsel.payment_processing.Invoice invoiceInfo, String id) {
-        for (InvoicePayment payment : invoiceInfo.getPayments()) {
-            if (payment.isSetPayment() && payment.isSetAdjustments()) {
-                for (InvoicePaymentAdjustment adjustment : payment.getAdjustments()) {
-                    if (adjustment.getId().equals(id)) {
-                        List<FinalCashFlowPosting> cashFlow = adjustment.getNewCashFlow();
-                        row.setAdjustmentId(id);
-                        row.setPaymentId(payment.getPayment().getId());
-                        cashFlowComputer.compute(cashFlow)
-                                .ifPresent(row::setCashFlowResult);
-                        initBaseRow(machineEvent, row, payment);
-                        List<FinalCashFlowPosting> oldCashFlow = adjustment.getNewCashFlow();
-                        if (!CollectionUtils.isEmpty(oldCashFlow)) {
-                            reversedCashFlowComputer.compute(oldCashFlow)
-                                    .ifPresent(row::setOldCashFlowResult);
+    private void initInfo(MachineEvent machineEvent, MgAdjustmentRow row, InvoicePayment payment, String id) {
+        payment.getAdjustments().stream()
+                .filter(adjustment -> adjustment.getId().equals(id))
+                .findFirst()
+                .ifPresentOrElse(adjustment ->
+                                mapRow(machineEvent, row, payment, id, adjustment)
+                        , () -> {
+                            throw new AdjustmentInfoNotFoundException();
                         }
-                    }
-                }
-            }
+                );
+    }
+
+    private void mapRow(MachineEvent machineEvent, MgAdjustmentRow row, InvoicePayment payment, String id, InvoicePaymentAdjustment adjustment) {
+        List<FinalCashFlowPosting> cashFlow = adjustment.getNewCashFlow();
+        row.setAdjustmentId(id);
+        row.setPaymentId(payment.getPayment().getId());
+        cashFlowComputer.compute(cashFlow)
+                .ifPresent(row::setCashFlowResult);
+        initBaseRow(machineEvent, row, payment);
+        List<FinalCashFlowPosting> oldCashFlow = adjustment.getNewCashFlow();
+        if (!CollectionUtils.isEmpty(oldCashFlow)) {
+            reversedCashFlowComputer.compute(oldCashFlow)
+                    .ifPresent(row::setOldCashFlowResult);
         }
     }
 

@@ -2,12 +2,12 @@ package com.rbkmoney.analytics.listener.mapper.factory;
 
 import com.rbkmoney.analytics.computer.CashFlowComputer;
 import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
+import com.rbkmoney.analytics.domain.InvoicePaymentWrapper;
 import com.rbkmoney.analytics.service.GeoProvider;
 import com.rbkmoney.damsel.domain.FinalCashFlowPosting;
 import com.rbkmoney.damsel.domain.Invoice;
 import com.rbkmoney.damsel.payment_processing.InvoicePayment;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -25,28 +25,23 @@ public class MgPaymentSinkRowFactory extends MgBaseRowFactory<MgPaymentSinkRow> 
     }
 
     @Override
-    public MgPaymentSinkRow create(MachineEvent machineEvent, com.rbkmoney.damsel.payment_processing.Invoice invoiceInfo, String paymentId) {
+    public MgPaymentSinkRow create(MachineEvent machineEvent, InvoicePaymentWrapper invoicePaymentWrapper, String paymentId) {
         MgPaymentSinkRow mgPaymentSinkRow = new MgPaymentSinkRow();
-        Invoice invoice = invoiceInfo.getInvoice();
+        Invoice invoice = invoicePaymentWrapper.getInvoice();
         mgPaymentSinkRow.setPartyId(invoice.getOwnerId());
         mgPaymentSinkRow.setShopId(invoice.getShopId());
         mgPaymentSinkRow.setInvoiceId(machineEvent.getSourceId());
         mgPaymentSinkRow.setPaymentId(paymentId);
         mgPaymentSinkRow.setSequenceId((machineEvent.getEventId()));
-        initInfo(machineEvent, mgPaymentSinkRow, invoiceInfo, paymentId);
+        initInfo(machineEvent, mgPaymentSinkRow, invoicePaymentWrapper.getInvoicePayment());
         return mgPaymentSinkRow;
     }
 
-    private void initInfo(MachineEvent machineEvent, MgPaymentSinkRow row,
-                         com.rbkmoney.damsel.payment_processing.Invoice invoiceInfo, String paymentId) {
-        for (InvoicePayment payment : invoiceInfo.getPayments()) {
-            if (payment.isSetPayment() && payment.getPayment().getId().equals(paymentId)) {
-                List<FinalCashFlowPosting> cashFlow = payment.getCashFlow();
-                cashFlowComputer.compute(cashFlow)
-                        .ifPresent(row::setCashFlowResult);
-                initBaseRow(machineEvent, row, payment);
-            }
-        }
+    private void initInfo(MachineEvent machineEvent, MgPaymentSinkRow row, InvoicePayment payment) {
+        List<FinalCashFlowPosting> cashFlow = payment.getCashFlow();
+        cashFlowComputer.compute(cashFlow)
+                .ifPresent(row::setCashFlowResult);
+        initBaseRow(machineEvent, row, payment);
     }
 
 }

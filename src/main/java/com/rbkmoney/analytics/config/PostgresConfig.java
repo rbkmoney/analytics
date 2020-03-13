@@ -21,9 +21,8 @@ public class PostgresConfig {
         PGSimpleDataSource dataSource = new PGSimpleDataSource();
         dataSource.setUrl(postgresDbProperties.getUrl());
         dataSource.setUser(postgresDbProperties.getUser());
-        dataSource.setPassword (postgresDbProperties.getPassword());
-        dataSource.setCurrentSchema (postgresDbProperties.getSchema());
-
+        dataSource.setPassword(postgresDbProperties.getPassword());
+        dataSource.setCurrentSchema(postgresDbProperties.getSchema());
         return dataSource;
     }
 

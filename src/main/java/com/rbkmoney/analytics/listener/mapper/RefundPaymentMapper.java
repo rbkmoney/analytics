@@ -3,20 +3,20 @@ package com.rbkmoney.analytics.listener.mapper;
 import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.constant.RefundStatus;
 import com.rbkmoney.analytics.dao.model.MgRefundRow;
-import com.rbkmoney.analytics.exception.RefundInfoNotFoundException;
+import com.rbkmoney.analytics.domain.InvoicePaymentWrapper;
 import com.rbkmoney.analytics.listener.mapper.factory.RowFactory;
 import com.rbkmoney.analytics.service.HgClientService;
 import com.rbkmoney.damsel.domain.Failure;
-import com.rbkmoney.damsel.payment_processing.InvoiceChange;
-import com.rbkmoney.damsel.payment_processing.InvoicePaymentRefundChange;
-import com.rbkmoney.damsel.payment_processing.InvoicePaymentRefundChangePayload;
-import com.rbkmoney.damsel.payment_processing.InvoicePaymentRefundStatusChanged;
+import com.rbkmoney.damsel.payment_processing.*;
 import com.rbkmoney.geck.common.util.TBaseUtil;
 import com.rbkmoney.geck.serializer.kit.tbase.TErrorUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
+import java.util.function.BiFunction;
 
 @Slf4j
 @Component
@@ -30,12 +30,6 @@ public class RefundPaymentMapper implements Mapper<InvoiceChange, MachineEvent, 
 
     @Override
     public MgRefundRow map(InvoiceChange change, MachineEvent event) {
-        com.rbkmoney.damsel.payment_processing.Invoice invoiceInfo = hgClientService.getInvoiceInfo(event);
-
-        if (invoiceInfo == null) {
-            throw new RefundInfoNotFoundException("Not found refund info in hg!");
-        }
-
         InvoicePaymentRefundChange invoicePaymentChange = change.getInvoicePaymentChange()
                 .getPayload()
                 .getInvoicePaymentRefundChange();
@@ -43,7 +37,8 @@ public class RefundPaymentMapper implements Mapper<InvoiceChange, MachineEvent, 
         InvoicePaymentRefundStatusChanged invoicePaymentRefundStatusChanged = payload.getInvoicePaymentRefundStatusChanged();
         String refundId = invoicePaymentChange.getId();
 
-        MgRefundRow refundRow = mgRefundRowFactory.create(event, invoiceInfo, refundId);
+        InvoicePaymentWrapper invoicePaymentWrapper = hgClientService.getInvoiceInfo(event.getSourceId(), findPayment(), refundId, event.getEventId());
+        MgRefundRow refundRow = mgRefundRowFactory.create(event, invoicePaymentWrapper, refundId);
 
         refundRow.setStatus(TBaseUtil.unionFieldToEnum(payload
                 .getInvoicePaymentRefundStatusChanged()
@@ -61,6 +56,17 @@ public class RefundPaymentMapper implements Mapper<InvoiceChange, MachineEvent, 
 
         log.debug("RefundPaymentMapper refundRow: {}", refundRow);
         return refundRow;
+    }
+
+    private BiFunction<String, Invoice, Optional<InvoicePayment>> findPayment() {
+        return (id, invoiceInfo) -> invoiceInfo.getPayments().stream()
+                .filter(payment ->
+                        payment.isSetPayment()
+                                && payment.isSetRefunds()
+                                && payment.getRefunds().stream()
+                                .anyMatch(refund -> refund.getRefund().getId().equals(id))
+                )
+                .findFirst();
     }
 
     @Override
