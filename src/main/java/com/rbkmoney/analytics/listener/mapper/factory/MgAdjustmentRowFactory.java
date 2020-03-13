@@ -46,9 +46,7 @@ public class MgAdjustmentRowFactory extends MgBaseRowFactory<MgAdjustmentRow> {
         payment.getAdjustments().stream()
                 .filter(adjustment -> adjustment.getId().equals(id))
                 .findFirst()
-                .ifPresentOrElse(adjustment ->
-                                mapRow(machineEvent, row, payment, id, adjustment)
-                        , () -> {
+                .ifPresentOrElse(adjustment -> mapRow(machineEvent, row, payment, id, adjustment), () -> {
                             throw new AdjustmentInfoNotFoundException();
                         }
                 );
