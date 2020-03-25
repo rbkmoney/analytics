@@ -45,6 +45,7 @@ public class InvoicePaymentMapper implements Mapper<InvoiceChange, MachineEvent,
         InvoicePaymentStatusChanged invoicePaymentStatusChanged = payload.getInvoicePaymentStatusChanged();
 
         InvoicePaymentWrapper invoicePaymentWrapper = hgClientService.getInvoiceInfo(event.getSourceId(), findPayment(), paymentId, event.getEventId());
+
         MgPaymentSinkRow mgPaymentSinkRow = mgPaymentSinkRowFactory.create(event, invoicePaymentWrapper, paymentId);
 
         mgPaymentSinkRow.setStatus(TBaseUtil.unionFieldToEnum(invoicePaymentStatusChanged.getStatus(), PaymentStatus.class));

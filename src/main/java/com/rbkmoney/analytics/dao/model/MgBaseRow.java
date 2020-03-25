@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 public class MgBaseRow {
 
     private LocalDateTime eventTime;
+    private LocalDateTime paymentTime;
 
     private String ip;
     private String email;
@@ -30,6 +31,8 @@ public class MgBaseRow {
     private String partyId;
 
     private String provider;
+    private Integer providerId;
+    private Integer terminal;
 
     private String invoiceId;
     private String paymentId;

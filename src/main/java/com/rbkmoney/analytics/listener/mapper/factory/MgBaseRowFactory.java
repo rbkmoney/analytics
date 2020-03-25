@@ -22,9 +22,15 @@ public abstract class MgBaseRowFactory<T extends MgBaseRow> implements RowFactor
     @Override
     public void initBaseRow(MachineEvent machineEvent, T row, InvoicePayment invoicePayment) {
         row.setEventTime(TypeUtil.stringToLocalDateTime(machineEvent.getCreatedAt()));
-        row.setCurrency(invoicePayment.getPayment().getCost().getCurrency().getSymbolicCode());
-        row.setPaymentId(invoicePayment.getPayment().getId());
-        Payer payer = invoicePayment.getPayment().getPayer();
+        com.rbkmoney.damsel.domain.InvoicePayment payment = invoicePayment.getPayment();
+        row.setCurrency(payment.getCost().getCurrency().getSymbolicCode());
+        row.setPaymentId(payment.getId());
+        row.setPaymentTime(TypeUtil.stringToLocalDateTime(payment.getCreatedAt()));
+        if (invoicePayment.isSetRoute()) {
+            row.setTerminal(invoicePayment.getRoute().getTerminal().getId());
+            row.setProviderId(invoicePayment.getRoute().getProvider().getId());
+        }
+        Payer payer = payment.getPayer();
         if (payer.isSetPaymentResource() && payer.getPaymentResource().isSetResource()) {
             DisposablePaymentResource resource = payer.getPaymentResource().getResource();
             PaymentTool paymentTool = resource.getPaymentTool();

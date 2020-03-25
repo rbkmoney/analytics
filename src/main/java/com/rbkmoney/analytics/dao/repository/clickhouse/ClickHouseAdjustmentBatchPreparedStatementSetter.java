@@ -75,9 +75,9 @@ public class ClickHouseAdjustmentBatchPreparedStatementSetter implements BatchPr
         ps.setString(l++, row.getDigitalWalletToken());
         ps.setString(l++, row.getCryptoCurrency());
         ps.setString(l++, row.getMobileOperator());
+
         ps.setString(l++, row.getPaymentCountry());
         ps.setString(l, row.getBankCountry());
-
     }
 
     @Override
