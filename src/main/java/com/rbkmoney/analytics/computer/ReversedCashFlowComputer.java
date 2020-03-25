@@ -3,25 +3,22 @@ package com.rbkmoney.analytics.computer;
 import com.rbkmoney.analytics.domain.CashFlowResult;
 import com.rbkmoney.damsel.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
-import java.util.Optional;
-
-import static com.google.common.base.Preconditions.checkState;
 
 @Service
 public class ReversedCashFlowComputer {
 
-    public Optional<CashFlowResult> compute(List<FinalCashFlowPosting> reversedCashFlow) {
-        long accountId = -1;
+    public CashFlowResult compute(List<FinalCashFlowPosting> reversedCashFlow) {
         long amount = 0L;
         long systemFee = 0L;
         long providerFee = 0L;
         long externalFee = 0L;
         long guaranteeDeposit = 0L;
 
-        if (reversedCashFlow == null) {
-            return Optional.empty();
+        if (CollectionUtils.isEmpty(reversedCashFlow)) {
+            return CashFlowResult.EMPTY;
         }
 
         for (FinalCashFlowPosting posting : reversedCashFlow) {
@@ -55,13 +52,13 @@ public class ReversedCashFlowComputer {
 
         }
 
-        return Optional.ofNullable(CashFlowResult.builder()
+        return CashFlowResult.builder()
                 .amount(amount)
                 .systemFee(systemFee)
                 .providerFee(providerFee)
                 .externalFee(externalFee)
                 .guaranteeDeposit(guaranteeDeposit)
-                .build());
+                .build();
     }
 
     private boolean isReversedPayment(FinalCashFlowPosting posting) {

@@ -13,7 +13,6 @@ import com.rbkmoney.damsel.payment_processing.InvoicePayment;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -53,17 +52,15 @@ public class MgAdjustmentRowFactory extends MgBaseRowFactory<MgAdjustmentRow> {
     }
 
     private void mapRow(MachineEvent machineEvent, MgAdjustmentRow row, InvoicePayment payment, String id, InvoicePaymentAdjustment adjustment) {
-        List<FinalCashFlowPosting> cashFlow = adjustment.getNewCashFlow();
         row.setAdjustmentId(id);
         row.setPaymentId(payment.getPayment().getId());
-        cashFlowComputer.compute(cashFlow)
-                .ifPresent(row::setCashFlowResult);
         initBaseRow(machineEvent, row, payment);
+
+        List<FinalCashFlowPosting> cashFlow = adjustment.getNewCashFlow();
+        row.setCashFlowResult(cashFlowComputer.compute(cashFlow));
+
         List<FinalCashFlowPosting> oldCashFlow = adjustment.getNewCashFlow();
-        if (!CollectionUtils.isEmpty(oldCashFlow)) {
-            reversedCashFlowComputer.compute(oldCashFlow)
-                    .ifPresent(row::setOldCashFlowResult);
-        }
+        row.setOldCashFlowResult(reversedCashFlowComputer.compute(oldCashFlow));
     }
 
 }

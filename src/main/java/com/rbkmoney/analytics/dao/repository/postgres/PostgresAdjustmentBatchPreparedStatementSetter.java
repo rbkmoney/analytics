@@ -25,9 +25,7 @@ public class PostgresAdjustmentBatchPreparedStatementSetter implements BatchPrep
 
         CashFlowResult cashFlowResult = row.getCashFlowResult();
         CashFlowResult reversedCashFlowResult = row.getOldCashFlowResult();
-        if (cashFlowResult != null && reversedCashFlowResult != null) {
-            ps.setLong(l++, reversedCashFlowResult.getSystemFee() - cashFlowResult.getSystemFee());
-        }
+        ps.setLong(l++, reversedCashFlowResult.getSystemFee() - cashFlowResult.getSystemFee());
 
         ps.setString(l, row.getCurrency());
     }

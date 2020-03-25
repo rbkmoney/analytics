@@ -52,8 +52,7 @@ public class MgRefundRowFactory extends MgBaseRowFactory<MgRefundRow> {
         List<FinalCashFlowPosting> cashFlow = refund.isSetCashFlow() ? refund.getCashFlow() : payment.getCashFlow();
         row.setRefundId(refundId);
         row.setPaymentId(payment.getPayment().getId());
-        cashFlowComputer.compute(cashFlow)
-                .ifPresent(row::setCashFlowResult);
+        row.setCashFlowResult(cashFlowComputer.compute(cashFlow));
         initBaseRow(machineEvent, row, payment);
     }
 

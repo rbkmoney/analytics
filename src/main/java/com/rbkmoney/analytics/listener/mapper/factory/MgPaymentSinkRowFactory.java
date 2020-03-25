@@ -39,8 +39,7 @@ public class MgPaymentSinkRowFactory extends MgBaseRowFactory<MgPaymentSinkRow> 
 
     private void initInfo(MachineEvent machineEvent, MgPaymentSinkRow row, InvoicePayment payment) {
         List<FinalCashFlowPosting> cashFlow = payment.getCashFlow();
-        cashFlowComputer.compute(cashFlow)
-                .ifPresent(row::setCashFlowResult);
+        row.setCashFlowResult(cashFlowComputer.compute(cashFlow));
         initBaseRow(machineEvent, row, payment);
     }
 

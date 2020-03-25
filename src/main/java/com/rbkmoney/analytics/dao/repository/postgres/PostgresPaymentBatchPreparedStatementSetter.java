@@ -25,9 +25,7 @@ public class PostgresPaymentBatchPreparedStatementSetter implements BatchPrepare
         ps.setString(l++, row.getShopId());
 
         CashFlowResult cashFlowResult = row.getCashFlowResult();
-        if (cashFlowResult != null) {
-            ps.setLong(l++, cashFlowResult.getAmount() - cashFlowResult.getSystemFee());
-        }
+        ps.setLong(l++, cashFlowResult.getAmount() - cashFlowResult.getSystemFee());
 
         ps.setString(l, row.getCurrency());
     }

@@ -4,17 +4,15 @@ import com.rbkmoney.analytics.domain.CashFlowResult;
 import com.rbkmoney.damsel.domain.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
-import java.util.Optional;
-
-import static org.msgpack.core.Preconditions.checkState;
 
 @Slf4j
 @Service
 public class CashFlowComputer {
 
-    public Optional<CashFlowResult> compute(List<FinalCashFlowPosting> cashFlow) {
+    public CashFlowResult compute(List<FinalCashFlowPosting> cashFlow) {
 
         long amount = 0L;
         long systemFee = 0L;
@@ -22,8 +20,8 @@ public class CashFlowComputer {
         long externalFee = 0L;
         long guaranteeDeposit = 0L;
 
-        if (cashFlow == null) {
-            return Optional.empty();
+        if (CollectionUtils.isEmpty(cashFlow)) {
+            return CashFlowResult.EMPTY;
         }
 
         for (FinalCashFlowPosting posting : cashFlow) {
@@ -57,13 +55,13 @@ public class CashFlowComputer {
 
         }
 
-        return Optional.ofNullable(CashFlowResult.builder()
+        return CashFlowResult.builder()
                 .amount(amount)
                 .systemFee(systemFee)
                 .providerFee(providerFee)
                 .externalFee(externalFee)
                 .guaranteeDeposit(guaranteeDeposit)
-                .build());
+                .build();
     }
 
     private boolean isPayment(FinalCashFlowPosting posting) {

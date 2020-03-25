@@ -38,8 +38,19 @@ public class ClickHouseAdjustmentBatchPreparedStatementSetter implements BatchPr
 
         ps.setString(l++, row.getEmail());
 
-        l = initCashFlow(ps, l, row.getCashFlowResult());
-        l = initCashFlow(ps, l, row.getOldCashFlowResult());
+        CashFlowResult cashFlowResult = row.getCashFlowResult();
+        ps.setLong(l++, cashFlowResult.getAmount());
+        ps.setLong(l++, cashFlowResult.getGuaranteeDeposit());
+        ps.setLong(l++, cashFlowResult.getSystemFee());
+        ps.setLong(l++, cashFlowResult.getExternalFee());
+        ps.setLong(l++, cashFlowResult.getProviderFee());
+
+        CashFlowResult oldCashFlowResult = row.getOldCashFlowResult();
+        ps.setLong(l++, oldCashFlowResult.getAmount());
+        ps.setLong(l++, oldCashFlowResult.getGuaranteeDeposit());
+        ps.setLong(l++, oldCashFlowResult.getSystemFee());
+        ps.setLong(l++, oldCashFlowResult.getExternalFee());
+        ps.setLong(l++, oldCashFlowResult.getProviderFee());
 
         ps.setString(l++, row.getCurrency());
 
@@ -67,15 +78,6 @@ public class ClickHouseAdjustmentBatchPreparedStatementSetter implements BatchPr
         ps.setString(l++, row.getPaymentCountry());
         ps.setString(l, row.getBankCountry());
 
-    }
-
-    private int initCashFlow(PreparedStatement ps, int l, CashFlowResult cashFlowResult) throws SQLException {
-        ps.setLong(l++, cashFlowResult != null ? cashFlowResult.getAmount() : 0);
-        ps.setLong(l++, cashFlowResult != null ? cashFlowResult.getGuaranteeDeposit() : 0);
-        ps.setLong(l++, cashFlowResult != null ? cashFlowResult.getSystemFee() : 0);
-        ps.setLong(l++, cashFlowResult != null ? cashFlowResult.getExternalFee() : 0);
-        ps.setLong(l++, cashFlowResult != null ? cashFlowResult.getProviderFee() : 0);
-        return l;
     }
 
     @Override
