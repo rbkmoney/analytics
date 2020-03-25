@@ -7,6 +7,8 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -26,9 +28,9 @@ public class ClickHouseRefundBatchPreparedStatementSetter implements BatchPrepar
     public void setValues(PreparedStatement ps, int i) throws SQLException {
         MgRefundRow row = batch.get(i);
         int l = 1;
-        ps.setDate(l++, row.getTimestamp());
-        ps.setLong(l++, row.getEventTime());
-        ps.setLong(l++, row.getEventTimeHour());
+        ps.setObject(l++, row.getEventTime().toLocalDate());
+        ps.setLong(l++, row.getEventTime().toEpochSecond(ZoneOffset.UTC));
+        ps.setLong(l++, row.getEventTime().toInstant(ZoneOffset.UTC).truncatedTo(ChronoUnit.HOURS).toEpochMilli());
 
         ps.setString(l++, row.getPartyId());
         ps.setString(l++, row.getShopId());

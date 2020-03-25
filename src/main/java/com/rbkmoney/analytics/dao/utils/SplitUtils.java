@@ -20,8 +20,8 @@ public class SplitUtils {
     public static Long generateOffset(Map row, SplitUnit splitUnit) {
         switch (splitUnit) {
             case MINUTE: {
-                Long hour = (Long) row.get(HOUR);
-                Long minutes = (Long) row.get(MINUTES);
+                Integer hour = (Integer) row.get(HOUR);
+                Integer minutes = (Integer) row.get(MINUTES);
                 Date date = (Date) row.get(DAY);
                 LocalDateTime localDateTime = date.toLocalDate()
                         .atStartOfDay()
@@ -32,7 +32,7 @@ public class SplitUtils {
                         .toInstant().toEpochMilli();
             }
             case HOUR: {
-                Long hour = (Long) row.get(HOUR);
+                Integer hour = (Integer) row.get(HOUR);
                 Date date = (Date) row.get(DAY);
                 LocalDateTime localDateTime = date.toLocalDate()
                         .atStartOfDay()
@@ -49,15 +49,15 @@ public class SplitUtils {
                         .toInstant().toEpochMilli();
             }
             case MONTH: {
-                Long date = (Long) row.get(YEAR);
-                Long months = (Long) row.get(MONTHS);
+                Integer date = (Integer) row.get(YEAR);
+                Integer months = (Integer) row.get(MONTHS);
                 return LocalDate.of(date.intValue(), months.intValue(), 1)
                         .atStartOfDay()
                         .atZone(UTC)
                         .toInstant().toEpochMilli();
             }
             case YEAR: {
-                Long date = (Long) row.get(YEAR);
+                Integer date = (Integer) row.get(YEAR);
                 return LocalDate.of(date.intValue(), 1, 1)
                         .atStartOfDay()
                         .atZone(UTC)

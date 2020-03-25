@@ -5,15 +5,13 @@ import com.rbkmoney.analytics.domain.CashFlowResult;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Date;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 public class MgBaseRow {
 
-    private Date timestamp;
-    private Long eventTime;
-    private Long eventTimeHour;
+    private LocalDateTime eventTime;
 
     private String ip;
     private String email;

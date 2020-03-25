@@ -20,7 +20,7 @@ public class PostgresPaymentBatchPreparedStatementSetter implements BatchPrepare
         MgPaymentSinkRow row = batch.get(i);
         int l = 1;
         ps.setString(l++, row.getInvoiceId() + "-" + row.getSequenceId());
-        ps.setTimestamp(l++, new Timestamp(row.getEventTime()));
+        ps.setObject(l++, row.getEventTime());
         ps.setString(l++, row.getPartyId());
         ps.setString(l++, row.getShopId());
 

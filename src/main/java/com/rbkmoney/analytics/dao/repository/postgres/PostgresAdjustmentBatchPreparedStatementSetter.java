@@ -19,7 +19,7 @@ public class PostgresAdjustmentBatchPreparedStatementSetter implements BatchPrep
         MgAdjustmentRow row = batch.get(i);
         int l = 1;
         ps.setString(l++, row.getInvoiceId() + "-" + row.getSequenceId());
-        ps.setDate(l++, row.getTimestamp());
+        ps.setObject(l++, row.getEventTime());
         ps.setString(l++, row.getPartyId());
         ps.setString(l++, row.getShopId());
 
