@@ -22,7 +22,7 @@ import java.util.List;
 public class PostgresBalanceChangesRepository {
 
     private static final String INSERT = "INSERT INTO analytics.balance_change " +
-            "(id, created_at, party_id, shop_id, amount, currency) " +
+            "(id, event_created_at, party_id, shop_id, amount, currency) " +
             "VALUES (?, ?, ?, ?, ?, ?) " +
             "ON CONFLICT (id) DO NOTHING";
 
