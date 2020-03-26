@@ -44,12 +44,11 @@ public class ClickHouseRefundRepository {
         long fromMillis = from.toInstant(ZoneOffset.UTC).toEpochMilli();
         long toMillis = to.toInstant(ZoneOffset.UTC).toEpochMilli();
 
-        String selectSql = "SELECT currency, sum(amount * sign) as amount " +
+        String selectSql = "SELECT currency, sum(amount) as amount " +
                 "from analytic.events_sink_refund ";
         String whereSql = "where timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ?";
         String groupedSql = " group by partyId, currency " +
-                " having partyId = ? " +
-                " AND sum(sign) > 0";
+                " having partyId = ?";
 
         String sql = selectSql;
         List<Object> params = null;
