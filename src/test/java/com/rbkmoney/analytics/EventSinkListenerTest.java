@@ -1,5 +1,6 @@
 package com.rbkmoney.analytics;
 
+import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
 import com.rbkmoney.analytics.dao.repository.postgres.PostgresBalanceChangesRepository;
 import com.rbkmoney.analytics.service.HgClientService;
 import com.rbkmoney.analytics.utils.BuildUtils;
@@ -32,6 +33,7 @@ import ru.yandex.clickhouse.settings.ClickHouseProperties;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -179,6 +181,11 @@ public class EventSinkListenerTest extends KafkaAbstractTest {
                 (resultSet, i) -> resultSet.getLong("sum"));
 
         Assert.assertEquals(23L, sum);
+
+        List<LocalDate> localDates = clickHouseJdbcTemplate.queryForList(
+                "SELECT timestamp from analytic.events_sink ", LocalDate.class);
+
+        System.out.println(localDates);
     }
 
     private void mockPayment(String sourceId) throws TException, IOException {

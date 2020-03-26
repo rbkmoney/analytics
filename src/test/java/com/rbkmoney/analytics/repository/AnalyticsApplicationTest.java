@@ -65,7 +65,7 @@ public class AnalyticsApplicationTest extends ClickHouseAbstractTest {
                         "group by partyId, currency " +
                         "having partyId = 'ca2e9162-eda2-4d17-bbfa-dc5e39b1772a' and currency = 'RUB'",
                 (resultSet, i) -> resultSet.getLong("sum"));
-        Assert.assertEquals(6000L, sum);
+        Assert.assertEquals(7000L, sum);
     }
 
     @Test
@@ -78,7 +78,10 @@ public class AnalyticsApplicationTest extends ClickHouseAbstractTest {
 
         list.forEach(stringObjectMap -> {
                     Object cnt = stringObjectMap.get("cnt");
-            Assert.assertEquals(2L, ((BigInteger) cnt).longValue());
+                    if (stringObjectMap.get("status").equals("captured"))
+                        Assert.assertEquals(2L, ((BigInteger) cnt).longValue());
+                    else if (stringObjectMap.get("status").equals("failed"))
+                        Assert.assertEquals(1L, ((BigInteger) cnt).longValue());
                 }
         );
     }
@@ -93,7 +96,7 @@ public class AnalyticsApplicationTest extends ClickHouseAbstractTest {
 
         list.forEach(stringObjectMap -> {
                     Object cnt = stringObjectMap.get("sum");
-            Assert.assertEquals(6000L, ((BigInteger) cnt).longValue());
+                    Assert.assertEquals(6000L, ((BigInteger) cnt).longValue());
                 }
         );
     }
@@ -102,11 +105,11 @@ public class AnalyticsApplicationTest extends ClickHouseAbstractTest {
     public void testPaymentTool() {
         List<Map<String, Object>> list = clickHouseJdbcTemplate.queryForList(
                 "SELECT partyId, paymentTool," +
-                        "( SELECT count() from analytic.events_sink " +
+                        "( SELECT count() from analytic.events_sink  where status='captured'" +
                         "group by partyId, currency " +
                         "having partyId = 'ca2e9162-eda2-4d17-bbfa-dc5e39b1772a' and currency = 'RUB') as total_count, " +
                         "count() * 100 / total_count as sum " +
-                        "from analytic.events_sink " +
+                        "from analytic.events_sink where status='captured'" +
                         "group by partyId, currency, paymentTool " +
                         "having partyId = 'ca2e9162-eda2-4d17-bbfa-dc5e39b1772a' and currency = 'RUB'");
 

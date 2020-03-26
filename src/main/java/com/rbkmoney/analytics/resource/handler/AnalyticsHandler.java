@@ -40,8 +40,8 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
         List<NamingDistribution> paymentsToolDistribution = clickHousePaymentRepository.getPaymentsToolDistribution(
                 merchantFilter.getPartyId(),
                 merchantFilter.getShopIds(),
-                convertToMillis(timeFilter.getFromTime()),
-                convertToMillis(timeFilter.getToTime())
+                TypeUtil.stringToLocalDateTime(timeFilter.getFromTime()),
+                TypeUtil.stringToLocalDateTime(timeFilter.getToTime())
         );
 
         return convertPaymentToolsToResponse.convert(paymentsToolDistribution);
@@ -60,8 +60,8 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
         List<NumberModel> paymentsToolDistribution = clickHousePaymentRepository.getPaymentsAmount(
                 merchantFilter.getPartyId(),
                 merchantFilter.getShopIds(),
-                convertToMillis(timeFilter.getFromTime()),
-                convertToMillis(timeFilter.getToTime())
+                TypeUtil.stringToLocalDateTime(timeFilter.getFromTime()),
+                TypeUtil.stringToLocalDateTime(timeFilter.getToTime())
         );
 
         return costToAmountResponseConverter.convert(paymentsToolDistribution);
@@ -75,8 +75,8 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
         List<NumberModel> paymentsToolDistribution = clickHousePaymentRepository.getAveragePayment(
                 merchantFilter.getPartyId(),
                 merchantFilter.getShopIds(),
-                convertToMillis(timeFilter.getFromTime()),
-                convertToMillis(timeFilter.getToTime())
+                TypeUtil.stringToLocalDateTime(timeFilter.getFromTime()),
+                TypeUtil.stringToLocalDateTime(timeFilter.getToTime())
         );
 
         return costToAmountResponseConverter.convert(paymentsToolDistribution);
@@ -90,8 +90,8 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
         List<NumberModel> paymentsToolDistribution = clickHousePaymentRepository.getPaymentsCount(
                 merchantFilter.getPartyId(),
                 merchantFilter.getShopIds(),
-                convertToMillis(timeFilter.getFromTime()),
-                convertToMillis(timeFilter.getToTime())
+                TypeUtil.stringToLocalDateTime(timeFilter.getFromTime()),
+                TypeUtil.stringToLocalDateTime(timeFilter.getToTime())
         );
 
         return countModelCountResponseConverter.convert(paymentsToolDistribution);
@@ -105,8 +105,8 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
         List<NamingDistribution> namingDistributions = clickHousePaymentRepository.getPaymentsErrorDistribution(
                 merchantFilter.getPartyId(),
                 merchantFilter.getShopIds(),
-                convertToMillis(timeFilter.getFromTime()),
-                convertToMillis(timeFilter.getToTime())
+                TypeUtil.stringToLocalDateTime(timeFilter.getFromTime()),
+                TypeUtil.stringToLocalDateTime(timeFilter.getToTime())
         );
 
         return daoErrorDistributionsToResponse.convert(namingDistributions);
@@ -122,8 +122,8 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
         List<SplitNumberModel> splitAmount = clickHousePaymentRepository.getPaymentsSplitAmount(
                 merchantFilter.getPartyId(),
                 merchantFilter.getShopIds(),
-                convertToMillis(timeFilter.getFromTime()),
-                convertToMillis(timeFilter.getToTime()),
+                TypeUtil.stringToLocalDateTime(timeFilter.getFromTime()),
+                TypeUtil.stringToLocalDateTime(timeFilter.getToTime()),
                 splitUnit
         );
 
@@ -141,8 +141,8 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
         List<SplitStatusNumberModel> splitAmount = clickHousePaymentRepository.getPaymentsSplitCount(
                 merchantFilter.getPartyId(),
                 merchantFilter.getShopIds(),
-                convertToMillis(timeFilter.getFromTime()),
-                convertToMillis(timeFilter.getToTime()),
+                TypeUtil.stringToLocalDateTime(timeFilter.getFromTime()),
+                TypeUtil.stringToLocalDateTime(timeFilter.getToTime()),
                 splitUnit
         );
 
@@ -157,8 +157,8 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
         List<NumberModel> paymentsToolDistribution = clickHouseRefundRepository.getPaymentsAmount(
                 merchantFilter.getPartyId(),
                 merchantFilter.getShopIds(),
-                convertToMillis(timeFilter.getFromTime()),
-                convertToMillis(timeFilter.getToTime())
+                TypeUtil.stringToLocalDateTime(timeFilter.getFromTime()),
+                TypeUtil.stringToLocalDateTime(timeFilter.getToTime())
         );
 
         return costToAmountResponseConverter.convert(paymentsToolDistribution);

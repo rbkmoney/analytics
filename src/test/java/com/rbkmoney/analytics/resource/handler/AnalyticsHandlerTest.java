@@ -48,7 +48,7 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
         String bankCard = "bank_card";
 
         NamingDistribution namingDistr = findByNameNamingDistribution(paymentsToolDistribution, bankCard);
-        Assert.assertEquals(50L, namingDistr.getPercents());
+        Assert.assertEquals(33L, namingDistr.getPercents());
 
         paymentsToolDistribution = analyticsHandler.getPaymentsToolDistribution(new FilterRequest()
                 .setMerchantFilter(new MerchantFilter()
@@ -76,18 +76,87 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
 
     @Test
     public void getPaymentsAmount() {
+        AmountResponse paymentsAmount = analyticsHandler.getPaymentsAmount(new FilterRequest()
+                .setMerchantFilter(new MerchantFilter()
+                        .setPartyId("ca2e9162-eda2-4d17-bbfa-dc5e39b1772a")
+                        .setShopIds(List.of("ad8b7bfd-0760-4781-a400-51903ee8e502"))
+                )
+                .setTimeFilter(new TimeFilter()
+                        .setFromTime("2016-08-10T16:07:18Z")
+                        .setToTime("2020-08-10T16:07:18Z")
+                ));
+        String RUB = "RUB";
+        List<CurrencyGroupedAmount> groupsAmount = paymentsAmount.getGroupsAmount();
+
+        CurrencyGroupedAmount rub = groupsAmount.stream()
+                .filter(currencyGroupedAmount -> currencyGroupedAmount.getCurrency().equals("RUB"))
+                .findFirst()
+                .get();
+
+        Assert.assertEquals(5000L, rub.amount);
     }
 
     @Test
     public void getAveragePayment() {
+        AmountResponse paymentsAmount = analyticsHandler.getAveragePayment(new FilterRequest()
+                .setMerchantFilter(new MerchantFilter()
+                        .setPartyId("ca2e9162-eda2-4d17-bbfa-dc5e39b1772a")
+                        .setShopIds(List.of("ad8b7bfd-0760-4781-a400-51903ee8e502"))
+                )
+                .setTimeFilter(new TimeFilter()
+                        .setFromTime("2016-08-10T16:07:18Z")
+                        .setToTime("2020-08-10T16:07:18Z")
+                ));
+        String RUB = "RUB";
+        List<CurrencyGroupedAmount> groupsAmount = paymentsAmount.getGroupsAmount();
+
+        CurrencyGroupedAmount rub = groupsAmount.stream()
+                .filter(currencyGroupedAmount -> currencyGroupedAmount.getCurrency().equals("RUB"))
+                .findFirst()
+                .get();
+
+        Assert.assertEquals(5000L, rub.amount);
     }
 
     @Test
     public void getPaymentsCount() {
+        CountResponse paymentsCount = analyticsHandler.getPaymentsCount(new FilterRequest()
+                .setMerchantFilter(new MerchantFilter()
+                        .setPartyId("ca2e9162-eda2-4d17-bbfa-dc5e39b1772a")
+                )
+                .setTimeFilter(new TimeFilter()
+                        .setFromTime("2016-08-10T16:07:18Z")
+                        .setToTime("2020-08-10T16:07:18Z")
+                ));
+        String RUB = "RUB";
+        List<CurrecyGroupCount> groupsCount = paymentsCount.getGroupsCount();
+
+        CurrecyGroupCount rub = groupsCount.stream()
+                .filter(currencyGroupedAmount -> currencyGroupedAmount.getCurrency().equals("RUB"))
+                .findFirst()
+                .get();
+
+        Assert.assertEquals(3L, rub.count);
     }
 
     @Test
     public void getPaymentsErrorDistribution() {
+        ErrorDistributionsResponse paymentsErrorDistribution = analyticsHandler.getPaymentsErrorDistribution(new FilterRequest()
+                .setMerchantFilter(new MerchantFilter()
+                        .setPartyId("ca2e9162-eda2-4d17-bbfa-dc5e39b1772a")
+                )
+                .setTimeFilter(new TimeFilter()
+                        .setFromTime("2016-08-10T16:07:18Z")
+                        .setToTime("2020-08-10T16:07:18Z")
+                ));
+        List<NamingDistribution> errorDistributions = paymentsErrorDistribution.getErrorDistributions();
+
+        NamingDistribution namingDistribution = errorDistributions.stream()
+                .filter(currencyGroupedAmount -> "card is failed".equals(currencyGroupedAmount.getName()))
+                .findFirst()
+                .get();
+
+        Assert.assertEquals(100L, namingDistribution.percents);
     }
 
     @Test
