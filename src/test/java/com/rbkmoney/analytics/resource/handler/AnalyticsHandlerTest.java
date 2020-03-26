@@ -20,6 +20,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 
+import static org.junit.Assert.*;
+
 
 @Slf4j
 @RunWith(SpringRunner.class)
@@ -48,7 +50,7 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
         String bankCard = "bank_card";
 
         NamingDistribution namingDistr = findByNameNamingDistribution(paymentsToolDistribution, bankCard);
-        Assert.assertEquals(33L, namingDistr.getPercents());
+        assertEquals(33L, namingDistr.getPercents());
 
         paymentsToolDistribution = analyticsHandler.getPaymentsToolDistribution(new FilterRequest()
                 .setMerchantFilter(new MerchantFilter()
@@ -62,7 +64,7 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
         );
 
         namingDistr = findByNameNamingDistribution(paymentsToolDistribution, bankCard);
-        Assert.assertEquals(100L, namingDistr.getPercents());
+        assertEquals(100L, namingDistr.getPercents());
     }
 
     @NotNull
@@ -93,7 +95,7 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
                 .findFirst()
                 .get();
 
-        Assert.assertEquals(5000L, rub.amount);
+        assertEquals(5000L, rub.amount);
     }
 
     @Test
@@ -115,7 +117,7 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
                 .findFirst()
                 .get();
 
-        Assert.assertEquals(5000L, rub.amount);
+        assertEquals(5000L, rub.amount);
     }
 
     @Test
@@ -136,7 +138,7 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
                 .findFirst()
                 .get();
 
-        Assert.assertEquals(3L, rub.count);
+        assertEquals(3L, rub.count);
     }
 
     @Test
@@ -156,7 +158,7 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
                 .findFirst()
                 .get();
 
-        Assert.assertEquals(100L, namingDistribution.percents);
+        assertEquals(100L, namingDistribution.percents);
     }
 
     @Test
@@ -171,8 +173,8 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
                                 .setToTime("2020-08-10T16:07:18Z"))));
         String RUB = "RUB";
         List<OffsetAmount> rub = findOffsetAmounts(paymentsSplitAmount, RUB);
-        Assert.assertEquals(3, rub.size());
-        Assert.assertEquals(1000L, rub.get(0).getAmount());
+        assertEquals(3, rub.size());
+        assertEquals(1000L, rub.get(0).getAmount());
     }
 
     private List<OffsetAmount> findOffsetAmounts(SplitAmountResponse paymentsSplitAmount, String RUB) {

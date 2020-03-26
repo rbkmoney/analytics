@@ -1,7 +1,6 @@
 package com.rbkmoney.analytics.repository;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +10,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 
 @Slf4j
 @RunWith(SpringRunner.class)
@@ -27,7 +28,7 @@ public class AnalyticsApplicationTest extends ClickHouseAbstractTest {
                         "group by partyId, shopId, currency " +
                         "having shopId = 'ad8b7bfd-0760-4781-a400-51903ee8e501' and currency = 'RUB'",
                 (resultSet, i) -> resultSet.getLong("sum"));
-        Assert.assertEquals(5000L, sum);
+        assertEquals(5000L, sum);
 
         sum = clickHouseJdbcTemplate.queryForObject(
                 "SELECT partyId, sum(amount) as sum " +
@@ -35,7 +36,7 @@ public class AnalyticsApplicationTest extends ClickHouseAbstractTest {
                         "group by partyId, currency " +
                         "having partyId = 'ca2e9162-eda2-4d17-bbfa-dc5e39b1772f' and currency = 'RUB'",
                 (resultSet, i) -> resultSet.getLong("sum"));
-        Assert.assertEquals(55000L, sum);
+        assertEquals(55000L, sum);
 
         sum = clickHouseJdbcTemplate.queryForObject(
                 "SELECT partyId, avg(amount) as sum " +
@@ -43,7 +44,7 @@ public class AnalyticsApplicationTest extends ClickHouseAbstractTest {
                         "group by partyId, currency " +
                         "having partyId = 'ca2e9162-eda2-4d17-bbfa-dc5e39b1772f' and currency = 'RUB'",
                 (resultSet, i) -> resultSet.getLong("sum"));
-        Assert.assertEquals(27500L, sum);
+        assertEquals(27500L, sum);
     }
 
     @Test
@@ -54,7 +55,7 @@ public class AnalyticsApplicationTest extends ClickHouseAbstractTest {
                         "group by partyId, currency " +
                         "having partyId = 'ca2e9162-eda2-4d17-bbfa-dc5e39b1772f' and currency = 'RUB'",
                 (resultSet, i) -> resultSet.getLong("sum"));
-        Assert.assertEquals(2L, sum);
+        assertEquals(2L, sum);
     }
 
     @Test
@@ -65,7 +66,7 @@ public class AnalyticsApplicationTest extends ClickHouseAbstractTest {
                         "group by partyId, currency " +
                         "having partyId = 'ca2e9162-eda2-4d17-bbfa-dc5e39b1772a' and currency = 'RUB'",
                 (resultSet, i) -> resultSet.getLong("sum"));
-        Assert.assertEquals(7000L, sum);
+        assertEquals(7000L, sum);
     }
 
     @Test
@@ -79,9 +80,9 @@ public class AnalyticsApplicationTest extends ClickHouseAbstractTest {
         list.forEach(stringObjectMap -> {
                     Object cnt = stringObjectMap.get("cnt");
                     if (stringObjectMap.get("status").equals("captured"))
-                        Assert.assertEquals(2L, ((BigInteger) cnt).longValue());
+                        assertEquals(2L, ((BigInteger) cnt).longValue());
                     else if (stringObjectMap.get("status").equals("failed"))
-                        Assert.assertEquals(1L, ((BigInteger) cnt).longValue());
+                        assertEquals(1L, ((BigInteger) cnt).longValue());
                 }
         );
     }
@@ -96,7 +97,7 @@ public class AnalyticsApplicationTest extends ClickHouseAbstractTest {
 
         list.forEach(stringObjectMap -> {
                     Object cnt = stringObjectMap.get("sum");
-                    Assert.assertEquals(6000L, ((BigInteger) cnt).longValue());
+                    assertEquals(6000L, ((BigInteger) cnt).longValue());
                 }
         );
     }
@@ -115,7 +116,7 @@ public class AnalyticsApplicationTest extends ClickHouseAbstractTest {
 
         list.forEach(stringObjectMap -> {
                     Object cnt = stringObjectMap.get("sum");
-                    Assert.assertEquals(50.0, cnt);
+                    assertEquals(50.0, cnt);
                     System.out.println(stringObjectMap);
                 }
         );
@@ -135,7 +136,7 @@ public class AnalyticsApplicationTest extends ClickHouseAbstractTest {
 
         list.forEach(stringObjectMap -> {
                     Object cnt = stringObjectMap.get("sum");
-                    Assert.assertEquals(100.0, cnt);
+                    assertEquals(100.0, cnt);
                     System.out.println(stringObjectMap);
                 }
         );
