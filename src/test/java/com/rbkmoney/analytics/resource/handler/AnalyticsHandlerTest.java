@@ -20,7 +20,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 
+<<<<<<< HEAD
 import static org.junit.Assert.assertEquals;
+=======
+import static org.junit.Assert.*;
+>>>>>>> origin/master
 
 
 @Slf4j
@@ -65,8 +69,11 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
 
         namingDistr = findByNameNamingDistribution(paymentsToolDistribution, bankCard);
         assertEquals(100L, namingDistr.getPercents());
+<<<<<<< HEAD
 
         paymentsToolDistribution.validate();
+=======
+>>>>>>> origin/master
     }
 
     @NotNull
@@ -79,7 +86,11 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
     }
 
     @Test
+<<<<<<< HEAD
     public void getPaymentsAmount() throws TException {
+=======
+    public void getPaymentsAmount() {
+>>>>>>> origin/master
         AmountResponse paymentsAmount = analyticsHandler.getPaymentsAmount(new FilterRequest()
                 .setMerchantFilter(new MerchantFilter()
                         .setPartyId("ca2e9162-eda2-4d17-bbfa-dc5e39b1772a")
@@ -98,12 +109,19 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
                 .get();
 
         assertEquals(5000L, rub.amount);
+<<<<<<< HEAD
 
         paymentsAmount.validate();
     }
 
     @Test
     public void getAveragePayment() throws TException {
+=======
+    }
+
+    @Test
+    public void getAveragePayment() {
+>>>>>>> origin/master
         AmountResponse paymentsAmount = analyticsHandler.getAveragePayment(new FilterRequest()
                 .setMerchantFilter(new MerchantFilter()
                         .setPartyId("ca2e9162-eda2-4d17-bbfa-dc5e39b1772a")
@@ -122,12 +140,19 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
                 .get();
 
         assertEquals(5000L, rub.amount);
+<<<<<<< HEAD
 
         paymentsAmount.validate();
     }
 
     @Test
     public void getPaymentsCount() throws TException {
+=======
+    }
+
+    @Test
+    public void getPaymentsCount() {
+>>>>>>> origin/master
         CountResponse paymentsCount = analyticsHandler.getPaymentsCount(new FilterRequest()
                 .setMerchantFilter(new MerchantFilter()
                         .setPartyId("ca2e9162-eda2-4d17-bbfa-dc5e39b1772a")
@@ -145,12 +170,19 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
                 .get();
 
         assertEquals(3L, rub.count);
+<<<<<<< HEAD
 
         paymentsCount.validate();
     }
 
     @Test
     public void getPaymentsErrorDistribution() throws TException {
+=======
+    }
+
+    @Test
+    public void getPaymentsErrorDistribution() {
+>>>>>>> origin/master
         ErrorDistributionsResponse paymentsErrorDistribution = analyticsHandler.getPaymentsErrorDistribution(new FilterRequest()
                 .setMerchantFilter(new MerchantFilter()
                         .setPartyId("ca2e9162-eda2-4d17-bbfa-dc5e39b1772a")
@@ -167,8 +199,11 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
                 .get();
 
         assertEquals(100L, namingDistribution.percents);
+<<<<<<< HEAD
 
         paymentsErrorDistribution.validate();
+=======
+>>>>>>> origin/master
     }
 
     @Test
@@ -185,8 +220,11 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
         List<OffsetAmount> rub = findOffsetAmounts(paymentsSplitAmount, RUB);
         assertEquals(3, rub.size());
         assertEquals(1000L, rub.get(0).getAmount());
+<<<<<<< HEAD
 
         paymentsSplitAmount.validate();
+=======
+>>>>>>> origin/master
     }
 
     private List<OffsetAmount> findOffsetAmounts(SplitAmountResponse paymentsSplitAmount, String RUB) {
