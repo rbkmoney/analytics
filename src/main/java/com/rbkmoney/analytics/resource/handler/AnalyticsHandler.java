@@ -34,6 +34,8 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
 
     @Override
     public PaymentToolDistributionResponse getPaymentsToolDistribution(FilterRequest filterRequest) {
+        log.info("-> getPaymentsToolDistribution filterRequest: {}", filterRequest);
+
         MerchantFilter merchantFilter = filterRequest.getMerchantFilter();
         TimeFilter timeFilter = filterRequest.getTimeFilter();
 
@@ -44,7 +46,9 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
                 TypeUtil.stringToLocalDateTime(timeFilter.getToTime())
         );
 
-        return convertPaymentToolsToResponse.convert(paymentsToolDistribution);
+        PaymentToolDistributionResponse paymentToolDistributionResponse = convertPaymentToolsToResponse.convert(paymentsToolDistribution);
+        log.info("<- getPaymentsToolDistribution paymentToolDistributionResponse: {}", paymentToolDistributionResponse);
+        return paymentToolDistributionResponse;
     }
 
     private Long convertToMillis(String fromTime) {
@@ -54,6 +58,7 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
 
     @Override
     public AmountResponse getPaymentsAmount(FilterRequest filterRequest) {
+        log.info("-> getPaymentsAmount filterRequest: {}", filterRequest);
         MerchantFilter merchantFilter = filterRequest.getMerchantFilter();
         TimeFilter timeFilter = filterRequest.getTimeFilter();
 
@@ -64,11 +69,15 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
                 TypeUtil.stringToLocalDateTime(timeFilter.getToTime())
         );
 
-        return costToAmountResponseConverter.convert(paymentsToolDistribution);
+        AmountResponse amountResponse = costToAmountResponseConverter.convert(paymentsToolDistribution);
+        log.info("<- getPaymentsAmount amountResponse: {}", amountResponse);
+        return amountResponse;
     }
 
     @Override
     public AmountResponse getAveragePayment(FilterRequest filterRequest) {
+        log.info("-> getAveragePayment filterRequest: {}", filterRequest);
+
         MerchantFilter merchantFilter = filterRequest.getMerchantFilter();
         TimeFilter timeFilter = filterRequest.getTimeFilter();
 
@@ -79,11 +88,15 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
                 TypeUtil.stringToLocalDateTime(timeFilter.getToTime())
         );
 
-        return costToAmountResponseConverter.convert(paymentsToolDistribution);
+        AmountResponse amountResponse = costToAmountResponseConverter.convert(paymentsToolDistribution);
+        log.info("<- getAveragePayment amountResponse: {}", amountResponse);
+        return amountResponse;
     }
 
     @Override
     public CountResponse getPaymentsCount(FilterRequest filterRequest) {
+        log.info("-> getPaymentsCount filterRequest: {}", filterRequest);
+
         MerchantFilter merchantFilter = filterRequest.getMerchantFilter();
         TimeFilter timeFilter = filterRequest.getTimeFilter();
 
@@ -94,11 +107,15 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
                 TypeUtil.stringToLocalDateTime(timeFilter.getToTime())
         );
 
-        return countModelCountResponseConverter.convert(paymentsToolDistribution);
+        CountResponse countResponse = countModelCountResponseConverter.convert(paymentsToolDistribution);
+        log.info("<- getPaymentsCount countResponse: {}", countResponse);
+        return countResponse;
     }
 
     @Override
     public ErrorDistributionsResponse getPaymentsErrorDistribution(FilterRequest filterRequest) {
+        log.info("-> getPaymentsErrorDistribution filterRequest: {}", filterRequest);
+
         MerchantFilter merchantFilter = filterRequest.getMerchantFilter();
         TimeFilter timeFilter = filterRequest.getTimeFilter();
 
@@ -109,11 +126,15 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
                 TypeUtil.stringToLocalDateTime(timeFilter.getToTime())
         );
 
-        return daoErrorDistributionsToResponse.convert(namingDistributions);
+        ErrorDistributionsResponse errorDistributionsResponse = daoErrorDistributionsToResponse.convert(namingDistributions);
+        log.info("<- getPaymentsErrorDistribution errorDistributionsResponse: {}", errorDistributionsResponse);
+        return errorDistributionsResponse;
     }
 
     @Override
     public SplitAmountResponse getPaymentsSplitAmount(SplitFilterRequest splitFilterRequest) {
+        log.info("-> getPaymentsSplitAmount splitFilterRequest: {}", splitFilterRequest);
+
         FilterRequest filterRequest = splitFilterRequest.getFilterRequest();
         SplitUnit splitUnit = splitFilterRequest.getSplitUnit();
         MerchantFilter merchantFilter = filterRequest.getMerchantFilter();
@@ -130,12 +151,15 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
         SplitAmountResponse splitAmountResponse = groupedCurAmountToResponseConverter.convert(splitAmount);
         splitAmountResponse.setResultSplitUnit(splitUnit);
 
+        log.info("<- getPaymentsSplitCount splitAmountResponse: {}", splitAmountResponse);
         return splitAmountResponse;
     }
 
 
     @Override
     public SplitCountResponse getPaymentsSplitCount(SplitFilterRequest splitFilterRequest) {
+        log.info("-> getPaymentsSplitCount splitFilterRequest: {}", splitFilterRequest);
+
         FilterRequest filterRequest = splitFilterRequest.getFilterRequest();
         SplitUnit splitUnit = splitFilterRequest.getSplitUnit();
         MerchantFilter merchantFilter = filterRequest.getMerchantFilter();
@@ -152,11 +176,14 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
         SplitCountResponse splitCountResponse = groupedCurCountToResponseConverter.convert(splitAmount);
         splitCountResponse.setResultSplitUnit(splitUnit);
 
+        log.info("<- getPaymentsSplitCount splitCountResponse: {}", splitCountResponse);
         return splitCountResponse;
     }
 
     @Override
     public AmountResponse getRefundsAmount(FilterRequest filterRequest) {
+        log.info("-> getRefundsAmount filterRequest: {}", filterRequest);
+
         MerchantFilter merchantFilter = filterRequest.getMerchantFilter();
         TimeFilter timeFilter = filterRequest.getTimeFilter();
 
@@ -167,6 +194,9 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
                 TypeUtil.stringToLocalDateTime(timeFilter.getToTime())
         );
 
-        return costToAmountResponseConverter.convert(paymentsToolDistribution);
+        AmountResponse amountResponse = costToAmountResponseConverter.convert(paymentsToolDistribution);
+
+        log.info("<- getRefundsAmount amountResponse: {}", amountResponse);
+        return amountResponse;
     }
 }

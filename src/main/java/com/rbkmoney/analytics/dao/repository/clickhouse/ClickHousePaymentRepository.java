@@ -119,6 +119,7 @@ public class ClickHousePaymentRepository {
             params = new ArrayList<>(Arrays.asList(from.toLocalDate(), to.toLocalDate(), fromMillis, toMillis, fromMillis, toMillis, partyId));
         }
 
+        log.info("splitQuery sql: {} params: {}", sql, params);
         return clickHouseJdbcTemplate.queryForList(sql, params.toArray());
     }
 

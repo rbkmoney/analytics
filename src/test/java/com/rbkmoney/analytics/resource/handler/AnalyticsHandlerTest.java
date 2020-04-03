@@ -87,7 +87,7 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
                 )
                 .setTimeFilter(new TimeFilter()
                         .setFromTime("2016-08-10T16:07:18Z")
-                        .setToTime("2020-08-10T16:07:18Z")
+                        .setToTime("2020-01-31T20:59:59.999000Z")
                 ));
         String RUB = "RUB";
         List<CurrencyGroupedAmount> groupsAmount = paymentsAmount.getGroupsAmount();
@@ -205,5 +205,6 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
 
     @Test
     public void getRefundsAmount() {
+
     }
 }

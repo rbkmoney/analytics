@@ -64,6 +64,7 @@ public class ClickHouseRefundRepository {
             params = new ArrayList<>(Arrays.asList(from.toLocalDate(), to.toLocalDate(), fromMillis, toMillis, fromMillis, toMillis, partyId));
         }
 
+        log.info("getPaymentsAmount sql: {} params: {}", sql, params);
         List<Map<String, Object>> rows = clickHouseJdbcTemplate.queryForList(sql, params.toArray());
         return costCommonRowsMapper.map(rows);
     }
