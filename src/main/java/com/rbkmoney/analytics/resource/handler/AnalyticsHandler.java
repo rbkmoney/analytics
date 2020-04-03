@@ -127,7 +127,10 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
                 splitUnit
         );
 
-        return groupedCurAmountToResponseConverter.convert(splitAmount);
+        SplitAmountResponse splitAmountResponse = groupedCurAmountToResponseConverter.convert(splitAmount);
+        splitAmountResponse.setResultSplitUnit(splitUnit);
+
+        return splitAmountResponse;
     }
 
 
@@ -146,7 +149,10 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
                 splitUnit
         );
 
-        return groupedCurCountToResponseConverter.convert(splitAmount);
+        SplitCountResponse splitCountResponse = groupedCurCountToResponseConverter.convert(splitAmount);
+        splitCountResponse.setResultSplitUnit(splitUnit);
+
+        return splitCountResponse;
     }
 
     @Override
