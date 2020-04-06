@@ -40,9 +40,9 @@ public class ClickHouseRefundRepository {
                                                LocalDateTime from,
                                                LocalDateTime to) {
 
-        String selectSql = "SELECT currency, sum(amount) as amount " +
+        String selectSql = "SELECT currency, sum(amount) as num " +
                 "from analytic.events_sink_refund ";
-        String whereSql = "where timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ?";
+        String whereSql = "where timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ? and status='succeeded'";
         String groupedSql = " group by partyId, currency " +
                 " having partyId = ?";
 

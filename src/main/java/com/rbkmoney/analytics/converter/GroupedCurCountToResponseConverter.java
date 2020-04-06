@@ -1,6 +1,7 @@
 package com.rbkmoney.analytics.converter;
 
 import com.rbkmoney.analytics.dao.model.SplitStatusNumberModel;
+import com.rbkmoney.analytics.exception.PaymentInfoRequestException;
 import com.rbkmoney.damsel.analytics.*;
 import org.springframework.stereotype.Service;
 
@@ -39,13 +40,29 @@ public class GroupedCurCountToResponseConverter {
 
     private GroupedStatusOffsetCount initGroupedStatusOffsetCount(Map.Entry<String, List<SplitStatusNumberModel>> entry) {
         return new GroupedStatusOffsetCount()
-                .setStatus(PaymentStatus.valueOf(entry.getKey()))
+                .setStatus(mapStatus(entry))
                 .setOffsetCounts(entry.getValue().stream()
                         .map(splitStatusNumberModel -> new OffsetCount()
                                 .setCount(splitStatusNumberModel.getNumber())
                                 .setOffset(splitStatusNumberModel.getOffset())
                         ).collect(toList())
                 );
+    }
+
+    private PaymentStatus mapStatus(Map.Entry<String, List<SplitStatusNumberModel>> entry) {
+        switch (entry.getKey()) {
+            case "captured": {
+                return PaymentStatus.CAPTURED;
+            }
+            case "failed": {
+                return PaymentStatus.FAILED;
+            }
+            case "cancelled": {
+                return PaymentStatus.CANCELLED;
+            }
+            default:
+                throw new PaymentInfoRequestException();
+        }
     }
 
 }

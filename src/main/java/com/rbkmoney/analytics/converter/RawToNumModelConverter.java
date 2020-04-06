@@ -23,7 +23,6 @@ public class RawToNumModelConverter implements Converter<Map, NumberModel> {
                 numberModel.setNumber(((BigInteger) row.get(NUM)).longValue());
             } else {
                 numberModel.setNumber((long) row.get(NUM));
-
             }
         }
         numberModel.setCurrency((String) row.get(CURRENCY));
