@@ -113,7 +113,7 @@ public class ClickHousePaymentRepository {
             params.add(partyId);
         }
 
-        log.info("splitQuery sql: {} params: {}", sql, params);
+        log.info("ClickHousePaymentRepository splitQuery sql: {} params: {}", sql, params);
         return clickHouseJdbcTemplate.queryForList(sql, params.toArray());
     }
 
@@ -174,7 +174,7 @@ public class ClickHousePaymentRepository {
             params = doubleList(timeParams).toArray();
         }
 
-        log.info("queryNamingDistributions sql: {} params: {}", sql, params);
+        log.info("ClickHousePaymentRepository queryNamingDistributions sql: {} params: {}", sql, params);
         List<Map<String, Object>> rows = clickHouseJdbcTemplate.queryForList(sql, params);
         return namingDistributionCommonRowsMapper.map(rows);
     }
