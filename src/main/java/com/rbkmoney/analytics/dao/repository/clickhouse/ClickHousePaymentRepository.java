@@ -6,6 +6,7 @@ import com.rbkmoney.analytics.dao.mapper.SplitStatusRowsMapper;
 import com.rbkmoney.analytics.dao.model.*;
 import com.rbkmoney.analytics.dao.utils.QueryUtils;
 import com.rbkmoney.analytics.dao.utils.SplitUtils;
+import com.rbkmoney.analytics.utils.TimeParamUtils;
 import com.rbkmoney.damsel.analytics.SplitUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,11 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import ru.yandex.clickhouse.except.ClickHouseException;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -104,19 +102,15 @@ public class ClickHousePaymentRepository {
     }
 
     private List<Map<String, Object>> splitQuery(String partyId, List<String> shopIds, LocalDateTime from, LocalDateTime to, String whereSql, String groupedSql, String sql) {
-        List<Object> params;
-
-        long fromMillis = from.toInstant(ZoneOffset.UTC).toEpochMilli();
-        long toMillis = to.toInstant(ZoneOffset.UTC).toEpochMilli();
+        List<Object> params = TimeParamUtils.generateTimeParams(from, to);
         if (!CollectionUtils.isEmpty(shopIds)) {
             StringBuilder inList = QueryUtils.generateInList(shopIds);
             sql = sql + whereSql + " AND shopId " + inList + groupedSql;
-            params = new ArrayList<>(Arrays.asList(from.toLocalDate(), to.toLocalDate(), fromMillis, toMillis, fromMillis, toMillis));
             params.addAll(shopIds);
             params.add(partyId);
         } else {
             sql = sql + whereSql + groupedSql;
-            params = new ArrayList<>(Arrays.asList(from.toLocalDate(), to.toLocalDate(), fromMillis, toMillis, fromMillis, toMillis, partyId));
+            params.add(partyId);
         }
 
         log.info("splitQuery sql: {} params: {}", sql, params);
@@ -168,20 +162,18 @@ public class ClickHousePaymentRepository {
                                                               LocalDateTime to,
                                                               String name) {
         Object[] params = null;
-        long fromMillis = from.toInstant(ZoneOffset.UTC).toEpochMilli();
-        long toMillis = to.toInstant(ZoneOffset.UTC).toEpochMilli();
-        LocalDate localDateFrom = from.toLocalDate();
-        LocalDate localDateTo = to.toLocalDate();
+
+        List<Object> timeParams = TimeParamUtils.generateTimeParams(from, to);
+
         if (!CollectionUtils.isEmpty(shopIds)) {
             StringBuilder inList = QueryUtils.generateInList(shopIds);
             sql = String.format(sql, SHOP_ID, inList.toString(), name);
-            List<Object> listParams = new ArrayList<>(Arrays.asList(localDateFrom, localDateTo, fromMillis, toMillis, fromMillis, toMillis));
-            listParams.addAll(shopIds);
-            params = doubleList(listParams).toArray();
+            timeParams.addAll(shopIds);
+            params = doubleList(timeParams).toArray();
         } else {
             sql = String.format(sql, PARTY_ID, " = ? ", name);
-            params = new Object[]{localDateFrom, localDateTo, fromMillis, toMillis, fromMillis, toMillis, partyId, localDateFrom, localDateTo,
-                    fromMillis, toMillis, fromMillis, toMillis, partyId};
+            timeParams.add(partyId);
+            params = doubleList(timeParams).toArray();
         }
 
         List<Map<String, Object>> rows = clickHouseJdbcTemplate.queryForList(sql, params);

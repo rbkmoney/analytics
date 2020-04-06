@@ -4,6 +4,7 @@ import com.rbkmoney.analytics.dao.mapper.CommonRowsMapper;
 import com.rbkmoney.analytics.dao.model.MgRefundRow;
 import com.rbkmoney.analytics.dao.model.NumberModel;
 import com.rbkmoney.analytics.dao.utils.QueryUtils;
+import com.rbkmoney.analytics.utils.TimeParamUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -14,9 +15,6 @@ import org.springframework.util.CollectionUtils;
 import ru.yandex.clickhouse.except.ClickHouseException;
 
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -41,8 +39,6 @@ public class ClickHouseRefundRepository {
                                                List<String> shopIds,
                                                LocalDateTime from,
                                                LocalDateTime to) {
-        long fromMillis = from.toInstant(ZoneOffset.UTC).toEpochMilli();
-        long toMillis = to.toInstant(ZoneOffset.UTC).toEpochMilli();
 
         String selectSql = "SELECT currency, sum(amount) as amount " +
                 "from analytic.events_sink_refund ";
@@ -51,20 +47,19 @@ public class ClickHouseRefundRepository {
                 " having partyId = ?";
 
         String sql = selectSql;
-        List<Object> params = null;
 
+        List<Object> params = TimeParamUtils.generateTimeParams(from, to);
         if (!CollectionUtils.isEmpty(shopIds)) {
             StringBuilder inList = QueryUtils.generateInList(shopIds);
             sql = sql + whereSql + " AND shopId " + inList + groupedSql;
-            params = new ArrayList<>(Arrays.asList(from.toLocalDate(), to.toLocalDate(), fromMillis, toMillis, fromMillis, toMillis));
             params.addAll(shopIds);
             params.add(partyId);
         } else {
             sql = sql + whereSql + groupedSql;
-            params = new ArrayList<>(Arrays.asList(from.toLocalDate(), to.toLocalDate(), fromMillis, toMillis, fromMillis, toMillis, partyId));
+            params.add(partyId);
         }
 
-        log.info("getPaymentsAmount sql: {} params: {}", sql, params);
+        log.info("ClickHouseRefundRepository getPaymentsAmount sql: {} params: {}", sql, params);
         List<Map<String, Object>> rows = clickHouseJdbcTemplate.queryForList(sql, params.toArray());
         return costCommonRowsMapper.map(rows);
     }
