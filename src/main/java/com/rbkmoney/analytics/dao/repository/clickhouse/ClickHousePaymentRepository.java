@@ -134,26 +134,24 @@ public class ClickHousePaymentRepository {
     public List<NamingDistribution> getPaymentsToolDistribution(String partyId, List<String> shopIds,
                                                                 LocalDateTime from,
                                                                 LocalDateTime to) {
-        String sql = "SELECT %1$s, %3$s as naming_result," +
+        String sql = "SELECT %3$s as naming_result," +
                 "(SELECT count() from analytic.events_sink " +
-                "where timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ? AND %1$s %2$s " +
-                "group by partyId) as total_count, count() * 100 / total_count as percent " +
+                "where timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ? AND %1$s %2$s) as total_count, count() * 100 / total_count as percent " +
                 "from analytic.events_sink " +
                 "where timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ? AND %1$s %2$s " +
-                "group by %1$s, %3$s";
+                "group by %3$s";
         return queryNamingDistributions(sql, partyId, shopIds, from, to, PAYMENT_TOOL);
     }
 
     public List<NamingDistribution> getPaymentsErrorDistribution(String partyId, List<String> shopIds,
                                                                  LocalDateTime from,
                                                                  LocalDateTime to) {
-        String sql = "SELECT %1$s, %3$s as naming_result," +
+        String sql = "SELECT %3$s as naming_result," +
                 "(SELECT count() from analytic.events_sink " +
-                "where status='failed' and timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ? AND %1$s %2$s " +
-                "group by partyId) as total_count, count() * 100 / total_count as percent " +
+                "where status='failed' and timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ? AND %1$s %2$s) as total_count, count() * 100 / total_count as percent " +
                 "from analytic.events_sink " +
                 "where status='failed' and timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ? AND %1$s %2$s " +
-                "group by %1$s, %3$s ";
+                "group by %3$s ";
         return queryNamingDistributions(sql, partyId, shopIds, from, to, ERROR_REASON);
     }
 
@@ -176,6 +174,7 @@ public class ClickHousePaymentRepository {
             params = doubleList(timeParams).toArray();
         }
 
+        log.info("queryNamingDistributions sql: {} params: {}", sql, params);
         List<Map<String, Object>> rows = clickHouseJdbcTemplate.queryForList(sql, params);
         return namingDistributionCommonRowsMapper.map(rows);
     }
