@@ -52,7 +52,7 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
         String bankCard = "bank_card";
 
         NamingDistribution namingDistr = findByNameNamingDistribution(paymentsToolDistribution, bankCard);
-        assertEquals(33L, namingDistr.getPercents());
+        assertEquals(33.33, namingDistr.getPercents(), 0);
 
         paymentsToolDistribution = analyticsHandler.getPaymentsToolDistribution(new FilterRequest()
                 .setMerchantFilter(new MerchantFilter()
@@ -63,7 +63,7 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
         );
 
         namingDistr = findByNameNamingDistribution(paymentsToolDistribution, bankCard);
-        assertEquals(100L, namingDistr.getPercents());
+        assertEquals(100.00, namingDistr.getPercents(), 0);
 
         paymentsToolDistribution.validate();
     }
@@ -150,7 +150,7 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
                 .findFirst()
                 .get();
 
-        assertEquals(100L, namingDistribution.percents);
+        assertEquals(100.00, namingDistribution.percents, 0.0);
 
         paymentsErrorDistribution.validate();
     }

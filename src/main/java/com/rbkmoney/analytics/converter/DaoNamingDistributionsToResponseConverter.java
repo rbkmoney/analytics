@@ -15,8 +15,7 @@ public class DaoNamingDistributionsToResponseConverter {
         List<NamingDistribution> collect = namingDistributions.stream()
                 .map(paymentToolDistribution -> new NamingDistribution()
                         .setName(paymentToolDistribution.getName())
-                        //TODO after proto to double
-                        .setPercents(paymentToolDistribution.getPercent().longValue())
+                        .setPercents(paymentToolDistribution.getPercent())
                 ).collect(toList());
 
         return new PaymentToolDistributionResponse()
