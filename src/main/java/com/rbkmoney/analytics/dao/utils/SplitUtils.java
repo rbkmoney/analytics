@@ -72,10 +72,10 @@ public class SplitUtils {
         String groupBy;
         switch (splitUnit) {
             case MINUTE:
-                groupBy = "timestamp as day, toHour(toDateTime(eventTime)) as hour, toMinute(toDateTime(eventTime)) as minutes";
+                groupBy = "timestamp as day, toHour(toDateTime(eventTime, 'UTC')) as hour, toMinute(toDateTime(eventTime, 'UTC')) as minutes";
                 break;
             case HOUR:
-                groupBy = "timestamp as day, toHour(toDateTime(eventTime)) as hour";
+                groupBy = "timestamp as day, toHour(toDateTime(eventTime, 'UTC')) as hour";
                 break;
             case DAY:
                 groupBy = "timestamp as day";
