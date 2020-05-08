@@ -208,7 +208,7 @@ public class ClickHousePaymentRepository {
                 "( " +
                 "    SELECT " +
                 "        currency, " +
-                "        sum(amount - systemFee) as sm_ref " +
+                "        sum(amount + systemFee) as sm_ref " +
                 "    FROM analytic.events_sink_refund " +
                 "    WHERE " +
                 "        ? >= timestamp " +
