@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import ru.yandex.clickhouse.except.ClickHouseException;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -184,6 +185,56 @@ public class ClickHousePaymentRepository {
         resultList.addAll(listParams);
         resultList.addAll(listParams);
         return resultList;
+    }
+
+    public List<NumberModel> getCurrentBalances(String partyId, List<String> shopIds) {
+        String selectSql = "SELECT " +
+                "    currency," +
+                "    sm_all - sm_ref as num  " +
+                "FROM " +
+                "( " +
+                "    SELECT " +
+                "        currency, " +
+                "        sum(amount - systemFee) as sm_all " +
+                "    FROM analytic.events_sink " +
+                "    WHERE " +
+                "        ? >= timestamp " +
+                "        and status = 'captured' " +
+                "        and partyId = ? " +
+                " %1$s " +
+                "    GROUP BY currency " +
+                ")" +
+                "ANY LEFT JOIN " +
+                "( " +
+                "    SELECT " +
+                "        currency, " +
+                "        sum(amount - systemFee) as sm_ref " +
+                "    FROM analytic.events_sink_refund " +
+                "    WHERE " +
+                "        ? >= timestamp " +
+                "        and status = 'succeeded' " +
+                "        and partyId = ? " +
+                " %1$s " +
+                "    GROUP BY currency " +
+                ") " +
+                " USING currency";
+
+        String sql;
+        LocalDate to = LocalDate.now();
+        List<Object> params = new ArrayList<>();
+        params.add(to);
+        params.add(partyId);
+        if (!CollectionUtils.isEmpty(shopIds)) {
+            StringBuilder stringBuilder = QueryUtils.generateInList(shopIds);
+            sql = String.format(selectSql, " and shopId " + stringBuilder.toString());
+            params.addAll(shopIds);
+        } else {
+            sql = String.format(selectSql, " ");
+        }
+        params.addAll(List.copyOf(params));
+        log.info("ClickHouseRefundRepository getCurrentBalances sql: {} params: {}", sql, params);
+        List<Map<String, Object>> rows = clickHouseJdbcTemplate.queryForList(sql, params.toArray());
+        return costCommonRowsMapper.map(rows);
     }
 
 }

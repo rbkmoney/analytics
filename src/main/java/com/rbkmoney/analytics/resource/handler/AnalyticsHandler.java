@@ -11,10 +11,9 @@ import com.rbkmoney.damsel.analytics.*;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.thrift.TException;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 
 @Slf4j
@@ -49,11 +48,6 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
         PaymentToolDistributionResponse paymentToolDistributionResponse = convertPaymentToolsToResponse.convert(paymentsToolDistribution);
         log.info("<- getPaymentsToolDistribution paymentToolDistributionResponse: {}", paymentToolDistributionResponse);
         return paymentToolDistributionResponse;
-    }
-
-    private Long convertToMillis(String fromTime) {
-        LocalDateTime localDateTime = TypeUtil.stringToLocalDateTime(fromTime);
-        return localDateTime.toInstant(ZoneOffset.UTC).toEpochMilli();
     }
 
     @Override
@@ -197,6 +191,21 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
         AmountResponse amountResponse = costToAmountResponseConverter.convert(paymentsToolDistribution);
 
         log.info("<- getRefundsAmount amountResponse: {}", amountResponse);
+        return amountResponse;
+    }
+
+    @Override
+    public AmountResponse getCurrentBalances(FilterRequest filterRequest) throws TException {
+        log.info("-> getCurrentBalances filterRequest: {}", filterRequest);
+        MerchantFilter merchantFilter = filterRequest.getMerchantFilter();
+        List<NumberModel> paymentsToolDistribution = clickHousePaymentRepository.getCurrentBalances(
+                merchantFilter.getPartyId(),
+                merchantFilter.getShopIds()
+        );
+
+        AmountResponse amountResponse = costToAmountResponseConverter.convert(paymentsToolDistribution);
+
+        log.info("<- getCurrentBalances amountResponse: {}", amountResponse);
         return amountResponse;
     }
 }
