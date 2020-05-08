@@ -239,6 +239,10 @@ public class PaymentRepositoryTest extends ClickHouseAbstractTest {
 
         countModel = findCountModel(currentBalances, RUB);
         assertEquals(50000L, countModel.getNumber().longValue());
+
+        currentBalances = clickHousePaymentRepository.getCurrentBalances("test", null);
+
+        assertTrue(currentBalances.isEmpty());
     }
 
 }
