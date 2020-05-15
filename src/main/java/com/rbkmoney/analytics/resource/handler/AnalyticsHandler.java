@@ -195,9 +195,8 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
     }
 
     @Override
-    public AmountResponse getCurrentBalances(FilterRequest filterRequest) throws TException {
-        log.info("-> getCurrentBalances filterRequest: {}", filterRequest);
-        MerchantFilter merchantFilter = filterRequest.getMerchantFilter();
+    public AmountResponse getCurrentBalances(MerchantFilter merchantFilter) throws TException {
+        log.info("-> getCurrentBalances filterRequest: {}", merchantFilter);
         List<NumberModel> paymentsToolDistribution = clickHousePaymentRepository.getCurrentBalances(
                 merchantFilter.getPartyId(),
                 merchantFilter.getShopIds()
