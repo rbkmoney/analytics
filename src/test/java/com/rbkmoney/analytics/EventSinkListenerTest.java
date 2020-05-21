@@ -48,6 +48,10 @@ public class EventSinkListenerTest extends KafkaAbstractTest {
     public static final long MESSAGE_TIMEOUT = 4_000L;
     public static final String SOURCE_ID = "sourceID";
     public static final String FIRST_ADJUSTMENT = "1";
+    public static final String SELECT_SUM = "SELECT shopId, sum(amount) as sum " +
+            "from %1s " +
+            "group by shopId, currency, status " +
+            "having shopId = '";
 
     @ClassRule
     public static ClickHouseContainer clickHouseContainer = new ClickHouseContainer();
@@ -108,11 +112,8 @@ public class EventSinkListenerTest extends KafkaAbstractTest {
 
         //check sum for captured payment
         long sum = clickHouseJdbcTemplate.queryForObject(
-                "SELECT shopId, sum(amount) as sum " +
-                        "from analytic.events_sink " +
-                        "group by shopId, currency, status " +
-                        "having shopId = '" + MgEventSinkFlowGenerator.SHOP_ID + "' and status = 'captured' and currency = 'RUB'",
-                (resultSet, i) -> resultSet.getLong("sum"));
+                String.format(SELECT_SUM, "analytic.events_sink") + MgEventSinkFlowGenerator.SHOP_ID
+                        + "' and status = 'captured' and currency = 'RUB'", (resultSet, i) -> resultSet.getLong("sum"));
 
         assertEquals(1000L, sum);
 
@@ -147,20 +148,15 @@ public class EventSinkListenerTest extends KafkaAbstractTest {
 
         //check sum for succeeded refund
         sum = clickHouseJdbcTemplate.queryForObject(
-                "SELECT shopId, sum(amount) as sum " +
-                        "from analytic.events_sink_refund " +
-                        "group by shopId, currency, status " +
-                        "having shopId = '" + MgEventSinkFlowGenerator.SHOP_ID + "' and status = 'succeeded' and currency = 'RUB'",
-                (resultSet, i) -> resultSet.getLong("sum"));
+                String.format(SELECT_SUM, "analytic.events_sink_refund") + MgEventSinkFlowGenerator.SHOP_ID
+                        + "' and status = 'succeeded' and currency = 'RUB'", (resultSet, i) -> resultSet.getLong("sum"));
 
         assertEquals(246L, sum);
 
         //check collapsing sum for pending refund
         List<Map<String, Object>> resultList = clickHouseJdbcTemplate.queryForList(
-                "SELECT shopId, sum(amount) as sum " +
-                        "from analytic.events_sink_refund " +
-                        "group by shopId, currency, status " +
-                        "having shopId = '" + MgEventSinkFlowGenerator.SHOP_ID + "' and status = 'pending' and currency = 'RUB'");
+                String.format(SELECT_SUM, "analytic.events_sink_refund") + MgEventSinkFlowGenerator.SHOP_ID
+                        + "' and status = 'pending' and currency = 'RUB'");
 
         assertTrue(resultList.isEmpty());
 
@@ -175,11 +171,8 @@ public class EventSinkListenerTest extends KafkaAbstractTest {
 
         //check sum for succeeded refund
         sum = clickHouseJdbcTemplate.queryForObject(
-                "SELECT shopId, sum(amount) as sum " +
-                        "from analytic.events_sink_adjustment " +
-                        "group by shopId, currency, status " +
-                        "having shopId = '" + MgEventSinkFlowGenerator.SHOP_ID + "' and status = 'captured' and currency = 'RUB'",
-                (resultSet, i) -> resultSet.getLong("sum"));
+                String.format(SELECT_SUM, "analytic.events_sink_adjustment") + MgEventSinkFlowGenerator.SHOP_ID
+                        + "' and status = 'captured' and currency = 'RUB'", (resultSet, i) -> resultSet.getLong("sum"));
 
         assertEquals(23L, sum);
 
