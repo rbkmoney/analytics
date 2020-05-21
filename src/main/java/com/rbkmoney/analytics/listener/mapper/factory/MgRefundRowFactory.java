@@ -42,7 +42,7 @@ public class MgRefundRowFactory extends MgBaseRowFactory<MgRefundRow> {
         payment.getRefunds().stream()
                 .filter(refund -> refund.getRefund().getId().equals(refundId))
                 .findFirst()
-                .ifPresentOrElse(adjustment -> mapRow(machineEvent, row, payment, refundId, adjustment), () -> {
+                .ifPresentOrElse(refund -> mapRow(machineEvent, row, payment, refundId, refund), () -> {
                             throw new AdjustmentInfoNotFoundException();
                         }
                 );

@@ -1,7 +1,6 @@
 package com.rbkmoney.analytics.listener;
 
 import com.rbkmoney.analytics.converter.SourceEventParser;
-import com.rbkmoney.analytics.flowresolver.FlowResolver;
 import com.rbkmoney.analytics.listener.handler.HandlerManager;
 import com.rbkmoney.damsel.payment_processing.InvoiceChange;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
@@ -28,17 +27,12 @@ public class MgInvoiceListener {
     @Value("${kafka.consumer.throttling-timeout-ms}")
     private int throttlingTimeout;
 
-    @Value("${kafka.event-flow.resolver.enabled}")
-    private boolean eventFlowResolverEnabled;
-
     private final SourceEventParser eventParser;
-    private final FlowResolver flowResolver;
     private final HandlerManager<InvoiceChange, MachineEvent> handlerManager;
 
     @KafkaListener(autoStartup = "${kafka.listener.event.sink.enabled}", topics = "${kafka.topic.event.sink.initial}", containerFactory = "kafkaListenerContainerFactory")
     public void listen(List<MachineEvent> batch, @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition,
-                       @Header(KafkaHeaders.OFFSET) int offsets,
-                       Acknowledgment ack) throws InterruptedException {
+                       @Header(KafkaHeaders.OFFSET) int offsets, Acknowledgment ack) throws InterruptedException {
         log.info("MgPaymentAggregatorListener listen offsets: {} partition: {} batch.size: {}", offsets, partition, batch.size());
         handleMessages(batch);
         ack.acknowledge();

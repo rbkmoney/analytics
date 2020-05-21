@@ -1,6 +1,7 @@
 package com.rbkmoney.analytics.dao.repository.postgres;
 
 import com.rbkmoney.analytics.dao.model.MgAdjustmentRow;
+import com.rbkmoney.analytics.dao.model.MgChargebackRow;
 import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
 import com.rbkmoney.analytics.dao.model.MgRefundRow;
 import lombok.RequiredArgsConstructor;
@@ -60,6 +61,23 @@ public class PostgresBalanceChangesRepository {
         log.info("Batch inserted adjustmentRows: {} firstElement: {}",
                 adjustmentRows.size(),
                 adjustmentRows.get(0).getInvoiceId());
+    }
+
+    @Retryable(value = SQLException.class, backoff = @Backoff(delay = 5000))
+    public void insertChargebacks(List<MgChargebackRow> mgChargebackRows) {
+        if (CollectionUtils.isEmpty(mgChargebackRows)) return;
+
+        log.info("Batch start insert mgChargebackRows: {} firstElement: {}",
+                mgChargebackRows.size(),
+                mgChargebackRows.get(0).getInvoiceId());
+
+        postgresJdbcTemplate.batchUpdate(
+                INSERT,
+                new PostgresChargebackBatchPreparedStatementSetter(mgChargebackRows));
+
+        log.info("Batch inserted mgChargebackRows: {} firstElement: {}",
+                mgChargebackRows.size(),
+                mgChargebackRows.get(0).getInvoiceId());
     }
 
     @Retryable(value = SQLException.class, backoff = @Backoff(delay = 5000))

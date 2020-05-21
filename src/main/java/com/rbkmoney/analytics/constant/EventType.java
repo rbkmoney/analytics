@@ -11,7 +11,8 @@ public enum EventType {
     INVOICE_PAYMENT_STATUS_CHANGED("invoice_payment_change.payload.invoice_payment_status_changed", new IsNullCondition().not()),
     INVOICE_PAYMENT_CASH_FLOW_CHANGED("invoice_payment_change.payload.invoice_payment_cash_flow_changed", new IsNullCondition().not()),
     INVOICE_PAYMENT_ADJUSTMENT_STATUS_CHANGED("invoice_payment_change.payload.invoice_payment_adjustment_change.payload.invoice_payment_adjustment_status_changed.status.captured", new IsNullCondition().not()),
-    INVOICE_PAYMENT_REFUND_STATUS_CHANGED("invoice_payment_change.payload.invoice_payment_refund_change.payload.invoice_payment_refund_status_changed", new IsNullCondition().not());
+    INVOICE_PAYMENT_REFUND_STATUS_CHANGED("invoice_payment_change.payload.invoice_payment_refund_change.payload.invoice_payment_refund_status_changed", new IsNullCondition().not()),
+    INVOICE_PAYMENT_CHARGEBACK_STATUS("invoice_payment_change.payload.invoice_payment_chargeback_change.payload.invoice_payment_chargeback_status_changed", new IsNullCondition().not());
 
     Filter filter;
 
@@ -22,4 +23,5 @@ public enum EventType {
     public Filter getFilter() {
         return filter;
     }
+
 }
