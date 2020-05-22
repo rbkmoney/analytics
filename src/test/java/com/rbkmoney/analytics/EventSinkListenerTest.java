@@ -47,7 +47,7 @@ public class EventSinkListenerTest extends KafkaAbstractTest {
 
     public static final long MESSAGE_TIMEOUT = 4_000L;
     public static final String SOURCE_ID = "sourceID";
-    public static final String FIRST_ADJUSTMENT = "1";
+    public static final String FIRST = "1";
     public static final String SELECT_SUM = "SELECT shopId, sum(amount) as sum " +
             "from %1s " +
             "group by shopId, currency, status " +
@@ -162,7 +162,7 @@ public class EventSinkListenerTest extends KafkaAbstractTest {
 
         String source_adjustment = "source_adjustment";
         mockPayment(source_adjustment);
-        mockAdjustment(source_adjustment, 7, FIRST_ADJUSTMENT);
+        mockAdjustment(source_adjustment, 7, FIRST);
 
         sinkEvents = MgEventSinkFlowGenerator.generateSuccessAdjustment(source_adjustment);
         sinkEvents.forEach(this::produceMessageToEventSink);
@@ -185,22 +185,29 @@ public class EventSinkListenerTest extends KafkaAbstractTest {
     private void mockPayment(String sourceId) throws TException, IOException {
         Mockito.when(invoicingClient.get(HgClientService.USER_INFO, sourceId, eventRangeFactory.create(6)))
                 .thenReturn(BuildUtils.buildInvoice(MgEventSinkFlowGenerator.PARTY_ID, MgEventSinkFlowGenerator.SHOP_ID,
-                        sourceId, "1", "1", FIRST_ADJUSTMENT,
+                        sourceId, "1", "1", FIRST,
                         InvoiceStatus.paid(new InvoicePaid()), InvoicePaymentStatus.pending(new InvoicePaymentPending())));
     }
 
     private void mockRefund(String sourceId, int sequenceId, String refundId) throws TException, IOException {
         Mockito.when(invoicingClient.get(HgClientService.USER_INFO, sourceId, eventRangeFactory.create(sequenceId)))
                 .thenReturn(BuildUtils.buildInvoice(MgEventSinkFlowGenerator.PARTY_ID, MgEventSinkFlowGenerator.SHOP_ID,
-                        sourceId, "1", refundId, FIRST_ADJUSTMENT,
+                        sourceId, "1", refundId, FIRST,
                         InvoiceStatus.paid(new InvoicePaid()), InvoicePaymentStatus.refunded(new InvoicePaymentRefunded())));
     }
 
     private void mockAdjustment(String sourceId, int sequenceId, String adjustmentId) throws TException, IOException {
         Mockito.when(invoicingClient.get(HgClientService.USER_INFO, sourceId, eventRangeFactory.create(sequenceId)))
                 .thenReturn(BuildUtils.buildInvoice(MgEventSinkFlowGenerator.PARTY_ID, MgEventSinkFlowGenerator.SHOP_ID,
-                        sourceId, "1", adjustmentId, FIRST_ADJUSTMENT,
+                        sourceId, "1", adjustmentId, FIRST,
                         InvoiceStatus.paid(new InvoicePaid()), InvoicePaymentStatus.captured(new InvoicePaymentCaptured())));
+    }
+
+    private void mockChargeback(String sourceId, int sequenceId, String chargebackId) throws TException, IOException {
+        Mockito.when(invoicingClient.get(HgClientService.USER_INFO, sourceId, eventRangeFactory.create(sequenceId)))
+                .thenReturn(BuildUtils.buildInvoice(MgEventSinkFlowGenerator.PARTY_ID, MgEventSinkFlowGenerator.SHOP_ID,
+                        sourceId, "1", chargebackId, FIRST,
+                        InvoiceStatus.paid(new InvoicePaid()), InvoicePaymentStatus.charged_back(new InvoicePaymentChargedBack())));
     }
 
 }
