@@ -1,9 +1,9 @@
 package com.rbkmoney.analytics.listener.handler;
 
-import com.rbkmoney.analytics.dao.model.MgRefundRow;
+import com.rbkmoney.analytics.dao.model.MgChargebackRow;
 import com.rbkmoney.analytics.dao.repository.MgRepositoryFacade;
 import com.rbkmoney.analytics.listener.Processor;
-import com.rbkmoney.analytics.listener.mapper.RefundPaymentMapper;
+import com.rbkmoney.analytics.listener.mapper.ChargebackPaymentMapper;
 import com.rbkmoney.damsel.payment_processing.InvoiceChange;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
@@ -19,19 +19,19 @@ import java.util.stream.Collectors;
 public class ChargebackBatchHandler implements BatchHandler<InvoiceChange, MachineEvent> {
 
     private final MgRepositoryFacade mgRepositoryFacade;
-    private final List<RefundPaymentMapper> mappers;
+    private final List<ChargebackPaymentMapper> mappers;
 
     @Override
-    public List<RefundPaymentMapper> getMappers() {
+    public List<ChargebackPaymentMapper> getMappers() {
         return mappers;
     }
 
     @Override
     public Processor handle(List<Map.Entry<MachineEvent, InvoiceChange>> changes) {
-        List<MgRefundRow> invoiceEvents = changes.stream()
+        List<MgChargebackRow> invoiceEvents = changes.stream()
                 .map(changeWithParent -> {
                     InvoiceChange change = changeWithParent.getValue();
-                    for (RefundPaymentMapper invoiceMapper : getMappers()) {
+                    for (ChargebackPaymentMapper invoiceMapper : getMappers()) {
                         if (invoiceMapper.accept(change)) {
                             return invoiceMapper.map(change, changeWithParent.getKey());
                         }
@@ -41,6 +41,6 @@ public class ChargebackBatchHandler implements BatchHandler<InvoiceChange, Machi
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
-        return () -> mgRepositoryFacade.insertRefunds(invoiceEvents);
+        return () -> mgRepositoryFacade.insertChargebacks(invoiceEvents);
     }
 }

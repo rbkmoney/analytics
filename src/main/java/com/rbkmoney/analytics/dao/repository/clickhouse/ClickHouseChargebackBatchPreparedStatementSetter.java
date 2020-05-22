@@ -18,10 +18,10 @@ public class ClickHouseChargebackBatchPreparedStatementSetter implements BatchPr
     public static final String INSERT = "INSERT INTO analytic.events_sink_chargeback " +
             "(timestamp, eventTime, eventTimeHour, partyId, shopId, email, " +
             "amount, guaranteeDeposit, systemFee, providerFee, externalFee, currency, providerName, " +
-            "status, chargebackCode, stage, status, category, invoiceId, paymentId, chargebackId, sequenceId, ip, " +
+            "status, chargebackCode, stage, category, invoiceId, paymentId, chargebackId, sequenceId, ip, " +
             "fingerprint, cardToken, paymentSystem, digitalWalletProvider, digitalWalletToken, cryptoCurrency, " +
             "mobileOperator, paymentCountry, bankCountry, paymentTime, providerId, terminal)" +
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private final List<MgChargebackRow> batch;
 
@@ -53,7 +53,6 @@ public class ClickHouseChargebackBatchPreparedStatementSetter implements BatchPr
 
         ps.setString(l++, row.getChargebackCode());
         ps.setString(l++, row.getStage().name());
-        ps.setString(l++, row.getStatus().name());
         ps.setString(l++, row.getCategory().name());
 
         ps.setString(l++, row.getInvoiceId());

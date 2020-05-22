@@ -6,6 +6,7 @@ import com.rbkmoney.analytics.utils.BuildUtils;
 import com.rbkmoney.analytics.utils.EventRangeFactory;
 import com.rbkmoney.analytics.utils.FileUtil;
 import com.rbkmoney.damsel.domain.*;
+import com.rbkmoney.damsel.geo_ip.GeoIpServiceSrv;
 import com.rbkmoney.damsel.payment_processing.InvoicingSrv;
 import com.rbkmoney.machinegun.eventsink.SinkEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +32,6 @@ import ru.yandex.clickhouse.settings.ClickHouseProperties;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -67,6 +67,9 @@ public class EventSinkListenerTest extends KafkaAbstractTest {
                     .applyTo(configurableApplicationContext.getEnvironment());
         }
     }
+
+    @MockBean
+    GeoIpServiceSrv.Iface iface;
 
     @MockBean
     InvoicingSrv.Iface invoicingClient;
@@ -176,37 +179,48 @@ public class EventSinkListenerTest extends KafkaAbstractTest {
 
         assertEquals(23L, sum);
 
-        List<LocalDate> localDates = clickHouseJdbcTemplate.queryForList(
-                "SELECT timestamp from analytic.events_sink ", LocalDate.class);
+        String sourceChargeback = "source_chargeback";
+        mockPayment(sourceChargeback);
+        mockChargeback(sourceChargeback, 7, FIRST);
+        sinkEvents = MgEventSinkFlowGenerator.generateChargebackFlow(sourceChargeback);
+        sinkEvents.forEach(this::produceMessageToEventSink);
 
-        System.out.println(localDates);
+        Thread.sleep(20000L);
+
+        //check sum for succeeded chargeback
+        sum = clickHouseJdbcTemplate.queryForObject(
+                String.format(SELECT_SUM, "analytic.events_sink_chargeback") + MgEventSinkFlowGenerator.SHOP_ID
+                        + "' and status = 'accepted' and currency = 'RUB'", (resultSet, i) -> resultSet.getLong("sum"));
+
+        assertEquals(23L, sum);
+
     }
 
     private void mockPayment(String sourceId) throws TException, IOException {
         Mockito.when(invoicingClient.get(HgClientService.USER_INFO, sourceId, eventRangeFactory.create(6)))
                 .thenReturn(BuildUtils.buildInvoice(MgEventSinkFlowGenerator.PARTY_ID, MgEventSinkFlowGenerator.SHOP_ID,
-                        sourceId, "1", "1", FIRST,
+                        sourceId, "1", "1", FIRST, FIRST,
                         InvoiceStatus.paid(new InvoicePaid()), InvoicePaymentStatus.pending(new InvoicePaymentPending())));
     }
 
     private void mockRefund(String sourceId, int sequenceId, String refundId) throws TException, IOException {
         Mockito.when(invoicingClient.get(HgClientService.USER_INFO, sourceId, eventRangeFactory.create(sequenceId)))
                 .thenReturn(BuildUtils.buildInvoice(MgEventSinkFlowGenerator.PARTY_ID, MgEventSinkFlowGenerator.SHOP_ID,
-                        sourceId, "1", refundId, FIRST,
+                        sourceId, "1", refundId, "1", "1",
                         InvoiceStatus.paid(new InvoicePaid()), InvoicePaymentStatus.refunded(new InvoicePaymentRefunded())));
     }
 
     private void mockAdjustment(String sourceId, int sequenceId, String adjustmentId) throws TException, IOException {
         Mockito.when(invoicingClient.get(HgClientService.USER_INFO, sourceId, eventRangeFactory.create(sequenceId)))
                 .thenReturn(BuildUtils.buildInvoice(MgEventSinkFlowGenerator.PARTY_ID, MgEventSinkFlowGenerator.SHOP_ID,
-                        sourceId, "1", adjustmentId, FIRST,
+                        sourceId, "1", "1", "1", adjustmentId,
                         InvoiceStatus.paid(new InvoicePaid()), InvoicePaymentStatus.captured(new InvoicePaymentCaptured())));
     }
 
     private void mockChargeback(String sourceId, int sequenceId, String chargebackId) throws TException, IOException {
         Mockito.when(invoicingClient.get(HgClientService.USER_INFO, sourceId, eventRangeFactory.create(sequenceId)))
                 .thenReturn(BuildUtils.buildInvoice(MgEventSinkFlowGenerator.PARTY_ID, MgEventSinkFlowGenerator.SHOP_ID,
-                        sourceId, "1", chargebackId, FIRST,
+                        sourceId, "1", "1", chargebackId, "1",
                         InvoiceStatus.paid(new InvoicePaid()), InvoicePaymentStatus.charged_back(new InvoicePaymentChargedBack())));
     }
 

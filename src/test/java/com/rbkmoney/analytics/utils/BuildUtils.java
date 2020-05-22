@@ -3,6 +3,7 @@ package com.rbkmoney.analytics.utils;
 import com.rbkmoney.damsel.base.Content;
 import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.payment_processing.InvoicePayment;
+import com.rbkmoney.damsel.payment_processing.InvoicePaymentChargeback;
 import com.rbkmoney.damsel.payment_processing.InvoiceRefundSession;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.geck.serializer.kit.mock.MockMode;
@@ -18,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.rbkmoney.analytics.MgEventSinkFlowGenerator.createCash;
+
 public class BuildUtils {
 
     public static com.rbkmoney.damsel.payment_processing.Invoice buildInvoice(
@@ -26,13 +29,14 @@ public class BuildUtils {
             String invoiceId,
             String paymentId,
             String refundId,
+            String chargebackId,
             String adjustmentId,
             InvoiceStatus invoiceStatus,
             InvoicePaymentStatus paymentStatus) throws IOException {
         MockTBaseProcessor tBaseProcessor = new MockTBaseProcessor(MockMode.RANDOM, 15, 1);
         com.rbkmoney.damsel.payment_processing.Invoice invoice = new com.rbkmoney.damsel.payment_processing.Invoice()
                 .setInvoice(buildInvoice(partyId, shopId, invoiceId, invoiceStatus, tBaseProcessor))
-                .setPayments(buildPayments(partyId, shopId, paymentId, refundId, adjustmentId, paymentStatus, tBaseProcessor));
+                .setPayments(buildPayments(partyId, shopId, paymentId, refundId, chargebackId, adjustmentId, paymentStatus, tBaseProcessor));
 
         if (invoice.getPayments().get(0).getPayment().getPayer().isSetPaymentResource()) {
             invoice.getPayments().get(0).getPayment().getPayer().getPaymentResource().getResource()
@@ -65,6 +69,7 @@ public class BuildUtils {
             String shopId,
             String paymentId,
             String refundId,
+            String chargebackId,
             String adjustmentId,
             InvoicePaymentStatus paymentStatus,
             MockTBaseProcessor tBaseProcessor) throws IOException {
@@ -73,6 +78,7 @@ public class BuildUtils {
                         .setAdjustments(List.of(buildAdjustment(adjustmentId, tBaseProcessor)))
                         .setPayment(buildPayment(partyId, shopId, paymentId, paymentStatus, tBaseProcessor))
                         .setRefunds(buildRefunds(refundId, tBaseProcessor))
+                        .setChargebacks(List.of(buildChargeback(chargebackId, tBaseProcessor)))
                         .setCashFlow(createCashFlow(1000L, 300L))
                         .setSessions(Collections.emptyList()));
     }
@@ -350,6 +356,22 @@ public class BuildUtils {
                 .setNewCashFlow(createCashFlow(23L, 100L))
                 .setOldCashFlowInverse(createCashFlow(123L, 100L))
                 .setId(adjustmentId);
+    }
+
+    private static InvoicePaymentChargeback buildChargeback(String chargebackId, MockTBaseProcessor tBaseProcessor) throws IOException {
+        return tBaseProcessor.process(
+                new InvoicePaymentChargeback(),
+                new TBaseHandler<>(InvoicePaymentChargeback.class))
+                .setChargeback(new com.rbkmoney.damsel.domain.InvoicePaymentChargeback()
+                        .setCreatedAt(TypeUtil.temporalToString(Instant.now()))
+                        .setId(chargebackId)
+                        .setReason(new InvoicePaymentChargebackReason()
+                                .setCategory(InvoicePaymentChargebackCategory.fraud(new InvoicePaymentChargebackCategoryFraud())))
+                        .setBody(createCash())
+                        .setLevy(createCash())
+                        .setStage(InvoicePaymentChargebackStage.chargeback(new InvoicePaymentChargebackStageChargeback()))
+                        .setStatus(InvoicePaymentChargebackStatus.pending(new InvoicePaymentChargebackPending()))
+                ).setCashFlow(createCashFlow(23L, 100L));
     }
 
     private static TransactionInfo getTransactionInfo() {

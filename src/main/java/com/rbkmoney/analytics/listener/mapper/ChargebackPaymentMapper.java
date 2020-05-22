@@ -32,7 +32,7 @@ public class ChargebackPaymentMapper implements Mapper<InvoiceChange, MachineEve
         InvoicePaymentChargebackChangePayload payload = invoicePaymentChargebackChange.getPayload();
         InvoicePaymentChargebackStatusChanged invoicePaymentChargebackStatusChanged = payload.getInvoicePaymentChargebackStatusChanged();
 
-        String chargebackId = invoicePaymentChange.getId();
+        String chargebackId = invoicePaymentChargebackChange.getId();
         InvoicePaymentWrapper invoicePaymentWrapper = hgClientService.getInvoiceInfo(event.getSourceId(), findPayment(),
                 paymentId, chargebackId, event.getEventId());
         MgChargebackRow chargebackRow = mgChargebackRowRowFactory.create(event, invoicePaymentWrapper, chargebackId);
@@ -40,7 +40,7 @@ public class ChargebackPaymentMapper implements Mapper<InvoiceChange, MachineEve
         chargebackRow.setStatus(TBaseUtil.unionFieldToEnum(
                 invoicePaymentChargebackStatusChanged.getStatus(), ChargebackStatus.class));
 
-        log.debug("RefundPaymentMapper refundRow: {}", chargebackRow);
+        log.debug("ChargebackPaymentMapper chargebackRow: {}", chargebackRow);
         return chargebackRow;
     }
 
