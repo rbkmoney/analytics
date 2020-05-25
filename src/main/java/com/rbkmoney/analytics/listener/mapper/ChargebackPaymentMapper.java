@@ -56,7 +56,7 @@ public class ChargebackPaymentMapper implements Mapper<InvoiceChange, MachineEve
 
     @Override
     public EventType getChangeType() {
-        return EventType.INVOICE_PAYMENT_CHARGEBACK_STATUS;
+        return EventType.INVOICE_PAYMENT_CHARGEBACK_STATUS_CHANGED;
     }
 
 }
