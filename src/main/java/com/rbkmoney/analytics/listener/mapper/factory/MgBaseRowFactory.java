@@ -5,6 +5,7 @@ import com.rbkmoney.analytics.constant.PaymentToolType;
 import com.rbkmoney.analytics.dao.model.MgBaseRow;
 import com.rbkmoney.analytics.service.GeoProvider;
 import com.rbkmoney.damsel.domain.*;
+import com.rbkmoney.damsel.domain.Invoice;
 import com.rbkmoney.damsel.payment_processing.InvoicePayment;
 import com.rbkmoney.geck.common.util.TBaseUtil;
 import com.rbkmoney.geck.common.util.TypeUtil;
@@ -16,15 +17,20 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public abstract class MgBaseRowFactory<T extends MgBaseRow> implements RowFactory<T> {
 
-    public static final String UNKNOWN = "UNKNOWN";
     private final GeoProvider geoProvider;
 
     @Override
-    public void initBaseRow(MachineEvent machineEvent, T row, InvoicePayment invoicePayment) {
+    public void initBaseRow(MachineEvent machineEvent, T row, InvoicePayment invoicePayment, Invoice invoice) {
         row.setEventTime(TypeUtil.stringToLocalDateTime(machineEvent.getCreatedAt()));
-        com.rbkmoney.damsel.domain.InvoicePayment payment = invoicePayment.getPayment();
-        row.setCurrency(payment.getCost().getCurrency().getSymbolicCode());
+        var payment = invoicePayment.getPayment();
+
+        row.setPartyId(invoice.getOwnerId());
+        row.setShopId(invoice.getShopId());
+        row.setInvoiceId(machineEvent.getSourceId());
         row.setPaymentId(payment.getId());
+        row.setSequenceId((machineEvent.getEventId()));
+
+        row.setCurrency(payment.getCost().getCurrency().getSymbolicCode());
         row.setPaymentTime(TypeUtil.stringToLocalDateTime(payment.getCreatedAt()));
         if (invoicePayment.isSetRoute()) {
             row.setTerminal(invoicePayment.getRoute().getTerminal().getId());
@@ -58,9 +64,9 @@ public abstract class MgBaseRowFactory<T extends MgBaseRow> implements RowFactor
         }
     }
 
-    private void initContactInfo(T mgRefundRow, ContactInfo contactInfo) {
+    private void initContactInfo(T row, ContactInfo contactInfo) {
         if (contactInfo != null) {
-            mgRefundRow.setEmail(contactInfo.getEmail());
+            row.setEmail(contactInfo.getEmail());
         }
     }
 

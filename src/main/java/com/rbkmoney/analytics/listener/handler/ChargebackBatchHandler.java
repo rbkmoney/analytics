@@ -29,18 +29,19 @@ public class ChargebackBatchHandler implements BatchHandler<InvoiceChange, Machi
     @Override
     public Processor handle(List<Map.Entry<MachineEvent, InvoiceChange>> changes) {
         List<MgChargebackRow> invoiceEvents = changes.stream()
-                .map(changeWithParent -> {
-                    InvoiceChange change = changeWithParent.getValue();
-                    for (ChargebackPaymentMapper invoiceMapper : getMappers()) {
-                        if (invoiceMapper.accept(change)) {
-                            return invoiceMapper.map(change, changeWithParent.getKey());
-                        }
-                    }
-                    return null;
-                })
+                .map(this::findAndMapChange)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-
         return () -> mgRepositoryFacade.insertChargebacks(invoiceEvents);
+    }
+
+    private MgChargebackRow findAndMapChange(Map.Entry<MachineEvent, InvoiceChange> changeWithParent) {
+        InvoiceChange change = changeWithParent.getValue();
+        for (ChargebackPaymentMapper invoiceMapper : getMappers()) {
+            if (invoiceMapper.accept(change)) {
+                return invoiceMapper.map(change, changeWithParent.getKey());
+            }
+        }
+        return null;
     }
 }

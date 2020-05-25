@@ -46,11 +46,10 @@ public class ChargebackPaymentMapper implements Mapper<InvoiceChange, MachineEve
 
     private BiFunction<String, Invoice, Optional<InvoicePayment>> findPayment() {
         return (id, invoiceInfo) -> invoiceInfo.getPayments().stream()
-                .filter(payment ->
-                        payment.isSetPayment()
-                                && payment.isSetRefunds()
-                                && payment.getRefunds().stream()
-                                .anyMatch(refund -> refund.getRefund().getId().equals(id))
+                .filter(payment -> payment.isSetPayment()
+                        && payment.isSetChargebacks()
+                        && payment.getChargebacks().stream()
+                        .anyMatch(chargeback -> chargeback.getChargeback().getId().equals(id))
                 )
                 .findFirst();
     }

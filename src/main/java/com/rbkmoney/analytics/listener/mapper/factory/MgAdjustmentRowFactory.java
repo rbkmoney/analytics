@@ -33,28 +33,21 @@ public class MgAdjustmentRowFactory extends MgBaseRowFactory<MgAdjustmentRow> {
     public MgAdjustmentRow create(MachineEvent machineEvent, InvoicePaymentWrapper invoicePaymentWrapper, String adjustmentId) {
         MgAdjustmentRow mgAdjustmentRow = new MgAdjustmentRow();
         Invoice invoice = invoicePaymentWrapper.getInvoice();
-        mgAdjustmentRow.setPartyId(invoice.getOwnerId());
-        mgAdjustmentRow.setShopId(invoice.getShopId());
-        mgAdjustmentRow.setInvoiceId(machineEvent.getSourceId());
-        mgAdjustmentRow.setSequenceId((machineEvent.getEventId()));
-        initInfo(machineEvent, mgAdjustmentRow, invoicePaymentWrapper.getInvoicePayment(), adjustmentId);
-        return mgAdjustmentRow;
-    }
-
-    private void initInfo(MachineEvent machineEvent, MgAdjustmentRow row, InvoicePayment payment, String id) {
+        InvoicePayment payment = invoicePaymentWrapper.getInvoicePayment();
         payment.getAdjustments().stream()
-                .filter(adjustment -> adjustment.getId().equals(id))
+                .filter(adjustment -> adjustment.getId().equals(adjustmentId))
                 .findFirst()
-                .ifPresentOrElse(adjustment -> mapRow(machineEvent, row, payment, id, adjustment), () -> {
+                .ifPresentOrElse(adjustment -> mapRow(machineEvent, mgAdjustmentRow, payment, invoice, adjustmentId, adjustment), () -> {
                             throw new AdjustmentInfoNotFoundException();
                         }
                 );
+        return mgAdjustmentRow;
     }
 
-    private void mapRow(MachineEvent machineEvent, MgAdjustmentRow row, InvoicePayment payment, String id, InvoicePaymentAdjustment adjustment) {
+    private void mapRow(MachineEvent machineEvent, MgAdjustmentRow row, InvoicePayment payment, Invoice invoice, String id, InvoicePaymentAdjustment adjustment) {
         row.setAdjustmentId(id);
         row.setPaymentId(payment.getPayment().getId());
-        initBaseRow(machineEvent, row, payment);
+        initBaseRow(machineEvent, row, payment, invoice);
 
         List<FinalCashFlowPosting> cashFlow = adjustment.getNewCashFlow();
         row.setCashFlowResult(cashFlowComputer.compute(cashFlow));

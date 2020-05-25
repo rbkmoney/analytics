@@ -29,31 +29,27 @@ public class MgRefundRowFactory extends MgBaseRowFactory<MgRefundRow> {
     @Override
     public MgRefundRow create(MachineEvent machineEvent, InvoicePaymentWrapper invoicePaymentWrapper, String refundId) {
         MgRefundRow mgPaymentSinkRow = new MgRefundRow();
-        Invoice invoice = invoicePaymentWrapper.getInvoice();
-        mgPaymentSinkRow.setPartyId(invoice.getOwnerId());
-        mgPaymentSinkRow.setShopId(invoice.getShopId());
-        mgPaymentSinkRow.setInvoiceId(machineEvent.getSourceId());
-        mgPaymentSinkRow.setSequenceId((machineEvent.getEventId()));
-        initInfo(machineEvent, mgPaymentSinkRow, invoicePaymentWrapper.getInvoicePayment(), refundId);
+        initInfo(machineEvent, mgPaymentSinkRow, invoicePaymentWrapper.getInvoicePayment(), invoicePaymentWrapper.getInvoice(), refundId);
         return mgPaymentSinkRow;
     }
 
-    private void initInfo(MachineEvent machineEvent, MgRefundRow row, InvoicePayment payment, String refundId) {
+    private void initInfo(MachineEvent machineEvent, MgRefundRow row, InvoicePayment payment, Invoice invoice, String refundId) {
         payment.getRefunds().stream()
                 .filter(refund -> refund.getRefund().getId().equals(refundId))
                 .findFirst()
-                .ifPresentOrElse(refund -> mapRow(machineEvent, row, payment, refundId, refund), () -> {
+                .ifPresentOrElse(refund -> mapRow(machineEvent, row, payment, invoice, refundId, refund), () -> {
                             throw new AdjustmentInfoNotFoundException();
                         }
                 );
     }
 
-    private void mapRow(MachineEvent machineEvent, MgRefundRow row, InvoicePayment payment, String refundId, InvoicePaymentRefund refund) {
+    private void mapRow(MachineEvent machineEvent, MgRefundRow row, InvoicePayment payment, Invoice invoice,
+                        String refundId, InvoicePaymentRefund refund) {
         List<FinalCashFlowPosting> cashFlow = refund.isSetCashFlow() ? refund.getCashFlow() : payment.getCashFlow();
         row.setRefundId(refundId);
         row.setPaymentId(payment.getPayment().getId());
         row.setCashFlowResult(cashFlowComputer.compute(cashFlow));
-        initBaseRow(machineEvent, row, payment);
+        initBaseRow(machineEvent, row, payment, invoice);
     }
 
 }

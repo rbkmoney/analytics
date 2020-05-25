@@ -5,7 +5,7 @@ import com.rbkmoney.analytics.constant.ChargebackCategory;
 import com.rbkmoney.analytics.constant.ChargebackStage;
 import com.rbkmoney.analytics.dao.model.MgChargebackRow;
 import com.rbkmoney.analytics.domain.InvoicePaymentWrapper;
-import com.rbkmoney.analytics.exception.AdjustmentInfoNotFoundException;
+import com.rbkmoney.analytics.exception.ChargebackInfoNotFoundException;
 import com.rbkmoney.analytics.service.GeoProvider;
 import com.rbkmoney.damsel.domain.FinalCashFlowPosting;
 import com.rbkmoney.damsel.domain.Invoice;
@@ -32,35 +32,30 @@ public class MgChargebackRowFactory extends MgBaseRowFactory<MgChargebackRow> {
     @Override
     public MgChargebackRow create(MachineEvent machineEvent, InvoicePaymentWrapper invoicePaymentWrapper, String chargebackId) {
         MgChargebackRow mgChargebackRow = new MgChargebackRow();
+        InvoicePayment payment = invoicePaymentWrapper.getInvoicePayment();
         Invoice invoice = invoicePaymentWrapper.getInvoice();
-        mgChargebackRow.setPartyId(invoice.getOwnerId());
-        mgChargebackRow.setShopId(invoice.getShopId());
-        mgChargebackRow.setInvoiceId(machineEvent.getSourceId());
-        mgChargebackRow.setSequenceId((machineEvent.getEventId()));
-        initInfo(machineEvent, mgChargebackRow, invoicePaymentWrapper.getInvoicePayment(), chargebackId);
-        return mgChargebackRow;
-    }
-
-    private void initInfo(MachineEvent machineEvent, MgChargebackRow row, InvoicePayment payment, String chargebackId) {
         payment.getChargebacks().stream()
                 .filter(chargeback -> chargeback.getChargeback().getId().equals(chargebackId))
                 .findFirst()
-                .ifPresentOrElse(chargeback -> mapRow(machineEvent, row, payment, chargebackId, chargeback), () -> {
-                            throw new AdjustmentInfoNotFoundException();
+                .ifPresentOrElse(chargeback -> {
+                            mapRow(machineEvent, mgChargebackRow, payment, invoice, chargebackId, chargeback);
+                        }, () -> {
+                            throw new ChargebackInfoNotFoundException();
                         }
                 );
+        return mgChargebackRow;
     }
 
-    private void mapRow(MachineEvent machineEvent, MgChargebackRow row, InvoicePayment payment, String chargebackId, InvoicePaymentChargeback chargeback) {
+    private void mapRow(MachineEvent machineEvent, MgChargebackRow row, InvoicePayment payment, Invoice invoice, String chargebackId, InvoicePaymentChargeback chargeback) {
         List<FinalCashFlowPosting> cashFlow = chargeback.isSetCashFlow() ? chargeback.getCashFlow() : payment.getCashFlow();
         row.setChargebackId(chargebackId);
         row.setPaymentId(payment.getPayment().getId());
         row.setCashFlowResult(cashFlowComputer.compute(cashFlow));
-        com.rbkmoney.damsel.domain.InvoicePaymentChargeback invoicePaymentChargeback = chargeback.getChargeback();
+        var invoicePaymentChargeback = chargeback.getChargeback();
         row.setChargebackCode(invoicePaymentChargeback.getReason().getCode());
         row.setCategory(TBaseUtil.unionFieldToEnum(invoicePaymentChargeback.getReason().getCategory(), ChargebackCategory.class));
         row.setStage(TBaseUtil.unionFieldToEnum(invoicePaymentChargeback.getStage(), ChargebackStage.class));
-        initBaseRow(machineEvent, row, payment);
+        initBaseRow(machineEvent, row, payment, invoice);
     }
 
 }
