@@ -25,7 +25,8 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
     private final ClickHouseRefundRepository clickHouseRefundRepository;
 
     private final DaoNamingDistributionsToResponseConverter convertPaymentToolsToResponse;
-    private final DaoErrorDistributionsToResponseConverter daoErrorDistributionsToResponse;
+    private final DaoErrorReasonDistributionsToResponseConverter daoErrorDistributionsToResponse;
+    private final DaoErrorCodeDistributionsToResponseConverter daoErrorCodeDistributionsToResponseConverter;
     private final CostToAmountResponseConverter costToAmountResponseConverter;
     private final CountModelCountResponseConverter countModelCountResponseConverter;
     private final GroupedCurAmountToResponseConverter groupedCurAmountToResponseConverter;
@@ -113,7 +114,7 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
         MerchantFilter merchantFilter = filterRequest.getMerchantFilter();
         TimeFilter timeFilter = filterRequest.getTimeFilter();
 
-        List<NamingDistribution> namingDistributions = clickHousePaymentRepository.getPaymentsErrorDistribution(
+        List<NamingDistribution> namingDistributions = clickHousePaymentRepository.getPaymentsErrorReasonDistribution(
                 merchantFilter.getPartyId(),
                 merchantFilter.getShopIds(),
                 TypeUtil.stringToLocalDateTime(timeFilter.getFromTime()),
@@ -123,6 +124,25 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
         ErrorDistributionsResponse errorDistributionsResponse = daoErrorDistributionsToResponse.convert(namingDistributions);
         log.info("<- getPaymentsErrorDistribution errorDistributionsResponse: {}", errorDistributionsResponse);
         return errorDistributionsResponse;
+    }
+
+    @Override
+    public SubErrorDistributionsResponse getPaymentsSubErrorDistribution(FilterRequest filterRequest) throws TException {
+        log.info("-> getPaymentsSubErrorDistribution filterRequest: {}", filterRequest);
+
+        MerchantFilter merchantFilter = filterRequest.getMerchantFilter();
+        TimeFilter timeFilter = filterRequest.getTimeFilter();
+
+        List<NamingDistribution> namingDistributions = clickHousePaymentRepository.getPaymentsErrorCodeDistribution(
+                merchantFilter.getPartyId(),
+                merchantFilter.getShopIds(),
+                TypeUtil.stringToLocalDateTime(timeFilter.getFromTime()),
+                TypeUtil.stringToLocalDateTime(timeFilter.getToTime())
+        );
+
+        SubErrorDistributionsResponse subErrorDistributionsResponse = daoErrorCodeDistributionsToResponseConverter.convert(namingDistributions);
+        log.info("<- getPaymentsSubErrorDistribution subErrorDistributionsResponse: {}", subErrorDistributionsResponse);
+        return subErrorDistributionsResponse;
     }
 
     @Override

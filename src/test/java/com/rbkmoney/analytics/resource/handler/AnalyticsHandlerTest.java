@@ -29,7 +29,8 @@ import static org.junit.Assert.assertEquals;
         classes = {RawToNumModelConverter.class, RawToSplitNumberConverter.class, RawToSplitStatusConverter.class,
                 SplitRowsMapper.class, SplitStatusRowsMapper.class, RawToNamingDistributionConverter.class,
                 RawMapperConfig.class, ClickHousePaymentRepository.class, ClickHouseRefundRepository.class, AnalyticsHandler.class,
-                DaoErrorDistributionsToResponseConverter.class, DaoNamingDistributionsToResponseConverter.class,
+                DaoErrorReasonDistributionsToResponseConverter.class, DaoErrorCodeDistributionsToResponseConverter.class,
+                DaoNamingDistributionsToResponseConverter.class,
                 CostToAmountResponseConverter.class, CountModelCountResponseConverter.class,
                 GroupedCurAmountToResponseConverter.class, GroupedCurCountToResponseConverter.class})
 public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
@@ -151,6 +152,26 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
                 .get();
 
         assertEquals(100.00, namingDistribution.percents, 0.0);
+
+        paymentsErrorDistribution.validate();
+    }
+
+    @Test
+    public void getPaymentsErrorCodeDistribution() throws TException {
+        SubErrorDistributionsResponse paymentsErrorDistribution = analyticsHandler.getPaymentsSubErrorDistribution(new FilterRequest()
+                .setMerchantFilter(new MerchantFilter()
+                        .setPartyId("ca2e9162-eda2-4d17-bbfa-dc5e39b1772a")
+                )
+                .setTimeFilter(timeFilterDefault));
+        List<ErrorDistribution> errorDistributions = paymentsErrorDistribution.getErrorDistributions();
+
+        ErrorDistribution namingDistribution = errorDistributions.stream()
+                .filter(currencyGroupedAmount -> "authorization_failed".equals(currencyGroupedAmount.getError().code))
+                .findFirst()
+                .get();
+
+        assertEquals(100.00, namingDistribution.percents, 0.0);
+        assertEquals("rejected_by_issuer", namingDistribution.error.sub_error.code);
 
         paymentsErrorDistribution.validate();
     }

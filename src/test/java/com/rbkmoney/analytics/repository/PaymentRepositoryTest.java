@@ -207,11 +207,22 @@ public class PaymentRepositoryTest extends ClickHouseAbstractTest {
 
     @Test
     public void testPaymentErrorDistr() {
-        List<NamingDistribution> errorDistribution = clickHousePaymentRepository.getPaymentsErrorDistribution("ca2e9162-eda2-4d17-bbfa-dc5e39b1772k", null,
+        List<NamingDistribution> errorDistribution = clickHousePaymentRepository.getPaymentsErrorReasonDistribution("ca2e9162-eda2-4d17-bbfa-dc5e39b1772k", null,
                 Instant.ofEpochMilli(1575554400000L).atZone(ZoneOffset.UTC).toLocalDateTime(), Instant.ofEpochMilli(1575556887697L).atZone(ZoneOffset.UTC).toLocalDateTime());
 
         Optional<NamingDistribution> errorResult = errorDistribution.stream()
                 .filter(error -> "card is failed".equals(error.getName()))
+                .findFirst();
+        assertEquals(errorResult.get().getPercent(), Double.valueOf(33.33));
+    }
+
+    @Test
+    public void testPaymentErrorCodeDistr() {
+        List<NamingDistribution> errorDistribution = clickHousePaymentRepository.getPaymentsErrorCodeDistribution("ca2e9162-eda2-4d17-bbfa-dc5e39b1772k", null,
+                Instant.ofEpochMilli(1575554400000L).atZone(ZoneOffset.UTC).toLocalDateTime(), Instant.ofEpochMilli(1575556887697L).atZone(ZoneOffset.UTC).toLocalDateTime());
+
+        Optional<NamingDistribution> errorResult = errorDistribution.stream()
+                .filter(error -> "authorization_failed:rejected_by_issuer".equals(error.getName()))
                 .findFirst();
         assertEquals(errorResult.get().getPercent(), Double.valueOf(33.33));
     }

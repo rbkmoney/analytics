@@ -32,6 +32,7 @@ public class ClickHousePaymentRepository {
     public static final String PARTY_ID = "partyId";
     public static final String PAYMENT_TOOL = "paymentTool";
     public static final String ERROR_REASON = "errorReason";
+    public static final String ERROR_CODE = "errorCode";
     public static final String WHERE_TIME_PARAMS = "where timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ?";
 
     private final JdbcTemplate clickHouseJdbcTemplate;
@@ -144,16 +145,26 @@ public class ClickHousePaymentRepository {
         return queryNamingDistributions(sql, partyId, shopIds, from, to, PAYMENT_TOOL);
     }
 
-    public List<NamingDistribution> getPaymentsErrorDistribution(String partyId, List<String> shopIds,
-                                                                 LocalDateTime from,
-                                                                 LocalDateTime to) {
+    public List<NamingDistribution> getPaymentsErrorReasonDistribution(String partyId, List<String> shopIds,
+                                                                       LocalDateTime from,
+                                                                       LocalDateTime to) {
+        return errorDistributionQuery(partyId, shopIds, from, to, ERROR_REASON);
+    }
+
+    public List<NamingDistribution> getPaymentsErrorCodeDistribution(String partyId, List<String> shopIds,
+                                                                     LocalDateTime from,
+                                                                     LocalDateTime to) {
+        return errorDistributionQuery(partyId, shopIds, from, to, ERROR_CODE);
+    }
+
+    private List<NamingDistribution> errorDistributionQuery(String partyId, List<String> shopIds, LocalDateTime from, LocalDateTime to, String errorReason) {
         String sql = "SELECT %3$s as naming_result," +
                 "(SELECT count() from analytic.events_sink " +
                 "where status='failed' and timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ? AND %1$s %2$s) as total_count, count() * 100 / total_count as percent " +
                 "from analytic.events_sink " +
                 "where status='failed' and timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ? AND %1$s %2$s " +
                 "group by %3$s ";
-        return queryNamingDistributions(sql, partyId, shopIds, from, to, ERROR_REASON);
+        return queryNamingDistributions(sql, partyId, shopIds, from, to, errorReason);
     }
 
     private List<NamingDistribution> queryNamingDistributions(String sql, String partyId, List<String> shopIds,
