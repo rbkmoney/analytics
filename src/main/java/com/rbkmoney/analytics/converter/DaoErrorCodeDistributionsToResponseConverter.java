@@ -23,5 +23,4 @@ public class DaoErrorCodeDistributionsToResponseConverter {
                 .setErrorDistributions(collect);
     }
 
-
 }

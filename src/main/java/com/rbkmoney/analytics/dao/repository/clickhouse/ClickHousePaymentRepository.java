@@ -157,14 +157,14 @@ public class ClickHousePaymentRepository {
         return errorDistributionQuery(partyId, shopIds, from, to, ERROR_CODE);
     }
 
-    private List<NamingDistribution> errorDistributionQuery(String partyId, List<String> shopIds, LocalDateTime from, LocalDateTime to, String errorReason) {
+    private List<NamingDistribution> errorDistributionQuery(String partyId, List<String> shopIds, LocalDateTime from, LocalDateTime to, String groupField) {
         String sql = "SELECT %3$s as naming_result," +
                 "(SELECT count() from analytic.events_sink " +
                 "where status='failed' and timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ? AND %1$s %2$s) as total_count, count() * 100 / total_count as percent " +
                 "from analytic.events_sink " +
                 "where status='failed' and timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ? AND %1$s %2$s " +
                 "group by %3$s ";
-        return queryNamingDistributions(sql, partyId, shopIds, from, to, errorReason);
+        return queryNamingDistributions(sql, partyId, shopIds, from, to, groupField);
     }
 
     private List<NamingDistribution> queryNamingDistributions(String sql, String partyId, List<String> shopIds,
