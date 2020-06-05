@@ -3,6 +3,7 @@ package com.rbkmoney.analytics.listener.mapper;
 import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.constant.PaymentStatus;
 import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
+import com.rbkmoney.analytics.domain.CashFlowResult;
 import com.rbkmoney.analytics.domain.InvoicePaymentWrapper;
 import com.rbkmoney.analytics.listener.mapper.factory.RowFactory;
 import com.rbkmoney.analytics.service.HgClientService;
@@ -58,6 +59,11 @@ public class InvoicePaymentMapper implements Mapper<InvoiceChange, MachineEvent,
                 mgPaymentSinkRow.setErrorReason(failure.getReason());
             } else if (invoicePaymentStatusChanged.getStatus().getFailed().getFailure().isSetOperationTimeout()) {
                 mgPaymentSinkRow.setErrorCode(OPERATION_TIMEOUT);
+            }
+            if (mgPaymentSinkRow.getCashFlowResult() == null || mgPaymentSinkRow.getCashFlowResult().getAmount() == 0) {
+                mgPaymentSinkRow.setCashFlowResult(CashFlowResult.builder()
+                        .amount(invoicePaymentWrapper.getInvoicePayment().getPayment().getCost().getAmount())
+                        .build());
             }
         }
 

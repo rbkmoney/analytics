@@ -305,6 +305,22 @@ public class MgEventSinkFlowGenerator {
         return invoiceChange;
     }
 
+    public static InvoiceChange createInvoiceFailed(String paymenId) {
+        InvoiceChange invoiceChange = new InvoiceChange();
+        InvoicePaymentChangePayload payload = new InvoicePaymentChangePayload();
+        InvoicePaymentStatusChanged invoicePaymentStatusChanged = new InvoicePaymentStatusChanged()
+                .setStatus(InvoicePaymentStatus.failed(new InvoicePaymentFailed(OperationFailure.failure(new Failure()
+                                .setCode("errCode")
+                                .setReason("reason")))
+                        )
+                );
+        payload.setInvoicePaymentStatusChanged(invoicePaymentStatusChanged);
+        invoiceChange.setInvoicePaymentChange(new InvoicePaymentChange()
+                .setId(paymenId)
+                .setPayload(payload));
+        return invoiceChange;
+    }
+
     private static InvoiceChange createInvoiceAdjustment() {
         InvoiceChange invoiceChange = new InvoiceChange();
         InvoicePaymentChangePayload payload = new InvoicePaymentChangePayload();
