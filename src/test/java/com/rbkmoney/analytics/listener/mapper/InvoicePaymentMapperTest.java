@@ -30,20 +30,20 @@ import static org.mockito.Mockito.when;
 public class InvoicePaymentMapperTest {
 
     public static final long AMOUNT = 123L;
-    HgClientService hgClientService;
-    @Mock
-    MgPaymentSinkRowFactory mgPaymentSinkRowFactory;
 
-    private InvoicePaymentMapper invoicePaymentMapper;
+    @Mock
+    private MgPaymentSinkRowFactory mgPaymentSinkRowFactory;
     @Mock
     private InvoicingSrv.Iface invoicingClient;
     @Mock
     private EventRangeFactory eventRangeFactory;
 
+    private InvoicePaymentMapper invoicePaymentMapper;
+
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
-        hgClientService = new HgClientService(invoicingClient, eventRangeFactory);
+        HgClientService hgClientService = new HgClientService(invoicingClient, eventRangeFactory);
         invoicePaymentMapper = new InvoicePaymentMapper(hgClientService, mgPaymentSinkRowFactory);
     }
 
