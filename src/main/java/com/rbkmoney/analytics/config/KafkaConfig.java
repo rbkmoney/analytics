@@ -1,11 +1,8 @@
 package com.rbkmoney.analytics.config;
 
 import com.rbkmoney.analytics.config.properties.KafkaSslProperties;
-import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
-import com.rbkmoney.analytics.dao.model.MgRefundRow;
 import com.rbkmoney.analytics.serde.MachineEventDeserializer;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
-import com.rbkmoney.mg.event.sink.handler.flow.EventHandler;
 import com.rbkmoney.mg.event.sink.service.ConsumerGroupIdService;
 import com.rbkmoney.mg.event.sink.utils.SslKafkaUtils;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +19,7 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.SeekToCurrentBatchErrorHandler;
 
-import javax.validation.constraints.NotNull;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.apache.kafka.clients.consumer.OffsetResetStrategy.EARLIEST;
@@ -49,8 +44,6 @@ public class KafkaConfig {
     private int concurrencyListeners;
 
     private final ConsumerGroupIdService consumerGroupIdService;
-    private final List<EventHandler<MgPaymentSinkRow>> eventHandlers;
-    private final List<EventHandler<MgRefundRow>> eventRefundHandlers;
     private final KafkaSslProperties kafkaSslProperties;
 
     private Map<String, Object> createSslConfig() {
@@ -94,7 +87,6 @@ public class KafkaConfig {
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
     }
 
-    @NotNull
     private Map<String, Object> createDefaultProperties(String value) {
         final Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
