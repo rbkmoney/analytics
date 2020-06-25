@@ -1,9 +1,6 @@
 package com.rbkmoney.analytics.dao.repository.postgres;
 
-import com.rbkmoney.analytics.dao.model.AdjustmentRow;
-import com.rbkmoney.analytics.dao.model.ChargebackRow;
-import com.rbkmoney.analytics.dao.model.PaymentRow;
-import com.rbkmoney.analytics.dao.model.RefundRow;
+import com.rbkmoney.analytics.dao.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -95,5 +92,13 @@ public class PostgresBalanceChangesRepository {
         log.info("Batch inserted refundRows: {} firstElement: {}",
                 refundRows.size(),
                 refundRows.get(0).getInvoiceId());
+    }
+
+    @Retryable(value = SQLException.class, backoff = @Backoff(delay = 5000))
+    public void insertPayouts(List<PayoutRow> payoutRows) {
+        if (CollectionUtils.isEmpty(payoutRows)) return;
+
+        // TODO [a.romanov]: impl
+        throw new UnsupportedOperationException();
     }
 }

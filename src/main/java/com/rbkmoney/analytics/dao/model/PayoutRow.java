@@ -1,5 +1,6 @@
 package com.rbkmoney.analytics.dao.model;
 
+import com.rbkmoney.analytics.constant.PayoutStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -11,5 +12,7 @@ import lombok.ToString;
 @NoArgsConstructor
 public class PayoutRow {
 
-    // TODO [a.romanov]: impl
+    private PayoutStatus status;
+
+    // TODO [a.romanov]: more fields
 }
