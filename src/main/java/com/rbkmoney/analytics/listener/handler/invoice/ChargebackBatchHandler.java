@@ -4,7 +4,7 @@ import com.rbkmoney.analytics.dao.model.MgChargebackRow;
 import com.rbkmoney.analytics.dao.repository.MgRepositoryFacade;
 import com.rbkmoney.analytics.listener.Processor;
 import com.rbkmoney.analytics.listener.handler.BatchHandler;
-import com.rbkmoney.analytics.listener.mapper.ChargebackPaymentMapper;
+import com.rbkmoney.analytics.listener.mapper.invoice.ChargebackMapper;
 import com.rbkmoney.damsel.payment_processing.InvoiceChange;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
@@ -21,11 +21,11 @@ import static java.util.stream.Collectors.toList;
 public class ChargebackBatchHandler implements BatchHandler<InvoiceChange, MachineEvent> {
 
     private final MgRepositoryFacade mgRepositoryFacade;
-    private final List<ChargebackPaymentMapper> mappers;
+    private final List<ChargebackMapper> mappers;
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<ChargebackPaymentMapper> getMappers() {
+    public List<ChargebackMapper> getMappers() {
         return mappers;
     }
 
@@ -41,7 +41,7 @@ public class ChargebackBatchHandler implements BatchHandler<InvoiceChange, Machi
 
     private MgChargebackRow findAndMapChange(Map.Entry<MachineEvent, InvoiceChange> changeWithParent) {
         InvoiceChange change = changeWithParent.getValue();
-        for (ChargebackPaymentMapper invoiceMapper : getMappers()) {
+        for (ChargebackMapper invoiceMapper : getMappers()) {
             if (invoiceMapper.accept(change)) {
                 return invoiceMapper.map(change, changeWithParent.getKey());
             }

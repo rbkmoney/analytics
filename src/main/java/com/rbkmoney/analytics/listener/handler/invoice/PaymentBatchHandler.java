@@ -4,7 +4,7 @@ import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
 import com.rbkmoney.analytics.dao.repository.MgRepositoryFacade;
 import com.rbkmoney.analytics.listener.Processor;
 import com.rbkmoney.analytics.listener.handler.BatchHandler;
-import com.rbkmoney.analytics.listener.mapper.InvoicePaymentMapper;
+import com.rbkmoney.analytics.listener.mapper.invoice.PaymentMapper;
 import com.rbkmoney.damsel.payment_processing.InvoiceChange;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
@@ -21,11 +21,11 @@ import static java.util.stream.Collectors.toList;
 public class PaymentBatchHandler implements BatchHandler<InvoiceChange, MachineEvent> {
 
     private final MgRepositoryFacade mgRepositoryFacade;
-    private final List<InvoicePaymentMapper> mappers;
+    private final List<PaymentMapper> mappers;
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<InvoicePaymentMapper> getMappers() {
+    public List<PaymentMapper> getMappers() {
         return mappers;
     }
 
@@ -34,7 +34,7 @@ public class PaymentBatchHandler implements BatchHandler<InvoiceChange, MachineE
         List<MgPaymentSinkRow> invoiceEvents = changes.stream()
                 .map(changeWithParent -> {
                     InvoiceChange change = changeWithParent.getValue();
-                    for (InvoicePaymentMapper invoiceMapper : getMappers()) {
+                    for (PaymentMapper invoiceMapper : getMappers()) {
                         if (invoiceMapper.accept(change)) {
                             return invoiceMapper.map(change, changeWithParent.getKey());
                         }

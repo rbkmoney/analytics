@@ -1,7 +1,8 @@
-package com.rbkmoney.analytics.listener.mapper;
+package com.rbkmoney.analytics.listener.mapper.payout;
 
 import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.dao.model.PayoutRow;
+import com.rbkmoney.analytics.listener.mapper.Mapper;
 import com.rbkmoney.damsel.payout_processing.Event;
 import com.rbkmoney.damsel.payout_processing.PayoutChange;
 import lombok.RequiredArgsConstructor;

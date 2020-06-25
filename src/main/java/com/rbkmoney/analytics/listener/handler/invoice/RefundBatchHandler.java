@@ -4,7 +4,7 @@ import com.rbkmoney.analytics.dao.model.MgRefundRow;
 import com.rbkmoney.analytics.dao.repository.MgRepositoryFacade;
 import com.rbkmoney.analytics.listener.Processor;
 import com.rbkmoney.analytics.listener.handler.BatchHandler;
-import com.rbkmoney.analytics.listener.mapper.RefundPaymentMapper;
+import com.rbkmoney.analytics.listener.mapper.invoice.RefundMapper;
 import com.rbkmoney.damsel.payment_processing.InvoiceChange;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
@@ -21,11 +21,11 @@ import static java.util.stream.Collectors.toList;
 public class RefundBatchHandler implements BatchHandler<InvoiceChange, MachineEvent> {
 
     private final MgRepositoryFacade mgRepositoryFacade;
-    private final List<RefundPaymentMapper> mappers;
+    private final List<RefundMapper> mappers;
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<RefundPaymentMapper> getMappers() {
+    public List<RefundMapper> getMappers() {
         return mappers;
     }
 
@@ -34,7 +34,7 @@ public class RefundBatchHandler implements BatchHandler<InvoiceChange, MachineEv
         List<MgRefundRow> invoiceEvents = changes.stream()
                 .map(changeWithParent -> {
                     InvoiceChange change = changeWithParent.getValue();
-                    for (RefundPaymentMapper invoiceMapper : getMappers()) {
+                    for (RefundMapper invoiceMapper : getMappers()) {
                         if (invoiceMapper.accept(change)) {
                             return invoiceMapper.map(change, changeWithParent.getKey());
                         }

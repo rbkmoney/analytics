@@ -1,9 +1,10 @@
-package com.rbkmoney.analytics.listener.mapper;
+package com.rbkmoney.analytics.listener.mapper.invoice;
 
 import com.rbkmoney.analytics.constant.AdjustmentStatus;
 import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.dao.model.MgAdjustmentRow;
 import com.rbkmoney.analytics.domain.InvoicePaymentWrapper;
+import com.rbkmoney.analytics.listener.mapper.Mapper;
 import com.rbkmoney.analytics.listener.mapper.factory.RowFactory;
 import com.rbkmoney.analytics.service.HgClientService;
 import com.rbkmoney.damsel.payment_processing.*;
@@ -19,7 +20,7 @@ import java.util.function.BiFunction;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class AdjustmentPaymentMapper implements Mapper<InvoiceChange, MachineEvent, MgAdjustmentRow> {
+public class AdjustmentMapper implements Mapper<InvoiceChange, MachineEvent, MgAdjustmentRow> {
 
     private final HgClientService hgClientService;
     private final RowFactory<MgAdjustmentRow> mgAdjustmentRowFactory;

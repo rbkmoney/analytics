@@ -1,10 +1,11 @@
-package com.rbkmoney.analytics.listener.mapper;
+package com.rbkmoney.analytics.listener.mapper.invoice;
 
 import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.constant.PaymentStatus;
 import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
 import com.rbkmoney.analytics.domain.CashFlowResult;
 import com.rbkmoney.analytics.domain.InvoicePaymentWrapper;
+import com.rbkmoney.analytics.listener.mapper.Mapper;
 import com.rbkmoney.analytics.listener.mapper.factory.RowFactory;
 import com.rbkmoney.analytics.service.HgClientService;
 import com.rbkmoney.damsel.domain.Failure;
@@ -23,7 +24,7 @@ import java.util.function.BiFunction;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class InvoicePaymentMapper implements Mapper<InvoiceChange, MachineEvent, MgPaymentSinkRow> {
+public class PaymentMapper implements Mapper<InvoiceChange, MachineEvent, MgPaymentSinkRow> {
 
     public static final String OPERATION_TIMEOUT = "operation_timeout";
 

@@ -5,6 +5,7 @@ import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
 import com.rbkmoney.analytics.domain.CashFlowResult;
 import com.rbkmoney.analytics.domain.InvoicePaymentWrapper;
 import com.rbkmoney.analytics.listener.mapper.factory.MgPaymentSinkRowFactory;
+import com.rbkmoney.analytics.listener.mapper.invoice.PaymentMapper;
 import com.rbkmoney.analytics.service.HgClientService;
 import com.rbkmoney.analytics.utils.EventRangeFactory;
 import com.rbkmoney.damsel.domain.Cash;
@@ -27,7 +28,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 
-public class InvoicePaymentMapperTest {
+public class PaymentMapperTest {
 
     public static final long AMOUNT = 123L;
 
@@ -38,13 +39,13 @@ public class InvoicePaymentMapperTest {
     @Mock
     private EventRangeFactory eventRangeFactory;
 
-    private InvoicePaymentMapper invoicePaymentMapper;
+    private PaymentMapper paymentMapper;
 
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
         HgClientService hgClientService = new HgClientService(invoicingClient, eventRangeFactory);
-        invoicePaymentMapper = new InvoicePaymentMapper(hgClientService, mgPaymentSinkRowFactory);
+        paymentMapper = new PaymentMapper(hgClientService, mgPaymentSinkRowFactory);
     }
 
     @Test
@@ -54,7 +55,7 @@ public class InvoicePaymentMapperTest {
         MgPaymentSinkRow paymentSinkRow = new MgPaymentSinkRow();
         paymentSinkRow.setCashFlowResult(CashFlowResult.EMPTY);
         when(mgPaymentSinkRowFactory.create(any(), any(), any())).thenReturn(paymentSinkRow);
-        MgPaymentSinkRow sinkRow = invoicePaymentMapper.map(
+        MgPaymentSinkRow sinkRow = paymentMapper.map(
                 MgEventSinkFlowGenerator.createInvoiceFailed(paymentId), new MachineEvent());
 
         Assert.assertEquals(AMOUNT, sinkRow.getCashFlowResult().getAmount());

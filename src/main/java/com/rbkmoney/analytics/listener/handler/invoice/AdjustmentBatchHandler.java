@@ -4,7 +4,7 @@ import com.rbkmoney.analytics.dao.model.MgAdjustmentRow;
 import com.rbkmoney.analytics.dao.repository.MgRepositoryFacade;
 import com.rbkmoney.analytics.listener.Processor;
 import com.rbkmoney.analytics.listener.handler.BatchHandler;
-import com.rbkmoney.analytics.listener.mapper.AdjustmentPaymentMapper;
+import com.rbkmoney.analytics.listener.mapper.invoice.AdjustmentMapper;
 import com.rbkmoney.damsel.payment_processing.InvoiceChange;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
@@ -21,11 +21,11 @@ import static java.util.stream.Collectors.toList;
 public class AdjustmentBatchHandler implements BatchHandler<InvoiceChange, MachineEvent> {
 
     private final MgRepositoryFacade mgRepositoryFacade;
-    private final List<AdjustmentPaymentMapper> mappers;
+    private final List<AdjustmentMapper> mappers;
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<AdjustmentPaymentMapper> getMappers() {
+    public List<AdjustmentMapper> getMappers() {
         return mappers;
     }
 
@@ -34,7 +34,7 @@ public class AdjustmentBatchHandler implements BatchHandler<InvoiceChange, Machi
         List<MgAdjustmentRow> invoiceEvents = changes.stream()
                 .map(changeWithParent -> {
                     InvoiceChange change = changeWithParent.getValue();
-                    for (AdjustmentPaymentMapper mapper : getMappers()) {
+                    for (AdjustmentMapper mapper : getMappers()) {
                         if (mapper.accept(change)) {
                             return mapper.map(change, changeWithParent.getKey());
                         }
