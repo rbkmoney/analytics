@@ -4,10 +4,7 @@ import com.rbkmoney.analytics.constant.AdjustmentStatus;
 import com.rbkmoney.analytics.constant.ChargebackStatus;
 import com.rbkmoney.analytics.constant.PaymentStatus;
 import com.rbkmoney.analytics.constant.RefundStatus;
-import com.rbkmoney.analytics.dao.model.MgAdjustmentRow;
-import com.rbkmoney.analytics.dao.model.MgChargebackRow;
-import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
-import com.rbkmoney.analytics.dao.model.MgRefundRow;
+import com.rbkmoney.analytics.dao.model.*;
 import com.rbkmoney.analytics.dao.repository.clickhouse.ClickHouseAdjustmentRepository;
 import com.rbkmoney.analytics.dao.repository.clickhouse.ClickHouseChargebackRepository;
 import com.rbkmoney.analytics.dao.repository.clickhouse.ClickHousePaymentRepository;
@@ -15,12 +12,12 @@ import com.rbkmoney.analytics.dao.repository.clickhouse.ClickHouseRefundReposito
 import com.rbkmoney.analytics.dao.repository.postgres.PostgresBalanceChangesRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Service
@@ -33,11 +30,6 @@ public class MgRepositoryFacade {
     private final ClickHouseRefundRepository clickHouseRefundRepository;
     private final ClickHouseAdjustmentRepository clickHouseAdjustmentRepository;
     private final ClickHouseChargebackRepository clickHouseChargebackRepository;
-
-    @Value("${repository.insert.enabled}")
-    private boolean repositoryInsertEnabled;
-    @Value("${repository.insert.logging.timeout:1000}")
-    private int repositoryInsertLoggingTimeout;
 
     public void insertPayments(List<MgPaymentSinkRow> mgPaymentSinkRows) {
         List<MgPaymentSinkRow> filteredRow = filterRows(mgPaymentSinkRows,
@@ -75,10 +67,15 @@ public class MgRepositoryFacade {
         log.info("MgRepositoryFacade CH inserted insertChargebacks: {}", mgChargebackRows.size());
     }
 
+    public void insertPayouts(List<PayoutRow> payoutRow) {
+        // TODO [a.romanov]: impl
+        throw new UnsupportedOperationException();
+    }
+
     private <T> List<T> filterRows(List<T> rows, Predicate<T> predicate) {
         return rows.stream()
-                .filter(predicate::test)
-                .collect(Collectors.toList());
+                .filter(predicate)
+                .collect(toList());
     }
 
 }
