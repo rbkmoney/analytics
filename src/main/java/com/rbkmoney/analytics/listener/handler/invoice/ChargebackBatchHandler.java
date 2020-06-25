@@ -1,8 +1,9 @@
-package com.rbkmoney.analytics.listener.handler;
+package com.rbkmoney.analytics.listener.handler.invoice;
 
 import com.rbkmoney.analytics.dao.model.MgChargebackRow;
 import com.rbkmoney.analytics.dao.repository.MgRepositoryFacade;
 import com.rbkmoney.analytics.listener.Processor;
+import com.rbkmoney.analytics.listener.handler.BatchHandler;
 import com.rbkmoney.analytics.listener.mapper.ChargebackPaymentMapper;
 import com.rbkmoney.damsel.payment_processing.InvoiceChange;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
@@ -12,7 +13,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Component
 @RequiredArgsConstructor
@@ -22,6 +24,7 @@ public class ChargebackBatchHandler implements BatchHandler<InvoiceChange, Machi
     private final List<ChargebackPaymentMapper> mappers;
 
     @Override
+    @SuppressWarnings("unchecked")
     public List<ChargebackPaymentMapper> getMappers() {
         return mappers;
     }
@@ -31,7 +34,8 @@ public class ChargebackBatchHandler implements BatchHandler<InvoiceChange, Machi
         List<MgChargebackRow> invoiceEvents = changes.stream()
                 .map(this::findAndMapChange)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .collect(toList());
+
         return () -> mgRepositoryFacade.insertChargebacks(invoiceEvents);
     }
 
@@ -42,6 +46,7 @@ public class ChargebackBatchHandler implements BatchHandler<InvoiceChange, Machi
                 return invoiceMapper.map(change, changeWithParent.getKey());
             }
         }
+
         return null;
     }
 }

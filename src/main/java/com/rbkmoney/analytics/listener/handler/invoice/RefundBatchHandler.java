@@ -1,8 +1,9 @@
-package com.rbkmoney.analytics.listener.handler;
+package com.rbkmoney.analytics.listener.handler.invoice;
 
 import com.rbkmoney.analytics.dao.model.MgRefundRow;
 import com.rbkmoney.analytics.dao.repository.MgRepositoryFacade;
 import com.rbkmoney.analytics.listener.Processor;
+import com.rbkmoney.analytics.listener.handler.BatchHandler;
 import com.rbkmoney.analytics.listener.mapper.RefundPaymentMapper;
 import com.rbkmoney.damsel.payment_processing.InvoiceChange;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
@@ -12,7 +13,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Component
 @RequiredArgsConstructor
@@ -22,6 +24,7 @@ public class RefundBatchHandler implements BatchHandler<InvoiceChange, MachineEv
     private final List<RefundPaymentMapper> mappers;
 
     @Override
+    @SuppressWarnings("unchecked")
     public List<RefundPaymentMapper> getMappers() {
         return mappers;
     }
@@ -39,7 +42,7 @@ public class RefundBatchHandler implements BatchHandler<InvoiceChange, MachineEv
                     return null;
                 })
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .collect(toList());
 
         return () -> mgRepositoryFacade.insertRefunds(invoiceEvents);
     }
