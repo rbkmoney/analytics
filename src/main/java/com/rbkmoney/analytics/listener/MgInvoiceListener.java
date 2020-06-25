@@ -17,8 +17,8 @@ import org.springframework.util.CollectionUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
@@ -57,7 +57,7 @@ public class MgInvoiceListener {
                             .map(invoiceChange -> Map.entry(entry.getKey(), invoiceChange))
                             .collect(toList()))
                     .flatMap(List::stream)
-                    .collect(Collectors.groupingBy(
+                    .collect(groupingBy(
                             entry -> Optional.ofNullable(handlerManager.getHandler(entry.getValue())),
                             toList()))
                     .forEach((handler, entries) -> handler

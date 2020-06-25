@@ -1,6 +1,8 @@
 package com.rbkmoney.analytics.listener;
 
+import com.rbkmoney.analytics.listener.handler.HandlerManager;
 import com.rbkmoney.damsel.payout_processing.Event;
+import com.rbkmoney.damsel.payout_processing.PayoutChange;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +14,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Service
@@ -20,6 +27,8 @@ public class PayoutListener {
 
     @Value("${kafka.consumer.throttling-timeout-ms}")
     private int throttlingTimeout;
+
+    private final HandlerManager<PayoutChange, Event> handlerManager;
 
     @KafkaListener(
             autoStartup = "${kafka.listener.payout.enabled}",
@@ -39,7 +48,18 @@ public class PayoutListener {
         try {
             if (!CollectionUtils.isEmpty(batch)) return;
 
-            // TODO [a.romanov]: impl
+            batch.stream()
+                    .map(payoutEvent -> Map.entry(payoutEvent, payoutEvent.getPayload()))
+                    .filter(entry -> entry.getValue().isSetPayoutChanges())
+                    .map(entry -> entry.getValue().getPayoutChanges().stream()
+                            .map(payoutChange -> Map.entry(entry.getKey(), payoutChange))
+                            .collect(toList()))
+                    .flatMap(List::stream)
+                    .collect(groupingBy(
+                            entry -> Optional.ofNullable(handlerManager.getHandler(entry.getValue())),
+                            toList()))
+                    .forEach((handler, entries) -> handler
+                            .ifPresent(eventBatchHandler -> eventBatchHandler.handle(entries).execute()));
         } catch (Exception e) {
             log.error("Error when PayoutListener listen e: ", e);
             Thread.sleep(throttlingTimeout);
