@@ -1,7 +1,7 @@
 package com.rbkmoney.analytics.dao.repository.clickhouse;
 
 import com.rbkmoney.analytics.constant.ClickHouseUtilsValue;
-import com.rbkmoney.analytics.dao.model.MgAdjustmentRow;
+import com.rbkmoney.analytics.dao.model.AdjustmentRow;
 import com.rbkmoney.analytics.domain.CashFlowResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -24,11 +24,11 @@ public class ClickHouseAdjustmentBatchPreparedStatementSetter implements BatchPr
             "paymentCountry, bankCountry, paymentTime, providerId, terminal)" +
             " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    private final List<MgAdjustmentRow> batch;
+    private final List<AdjustmentRow> batch;
 
     @Override
     public void setValues(PreparedStatement ps, int i) throws SQLException {
-        MgAdjustmentRow row = batch.get(i);
+        AdjustmentRow row = batch.get(i);
         int l = 1;
         ps.setObject(l++, row.getEventTime().toLocalDate());
         ps.setLong(l++, row.getEventTime().toEpochSecond(ZoneOffset.UTC));

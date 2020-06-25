@@ -1,7 +1,7 @@
 package com.rbkmoney.analytics.dao.repository.clickhouse;
 
 import com.rbkmoney.analytics.constant.ClickHouseUtilsValue;
-import com.rbkmoney.analytics.dao.model.MgChargebackRow;
+import com.rbkmoney.analytics.dao.model.ChargebackRow;
 import com.rbkmoney.analytics.domain.CashFlowResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -23,11 +23,11 @@ public class ClickHouseChargebackBatchPreparedStatementSetter implements BatchPr
             "mobileOperator, paymentCountry, bankCountry, paymentTime, providerId, terminal)" +
             " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    private final List<MgChargebackRow> batch;
+    private final List<ChargebackRow> batch;
 
     @Override
     public void setValues(PreparedStatement ps, int i) throws SQLException {
-        MgChargebackRow row = batch.get(i);
+        ChargebackRow row = batch.get(i);
         int l = 1;
         ps.setObject(l++, row.getEventTime().toLocalDate());
         ps.setLong(l++, row.getEventTime().toEpochSecond(ZoneOffset.UTC));

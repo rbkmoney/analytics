@@ -2,7 +2,7 @@ package com.rbkmoney.analytics.listener.mapper.factory;
 
 import com.rbkmoney.analytics.computer.CashFlowComputer;
 import com.rbkmoney.analytics.computer.ReversedCashFlowComputer;
-import com.rbkmoney.analytics.dao.model.MgAdjustmentRow;
+import com.rbkmoney.analytics.dao.model.AdjustmentRow;
 import com.rbkmoney.analytics.domain.InvoicePaymentWrapper;
 import com.rbkmoney.analytics.exception.AdjustmentInfoNotFoundException;
 import com.rbkmoney.analytics.service.GeoProvider;
@@ -18,33 +18,33 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class MgAdjustmentRowFactory extends MgBaseRowFactory<MgAdjustmentRow> {
+public class AdjustmentRowFactory extends InvoiceBaseRowFactory<AdjustmentRow> {
 
     private final CashFlowComputer cashFlowComputer;
     private final ReversedCashFlowComputer reversedCashFlowComputer;
 
-    public MgAdjustmentRowFactory(GeoProvider geoProvider, CashFlowComputer cashFlowComputer, ReversedCashFlowComputer reversedCashFlowComputer) {
+    public AdjustmentRowFactory(GeoProvider geoProvider, CashFlowComputer cashFlowComputer, ReversedCashFlowComputer reversedCashFlowComputer) {
         super(geoProvider);
         this.cashFlowComputer = cashFlowComputer;
         this.reversedCashFlowComputer = reversedCashFlowComputer;
     }
 
     @Override
-    public MgAdjustmentRow create(MachineEvent machineEvent, InvoicePaymentWrapper invoicePaymentWrapper, String adjustmentId) {
-        MgAdjustmentRow mgAdjustmentRow = new MgAdjustmentRow();
+    public AdjustmentRow create(MachineEvent machineEvent, InvoicePaymentWrapper invoicePaymentWrapper, String adjustmentId) {
+        AdjustmentRow adjustmentRow = new AdjustmentRow();
         Invoice invoice = invoicePaymentWrapper.getInvoice();
         InvoicePayment payment = invoicePaymentWrapper.getInvoicePayment();
         payment.getAdjustments().stream()
                 .filter(adjustment -> adjustment.getId().equals(adjustmentId))
                 .findFirst()
-                .ifPresentOrElse(adjustment -> mapRow(machineEvent, mgAdjustmentRow, payment, invoice, adjustmentId, adjustment), () -> {
+                .ifPresentOrElse(adjustment -> mapRow(machineEvent, adjustmentRow, payment, invoice, adjustmentId, adjustment), () -> {
                             throw new AdjustmentInfoNotFoundException();
                         }
                 );
-        return mgAdjustmentRow;
+        return adjustmentRow;
     }
 
-    private void mapRow(MachineEvent machineEvent, MgAdjustmentRow row, InvoicePayment payment, Invoice invoice, String id, InvoicePaymentAdjustment adjustment) {
+    private void mapRow(MachineEvent machineEvent, AdjustmentRow row, InvoicePayment payment, Invoice invoice, String id, InvoicePaymentAdjustment adjustment) {
         row.setAdjustmentId(id);
         row.setPaymentId(payment.getPayment().getId());
         initBaseRow(machineEvent, row, payment, invoice);

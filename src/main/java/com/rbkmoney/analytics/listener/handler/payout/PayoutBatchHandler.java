@@ -1,7 +1,7 @@
 package com.rbkmoney.analytics.listener.handler.payout;
 
 import com.rbkmoney.analytics.dao.model.PayoutRow;
-import com.rbkmoney.analytics.dao.repository.MgRepositoryFacade;
+import com.rbkmoney.analytics.dao.repository.RepositoryFacade;
 import com.rbkmoney.analytics.listener.Processor;
 import com.rbkmoney.analytics.listener.handler.BatchHandler;
 import com.rbkmoney.analytics.listener.mapper.payout.PayoutMapper;
@@ -20,7 +20,7 @@ import static java.util.stream.Collectors.toList;
 @RequiredArgsConstructor
 public class PayoutBatchHandler implements BatchHandler<PayoutChange, Event> {
 
-    private final MgRepositoryFacade mgRepositoryFacade;
+    private final RepositoryFacade repositoryFacade;
     private final List<PayoutMapper> mappers;
 
     @Override
@@ -44,6 +44,6 @@ public class PayoutBatchHandler implements BatchHandler<PayoutChange, Event> {
                 .filter(Objects::nonNull)
                 .collect(toList());
 
-        return () -> mgRepositoryFacade.insertPayouts(payoutRows);
+        return () -> repositoryFacade.insertPayouts(payoutRows);
     }
 }

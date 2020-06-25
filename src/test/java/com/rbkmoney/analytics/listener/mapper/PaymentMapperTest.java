@@ -1,10 +1,10 @@
 package com.rbkmoney.analytics.listener.mapper;
 
-import com.rbkmoney.analytics.MgEventSinkFlowGenerator;
-import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
+import com.rbkmoney.analytics.InvoiceFlowGenerator;
+import com.rbkmoney.analytics.dao.model.PaymentRow;
 import com.rbkmoney.analytics.domain.CashFlowResult;
 import com.rbkmoney.analytics.domain.InvoicePaymentWrapper;
-import com.rbkmoney.analytics.listener.mapper.factory.MgPaymentSinkRowFactory;
+import com.rbkmoney.analytics.listener.mapper.factory.PaymentRowFactory;
 import com.rbkmoney.analytics.listener.mapper.invoice.PaymentMapper;
 import com.rbkmoney.analytics.service.HgClientService;
 import com.rbkmoney.analytics.utils.EventRangeFactory;
@@ -33,7 +33,7 @@ public class PaymentMapperTest {
     public static final long AMOUNT = 123L;
 
     @Mock
-    private MgPaymentSinkRowFactory mgPaymentSinkRowFactory;
+    private PaymentRowFactory paymentRowFactory;
     @Mock
     private InvoicingSrv.Iface invoicingClient;
     @Mock
@@ -45,18 +45,18 @@ public class PaymentMapperTest {
     public void init() {
         MockitoAnnotations.initMocks(this);
         HgClientService hgClientService = new HgClientService(invoicingClient, eventRangeFactory);
-        paymentMapper = new PaymentMapper(hgClientService, mgPaymentSinkRowFactory);
+        paymentMapper = new PaymentMapper(hgClientService, paymentRowFactory);
     }
 
     @Test
     public void map() throws TException {
         String paymentId = "test";
         when(invoicingClient.get(any(), any(), any())).thenReturn(createInvoice(paymentId));
-        MgPaymentSinkRow paymentSinkRow = new MgPaymentSinkRow();
-        paymentSinkRow.setCashFlowResult(CashFlowResult.EMPTY);
-        when(mgPaymentSinkRowFactory.create(any(), any(), any())).thenReturn(paymentSinkRow);
-        MgPaymentSinkRow sinkRow = paymentMapper.map(
-                MgEventSinkFlowGenerator.createInvoiceFailed(paymentId), new MachineEvent());
+        PaymentRow paymentRow = new PaymentRow();
+        paymentRow.setCashFlowResult(CashFlowResult.EMPTY);
+        when(paymentRowFactory.create(any(), any(), any())).thenReturn(paymentRow);
+        PaymentRow sinkRow = paymentMapper.map(
+                InvoiceFlowGenerator.createInvoiceFailed(paymentId), new MachineEvent());
 
         Assert.assertEquals(AMOUNT, sinkRow.getCashFlowResult().getAmount());
     }

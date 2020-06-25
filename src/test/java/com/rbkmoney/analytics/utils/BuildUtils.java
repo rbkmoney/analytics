@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.rbkmoney.analytics.MgEventSinkFlowGenerator.createCash;
+import static com.rbkmoney.analytics.InvoiceFlowGenerator.createCash;
 
 public class BuildUtils {
 

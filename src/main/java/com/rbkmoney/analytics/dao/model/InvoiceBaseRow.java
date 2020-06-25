@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
-public class MgBaseRow {
+public class InvoiceBaseRow {
 
     private LocalDateTime eventTime;
     private LocalDateTime paymentTime;

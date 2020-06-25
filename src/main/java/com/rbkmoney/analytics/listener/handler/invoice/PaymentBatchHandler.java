@@ -1,7 +1,7 @@
 package com.rbkmoney.analytics.listener.handler.invoice;
 
-import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
-import com.rbkmoney.analytics.dao.repository.MgRepositoryFacade;
+import com.rbkmoney.analytics.dao.model.PaymentRow;
+import com.rbkmoney.analytics.dao.repository.RepositoryFacade;
 import com.rbkmoney.analytics.listener.Processor;
 import com.rbkmoney.analytics.listener.handler.BatchHandler;
 import com.rbkmoney.analytics.listener.mapper.invoice.PaymentMapper;
@@ -20,7 +20,7 @@ import static java.util.stream.Collectors.toList;
 @RequiredArgsConstructor
 public class PaymentBatchHandler implements BatchHandler<InvoiceChange, MachineEvent> {
 
-    private final MgRepositoryFacade mgRepositoryFacade;
+    private final RepositoryFacade repositoryFacade;
     private final List<PaymentMapper> mappers;
 
     @Override
@@ -31,7 +31,7 @@ public class PaymentBatchHandler implements BatchHandler<InvoiceChange, MachineE
 
     @Override
     public Processor handle(List<Map.Entry<MachineEvent, InvoiceChange>> changes) {
-        List<MgPaymentSinkRow> invoiceEvents = changes.stream()
+        List<PaymentRow> invoiceEvents = changes.stream()
                 .map(changeWithParent -> {
                     InvoiceChange change = changeWithParent.getValue();
                     for (PaymentMapper invoiceMapper : getMappers()) {
@@ -44,6 +44,6 @@ public class PaymentBatchHandler implements BatchHandler<InvoiceChange, MachineE
                 .filter(Objects::nonNull)
                 .collect(toList());
 
-        return () -> mgRepositoryFacade.insertPayments(invoiceEvents);
+        return () -> repositoryFacade.insertPayments(invoiceEvents);
     }
 }

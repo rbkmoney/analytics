@@ -44,14 +44,14 @@ public class ClickHousePaymentRepository {
     private final SplitStatusRowsMapper splitStatusRowsMapper;
 
     @Retryable(value = ClickHouseException.class, backoff = @Backoff(delay = 5000))
-    public void insertBatch(List<MgPaymentSinkRow> mgPaymentSinkRows) {
-        if (mgPaymentSinkRows != null && !mgPaymentSinkRows.isEmpty()) {
-            log.info("Batch start insert mgPaymentSinkRows: {} firstElement: {}", mgPaymentSinkRows.size(),
-                    mgPaymentSinkRows.get(0).getInvoiceId());
+    public void insertBatch(List<PaymentRow> paymentRows) {
+        if (paymentRows != null && !paymentRows.isEmpty()) {
+            log.info("Batch start insert paymentRows: {} firstElement: {}", paymentRows.size(),
+                    paymentRows.get(0).getInvoiceId());
             clickHouseJdbcTemplate.batchUpdate(ClickHousePaymentBatchPreparedStatementSetter.INSERT,
-                    new ClickHousePaymentBatchPreparedStatementSetter(mgPaymentSinkRows));
-            log.info("Batch inserted mgPaymentSinkRows: {} firstElement: {}", mgPaymentSinkRows.size(),
-                    mgPaymentSinkRows.get(0).getInvoiceId());
+                    new ClickHousePaymentBatchPreparedStatementSetter(paymentRows));
+            log.info("Batch inserted paymentRows: {} firstElement: {}", paymentRows.size(),
+                    paymentRows.get(0).getInvoiceId());
         }
     }
 

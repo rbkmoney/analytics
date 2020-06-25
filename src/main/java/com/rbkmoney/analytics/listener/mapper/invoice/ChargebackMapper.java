@@ -2,7 +2,7 @@ package com.rbkmoney.analytics.listener.mapper.invoice;
 
 import com.rbkmoney.analytics.constant.ChargebackStatus;
 import com.rbkmoney.analytics.constant.EventType;
-import com.rbkmoney.analytics.dao.model.MgChargebackRow;
+import com.rbkmoney.analytics.dao.model.ChargebackRow;
 import com.rbkmoney.analytics.domain.InvoicePaymentWrapper;
 import com.rbkmoney.analytics.listener.mapper.Mapper;
 import com.rbkmoney.analytics.listener.mapper.factory.RowFactory;
@@ -20,13 +20,13 @@ import java.util.function.BiFunction;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ChargebackMapper implements Mapper<InvoiceChange, MachineEvent, MgChargebackRow> {
+public class ChargebackMapper implements Mapper<InvoiceChange, MachineEvent, ChargebackRow> {
 
     private final HgClientService hgClientService;
-    private final RowFactory<MgChargebackRow> mgChargebackRowRowFactory;
+    private final RowFactory<ChargebackRow> chargebackRowRowFactory;
 
     @Override
-    public MgChargebackRow map(InvoiceChange change, MachineEvent event) {
+    public ChargebackRow map(InvoiceChange change, MachineEvent event) {
         InvoicePaymentChange invoicePaymentChange = change.getInvoicePaymentChange();
         String paymentId = invoicePaymentChange.getId();
         InvoicePaymentChargebackChange invoicePaymentChargebackChange = invoicePaymentChange.getPayload().getInvoicePaymentChargebackChange();
@@ -36,7 +36,7 @@ public class ChargebackMapper implements Mapper<InvoiceChange, MachineEvent, MgC
         String chargebackId = invoicePaymentChargebackChange.getId();
         InvoicePaymentWrapper invoicePaymentWrapper = hgClientService.getInvoiceInfo(event.getSourceId(), findPayment(),
                 paymentId, chargebackId, event.getEventId());
-        MgChargebackRow chargebackRow = mgChargebackRowRowFactory.create(event, invoicePaymentWrapper, chargebackId);
+        ChargebackRow chargebackRow = chargebackRowRowFactory.create(event, invoicePaymentWrapper, chargebackId);
 
         chargebackRow.setStatus(TBaseUtil.unionFieldToEnum(
                 invoicePaymentChargebackStatusChanged.getStatus(), ChargebackStatus.class));

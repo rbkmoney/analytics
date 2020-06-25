@@ -2,7 +2,7 @@ package com.rbkmoney.analytics.listener.mapper.invoice;
 
 import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.constant.PaymentStatus;
-import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
+import com.rbkmoney.analytics.dao.model.PaymentRow;
 import com.rbkmoney.analytics.domain.CashFlowResult;
 import com.rbkmoney.analytics.domain.InvoicePaymentWrapper;
 import com.rbkmoney.analytics.listener.mapper.Mapper;
@@ -24,12 +24,12 @@ import java.util.function.BiFunction;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class PaymentMapper implements Mapper<InvoiceChange, MachineEvent, MgPaymentSinkRow> {
+public class PaymentMapper implements Mapper<InvoiceChange, MachineEvent, PaymentRow> {
 
     public static final String OPERATION_TIMEOUT = "operation_timeout";
 
     private final HgClientService hgClientService;
-    private final RowFactory<MgPaymentSinkRow> mgPaymentSinkRowFactory;
+    private final RowFactory<PaymentRow> paymentSinkRowFactory;
 
     @Override
     public boolean accept(InvoiceChange change) {
@@ -40,7 +40,7 @@ public class PaymentMapper implements Mapper<InvoiceChange, MachineEvent, MgPaym
     }
 
     @Override
-    public MgPaymentSinkRow map(InvoiceChange change, MachineEvent event) {
+    public PaymentRow map(InvoiceChange change, MachineEvent event) {
         String paymentId = change.getInvoicePaymentChange().getId();
         InvoicePaymentChange invoicePaymentChange = change.getInvoicePaymentChange();
         InvoicePaymentChangePayload payload = invoicePaymentChange.getPayload();
@@ -48,28 +48,28 @@ public class PaymentMapper implements Mapper<InvoiceChange, MachineEvent, MgPaym
 
         InvoicePaymentWrapper invoicePaymentWrapper = hgClientService.getInvoiceInfo(event.getSourceId(), findPayment(), paymentId, event.getEventId());
 
-        MgPaymentSinkRow mgPaymentSinkRow = mgPaymentSinkRowFactory.create(event, invoicePaymentWrapper, paymentId);
+        PaymentRow paymentRow = paymentSinkRowFactory.create(event, invoicePaymentWrapper, paymentId);
 
-        mgPaymentSinkRow.setStatus(TBaseUtil.unionFieldToEnum(invoicePaymentStatusChanged.getStatus(), PaymentStatus.class));
+        paymentRow.setStatus(TBaseUtil.unionFieldToEnum(invoicePaymentStatusChanged.getStatus(), PaymentStatus.class));
 
         if (invoicePaymentStatusChanged.getStatus().isSetFailed()) {
             OperationFailure operationFailure = invoicePaymentStatusChanged.getStatus().getFailed().getFailure();
             if (operationFailure.isSetFailure()) {
                 Failure failure = operationFailure.getFailure();
-                mgPaymentSinkRow.setErrorCode(TErrorUtil.toStringVal(failure));
-                mgPaymentSinkRow.setErrorReason(failure.getReason());
+                paymentRow.setErrorCode(TErrorUtil.toStringVal(failure));
+                paymentRow.setErrorReason(failure.getReason());
             } else if (invoicePaymentStatusChanged.getStatus().getFailed().getFailure().isSetOperationTimeout()) {
-                mgPaymentSinkRow.setErrorCode(OPERATION_TIMEOUT);
+                paymentRow.setErrorCode(OPERATION_TIMEOUT);
             }
-            if (mgPaymentSinkRow.getCashFlowResult() == null || mgPaymentSinkRow.getCashFlowResult().getAmount() == 0) {
-                mgPaymentSinkRow.setCashFlowResult(CashFlowResult.builder()
+            if (paymentRow.getCashFlowResult() == null || paymentRow.getCashFlowResult().getAmount() == 0) {
+                paymentRow.setCashFlowResult(CashFlowResult.builder()
                         .amount(invoicePaymentWrapper.getInvoicePayment().getPayment().getCost().getAmount())
                         .build());
             }
         }
 
-        log.debug("InvoicePaymentMapper mgPaymentSinkRow: {}", mgPaymentSinkRow);
-        return mgPaymentSinkRow;
+        log.debug("PaymentMapper paymentRow: {}", paymentRow);
+        return paymentRow;
     }
 
     private BiFunction<String, Invoice, Optional<InvoicePayment>> findPayment() {

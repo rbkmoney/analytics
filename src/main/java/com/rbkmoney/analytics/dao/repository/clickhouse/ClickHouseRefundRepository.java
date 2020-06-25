@@ -1,7 +1,7 @@
 package com.rbkmoney.analytics.dao.repository.clickhouse;
 
 import com.rbkmoney.analytics.dao.mapper.CommonRowsMapper;
-import com.rbkmoney.analytics.dao.model.MgRefundRow;
+import com.rbkmoney.analytics.dao.model.RefundRow;
 import com.rbkmoney.analytics.dao.model.NumberModel;
 import com.rbkmoney.analytics.dao.utils.QueryUtils;
 import com.rbkmoney.analytics.utils.TimeParamUtils;
@@ -27,11 +27,11 @@ public class ClickHouseRefundRepository {
     private final CommonRowsMapper<NumberModel> costCommonRowsMapper;
 
     @Retryable(value = ClickHouseException.class, backoff = @Backoff(delay = 5000))
-    public void insertBatch(List<MgRefundRow> mgRefundRows) {
-        if (mgRefundRows != null && !mgRefundRows.isEmpty()) {
-            clickHouseJdbcTemplate.batchUpdate(ClickHouseRefundBatchPreparedStatementSetter.INSERT, new ClickHouseRefundBatchPreparedStatementSetter(mgRefundRows));
-            log.info("Batch inserted mgRefundRows: {} firstElement: {}", mgRefundRows.size(),
-                    mgRefundRows.get(0).getInvoiceId());
+    public void insertBatch(List<RefundRow> refundRows) {
+        if (refundRows != null && !refundRows.isEmpty()) {
+            clickHouseJdbcTemplate.batchUpdate(ClickHouseRefundBatchPreparedStatementSetter.INSERT, new ClickHouseRefundBatchPreparedStatementSetter(refundRows));
+            log.info("Batch inserted refundRows: {} firstElement: {}", refundRows.size(),
+                    refundRows.get(0).getInvoiceId());
         }
     }
 

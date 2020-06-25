@@ -1,7 +1,7 @@
 package com.rbkmoney.analytics.listener.handler.invoice;
 
-import com.rbkmoney.analytics.dao.model.MgRefundRow;
-import com.rbkmoney.analytics.dao.repository.MgRepositoryFacade;
+import com.rbkmoney.analytics.dao.model.RefundRow;
+import com.rbkmoney.analytics.dao.repository.RepositoryFacade;
 import com.rbkmoney.analytics.listener.Processor;
 import com.rbkmoney.analytics.listener.handler.BatchHandler;
 import com.rbkmoney.analytics.listener.mapper.invoice.RefundMapper;
@@ -20,7 +20,7 @@ import static java.util.stream.Collectors.toList;
 @RequiredArgsConstructor
 public class RefundBatchHandler implements BatchHandler<InvoiceChange, MachineEvent> {
 
-    private final MgRepositoryFacade mgRepositoryFacade;
+    private final RepositoryFacade repositoryFacade;
     private final List<RefundMapper> mappers;
 
     @Override
@@ -31,7 +31,7 @@ public class RefundBatchHandler implements BatchHandler<InvoiceChange, MachineEv
 
     @Override
     public Processor handle(List<Map.Entry<MachineEvent, InvoiceChange>> changes) {
-        List<MgRefundRow> invoiceEvents = changes.stream()
+        List<RefundRow> invoiceEvents = changes.stream()
                 .map(changeWithParent -> {
                     InvoiceChange change = changeWithParent.getValue();
                     for (RefundMapper invoiceMapper : getMappers()) {
@@ -44,6 +44,6 @@ public class RefundBatchHandler implements BatchHandler<InvoiceChange, MachineEv
                 .filter(Objects::nonNull)
                 .collect(toList());
 
-        return () -> mgRepositoryFacade.insertRefunds(invoiceEvents);
+        return () -> repositoryFacade.insertRefunds(invoiceEvents);
     }
 }

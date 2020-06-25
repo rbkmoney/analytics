@@ -2,7 +2,7 @@ package com.rbkmoney.analytics.listener.mapper.invoice;
 
 import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.constant.RefundStatus;
-import com.rbkmoney.analytics.dao.model.MgRefundRow;
+import com.rbkmoney.analytics.dao.model.RefundRow;
 import com.rbkmoney.analytics.domain.InvoicePaymentWrapper;
 import com.rbkmoney.analytics.listener.mapper.Mapper;
 import com.rbkmoney.analytics.listener.mapper.factory.RowFactory;
@@ -22,15 +22,15 @@ import java.util.function.BiFunction;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class RefundMapper implements Mapper<InvoiceChange, MachineEvent, MgRefundRow> {
+public class RefundMapper implements Mapper<InvoiceChange, MachineEvent, RefundRow> {
 
     public static final String OPERATION_TIMEOUT = "operation_timeout";
 
     private final HgClientService hgClientService;
-    private final RowFactory<MgRefundRow> mgRefundRowFactory;
+    private final RowFactory<RefundRow> refundRowFactory;
 
     @Override
-    public MgRefundRow map(InvoiceChange change, MachineEvent event) {
+    public RefundRow map(InvoiceChange change, MachineEvent event) {
         InvoicePaymentChange invoicePaymentChange = change.getInvoicePaymentChange();
         String paymentId = invoicePaymentChange.getId();
         InvoicePaymentRefundChange invoicePaymentRefundChange = invoicePaymentChange.getPayload().getInvoicePaymentRefundChange();
@@ -40,7 +40,7 @@ public class RefundMapper implements Mapper<InvoiceChange, MachineEvent, MgRefun
 
         InvoicePaymentWrapper invoicePaymentWrapper = hgClientService.getInvoiceInfo(
                 event.getSourceId(), findPayment(), paymentId, refundId, event.getEventId());
-        MgRefundRow refundRow = mgRefundRowFactory.create(event, invoicePaymentWrapper, refundId);
+        RefundRow refundRow = refundRowFactory.create(event, invoicePaymentWrapper, refundId);
 
         refundRow.setStatus(TBaseUtil.unionFieldToEnum(payload
                 .getInvoicePaymentRefundStatusChanged()

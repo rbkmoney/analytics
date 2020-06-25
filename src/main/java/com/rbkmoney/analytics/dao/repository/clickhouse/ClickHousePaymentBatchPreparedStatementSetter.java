@@ -1,7 +1,7 @@
 package com.rbkmoney.analytics.dao.repository.clickhouse;
 
 import com.rbkmoney.analytics.constant.ClickHouseUtilsValue;
-import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
+import com.rbkmoney.analytics.dao.model.PaymentRow;
 import com.rbkmoney.analytics.domain.CashFlowResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -23,11 +23,11 @@ public class ClickHousePaymentBatchPreparedStatementSetter implements BatchPrepa
             "paymentCountry, bankCountry, paymentTime, providerId, terminal)" +
             " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    private final List<MgPaymentSinkRow> batch;
+    private final List<PaymentRow> batch;
 
     @Override
     public void setValues(PreparedStatement ps, int i) throws SQLException {
-        MgPaymentSinkRow row = batch.get(i);
+        PaymentRow row = batch.get(i);
         int l = 1;
         ps.setObject(l++, row.getEventTime().toLocalDate());
         ps.setLong(l++, row.getEventTime().toEpochSecond(ZoneOffset.UTC));

@@ -2,7 +2,7 @@ package com.rbkmoney.analytics.listener.mapper.invoice;
 
 import com.rbkmoney.analytics.constant.AdjustmentStatus;
 import com.rbkmoney.analytics.constant.EventType;
-import com.rbkmoney.analytics.dao.model.MgAdjustmentRow;
+import com.rbkmoney.analytics.dao.model.AdjustmentRow;
 import com.rbkmoney.analytics.domain.InvoicePaymentWrapper;
 import com.rbkmoney.analytics.listener.mapper.Mapper;
 import com.rbkmoney.analytics.listener.mapper.factory.RowFactory;
@@ -20,10 +20,10 @@ import java.util.function.BiFunction;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class AdjustmentMapper implements Mapper<InvoiceChange, MachineEvent, MgAdjustmentRow> {
+public class AdjustmentMapper implements Mapper<InvoiceChange, MachineEvent, AdjustmentRow> {
 
     private final HgClientService hgClientService;
-    private final RowFactory<MgAdjustmentRow> mgAdjustmentRowFactory;
+    private final RowFactory<AdjustmentRow> adjustmentRowFactory;
 
     @Override
     public boolean accept(InvoiceChange change) {
@@ -31,7 +31,7 @@ public class AdjustmentMapper implements Mapper<InvoiceChange, MachineEvent, MgA
     }
 
     @Override
-    public MgAdjustmentRow map(InvoiceChange change, MachineEvent event) {
+    public AdjustmentRow map(InvoiceChange change, MachineEvent event) {
         InvoicePaymentChange invoicePaymentChange = change.getInvoicePaymentChange();
         String paymentId = invoicePaymentChange.getId();
         InvoicePaymentAdjustmentChange invoicePaymentAdjustmentChange = invoicePaymentChange
@@ -42,14 +42,14 @@ public class AdjustmentMapper implements Mapper<InvoiceChange, MachineEvent, MgA
 
         InvoicePaymentWrapper invoicePaymentWrapper = hgClientService.getInvoiceInfo(
                 event.getSourceId(), findPayment(), paymentId, adjustmentChangeId, event.getEventId());
-        MgAdjustmentRow mgAdjustmentRow = mgAdjustmentRowFactory.create(event, invoicePaymentWrapper, adjustmentChangeId);
+        AdjustmentRow adjustmentRow = adjustmentRowFactory.create(event, invoicePaymentWrapper, adjustmentChangeId);
 
-        mgAdjustmentRow.setStatus(TBaseUtil.unionFieldToEnum(payload
+        adjustmentRow.setStatus(TBaseUtil.unionFieldToEnum(payload
                 .getInvoicePaymentAdjustmentStatusChanged()
                 .getStatus(), AdjustmentStatus.class));
 
-        log.debug("RefundPaymentMapper mgAdjustmentRow: {}", mgAdjustmentRow);
-        return mgAdjustmentRow;
+        log.debug("AdjustmentMapper adjustmentRow: {}", adjustmentRow);
+        return adjustmentRow;
     }
 
     private BiFunction<String, Invoice, Optional<InvoicePayment>> findPayment() {

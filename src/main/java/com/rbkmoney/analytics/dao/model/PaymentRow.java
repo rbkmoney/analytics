@@ -1,6 +1,6 @@
 package com.rbkmoney.analytics.dao.model;
 
-import com.rbkmoney.analytics.constant.RefundStatus;
+import com.rbkmoney.analytics.constant.PaymentStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -10,11 +10,8 @@ import lombok.ToString;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-public class MgRefundRow extends MgBaseRow {
+public class PaymentRow extends InvoiceBaseRow {
 
-    private RefundStatus status;
-
-    private String reason;
-    private String refundId;
+    private PaymentStatus status;
 
 }

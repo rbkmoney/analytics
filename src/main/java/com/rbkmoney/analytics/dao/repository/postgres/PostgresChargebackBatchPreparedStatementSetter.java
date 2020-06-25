@@ -1,7 +1,6 @@
 package com.rbkmoney.analytics.dao.repository.postgres;
 
-import com.rbkmoney.analytics.dao.model.MgChargebackRow;
-import com.rbkmoney.analytics.dao.model.MgRefundRow;
+import com.rbkmoney.analytics.dao.model.ChargebackRow;
 import com.rbkmoney.analytics.domain.CashFlowResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -13,11 +12,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PostgresChargebackBatchPreparedStatementSetter implements BatchPreparedStatementSetter {
 
-    private final List<MgChargebackRow> batch;
+    private final List<ChargebackRow> batch;
 
     @Override
     public void setValues(PreparedStatement ps, int i) throws SQLException {
-        MgChargebackRow row = batch.get(i);
+        ChargebackRow row = batch.get(i);
         int l = 1;
         ps.setString(l++, row.getInvoiceId() + "-" + row.getSequenceId());
         ps.setObject(l++, row.getEventTime());

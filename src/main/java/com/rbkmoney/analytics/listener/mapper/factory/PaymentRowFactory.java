@@ -1,7 +1,7 @@
 package com.rbkmoney.analytics.listener.mapper.factory;
 
 import com.rbkmoney.analytics.computer.CashFlowComputer;
-import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
+import com.rbkmoney.analytics.dao.model.PaymentRow;
 import com.rbkmoney.analytics.domain.InvoicePaymentWrapper;
 import com.rbkmoney.analytics.service.GeoProvider;
 import com.rbkmoney.damsel.domain.FinalCashFlowPosting;
@@ -14,23 +14,23 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class MgPaymentSinkRowFactory extends MgBaseRowFactory<MgPaymentSinkRow> {
+public class PaymentRowFactory extends InvoiceBaseRowFactory<PaymentRow> {
 
     private final CashFlowComputer cashFlowComputer;
 
-    public MgPaymentSinkRowFactory(GeoProvider geoProvider, CashFlowComputer cashFlowComputer) {
+    public PaymentRowFactory(GeoProvider geoProvider, CashFlowComputer cashFlowComputer) {
         super(geoProvider);
         this.cashFlowComputer = cashFlowComputer;
     }
 
     @Override
-    public MgPaymentSinkRow create(MachineEvent machineEvent, InvoicePaymentWrapper invoicePaymentWrapper, String paymentId) {
-        MgPaymentSinkRow mgPaymentSinkRow = new MgPaymentSinkRow();
+    public PaymentRow create(MachineEvent machineEvent, InvoicePaymentWrapper invoicePaymentWrapper, String paymentId) {
+        PaymentRow paymentRow = new PaymentRow();
         InvoicePayment payment = invoicePaymentWrapper.getInvoicePayment();
         List<FinalCashFlowPosting> cashFlow = payment.getCashFlow();
-        mgPaymentSinkRow.setCashFlowResult(cashFlowComputer.compute(cashFlow));
-        initBaseRow(machineEvent, mgPaymentSinkRow, payment, invoicePaymentWrapper.getInvoice());
-        return mgPaymentSinkRow;
+        paymentRow.setCashFlowResult(cashFlowComputer.compute(cashFlow));
+        initBaseRow(machineEvent, paymentRow, payment, invoicePaymentWrapper.getInvoice());
+        return paymentRow;
     }
 
 }

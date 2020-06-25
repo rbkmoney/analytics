@@ -1,7 +1,7 @@
 package com.rbkmoney.analytics.listener.handler.invoice;
 
-import com.rbkmoney.analytics.dao.model.MgChargebackRow;
-import com.rbkmoney.analytics.dao.repository.MgRepositoryFacade;
+import com.rbkmoney.analytics.dao.model.ChargebackRow;
+import com.rbkmoney.analytics.dao.repository.RepositoryFacade;
 import com.rbkmoney.analytics.listener.Processor;
 import com.rbkmoney.analytics.listener.handler.BatchHandler;
 import com.rbkmoney.analytics.listener.mapper.invoice.ChargebackMapper;
@@ -20,7 +20,7 @@ import static java.util.stream.Collectors.toList;
 @RequiredArgsConstructor
 public class ChargebackBatchHandler implements BatchHandler<InvoiceChange, MachineEvent> {
 
-    private final MgRepositoryFacade mgRepositoryFacade;
+    private final RepositoryFacade repositoryFacade;
     private final List<ChargebackMapper> mappers;
 
     @Override
@@ -31,15 +31,15 @@ public class ChargebackBatchHandler implements BatchHandler<InvoiceChange, Machi
 
     @Override
     public Processor handle(List<Map.Entry<MachineEvent, InvoiceChange>> changes) {
-        List<MgChargebackRow> invoiceEvents = changes.stream()
+        List<ChargebackRow> invoiceEvents = changes.stream()
                 .map(this::findAndMapChange)
                 .filter(Objects::nonNull)
                 .collect(toList());
 
-        return () -> mgRepositoryFacade.insertChargebacks(invoiceEvents);
+        return () -> repositoryFacade.insertChargebacks(invoiceEvents);
     }
 
-    private MgChargebackRow findAndMapChange(Map.Entry<MachineEvent, InvoiceChange> changeWithParent) {
+    private ChargebackRow findAndMapChange(Map.Entry<MachineEvent, InvoiceChange> changeWithParent) {
         InvoiceChange change = changeWithParent.getValue();
         for (ChargebackMapper invoiceMapper : getMappers()) {
             if (invoiceMapper.accept(change)) {

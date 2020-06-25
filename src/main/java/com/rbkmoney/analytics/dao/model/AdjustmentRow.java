@@ -11,7 +11,7 @@ import lombok.ToString;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-public class MgAdjustmentRow extends MgBaseRow {
+public class AdjustmentRow extends InvoiceBaseRow {
 
     private AdjustmentStatus status;
     private String adjustmentId;

@@ -3,7 +3,7 @@ package com.rbkmoney.analytics.listener.mapper.factory;
 import com.rbkmoney.analytics.computer.CashFlowComputer;
 import com.rbkmoney.analytics.constant.ChargebackCategory;
 import com.rbkmoney.analytics.constant.ChargebackStage;
-import com.rbkmoney.analytics.dao.model.MgChargebackRow;
+import com.rbkmoney.analytics.dao.model.ChargebackRow;
 import com.rbkmoney.analytics.domain.InvoicePaymentWrapper;
 import com.rbkmoney.analytics.exception.ChargebackInfoNotFoundException;
 import com.rbkmoney.analytics.service.GeoProvider;
@@ -20,33 +20,33 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class MgChargebackRowFactory extends MgBaseRowFactory<MgChargebackRow> {
+public class ChargebackRowFactory extends InvoiceBaseRowFactory<ChargebackRow> {
 
     private final CashFlowComputer cashFlowComputer;
 
-    public MgChargebackRowFactory(GeoProvider geoProvider, CashFlowComputer cashFlowComputer) {
+    public ChargebackRowFactory(GeoProvider geoProvider, CashFlowComputer cashFlowComputer) {
         super(geoProvider);
         this.cashFlowComputer = cashFlowComputer;
     }
 
     @Override
-    public MgChargebackRow create(MachineEvent machineEvent, InvoicePaymentWrapper invoicePaymentWrapper, String chargebackId) {
-        MgChargebackRow mgChargebackRow = new MgChargebackRow();
+    public ChargebackRow create(MachineEvent machineEvent, InvoicePaymentWrapper invoicePaymentWrapper, String chargebackId) {
+        ChargebackRow chargebackRow = new ChargebackRow();
         InvoicePayment payment = invoicePaymentWrapper.getInvoicePayment();
         Invoice invoice = invoicePaymentWrapper.getInvoice();
         payment.getChargebacks().stream()
                 .filter(chargeback -> chargeback.getChargeback().getId().equals(chargebackId))
                 .findFirst()
                 .ifPresentOrElse(chargeback -> {
-                            mapRow(machineEvent, mgChargebackRow, payment, invoice, chargebackId, chargeback);
+                            mapRow(machineEvent, chargebackRow, payment, invoice, chargebackId, chargeback);
                         }, () -> {
                             throw new ChargebackInfoNotFoundException();
                         }
                 );
-        return mgChargebackRow;
+        return chargebackRow;
     }
 
-    private void mapRow(MachineEvent machineEvent, MgChargebackRow row, InvoicePayment payment, Invoice invoice, String chargebackId, InvoicePaymentChargeback chargeback) {
+    private void mapRow(MachineEvent machineEvent, ChargebackRow row, InvoicePayment payment, Invoice invoice, String chargebackId, InvoicePaymentChargeback chargeback) {
         List<FinalCashFlowPosting> cashFlow = chargeback.isSetCashFlow() ? chargeback.getCashFlow() : payment.getCashFlow();
         row.setChargebackId(chargebackId);
         row.setPaymentId(payment.getPayment().getId());

@@ -1,12 +1,12 @@
 package com.rbkmoney.analytics.repository;
 
 import com.rbkmoney.analytics.AnalyticsApplication;
-import com.rbkmoney.analytics.dao.model.MgAdjustmentRow;
-import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
-import com.rbkmoney.analytics.dao.model.MgRefundRow;
+import com.rbkmoney.analytics.dao.model.AdjustmentRow;
+import com.rbkmoney.analytics.dao.model.PaymentRow;
+import com.rbkmoney.analytics.dao.model.RefundRow;
 import com.rbkmoney.analytics.dao.repository.postgres.PostgresBalanceChangesRepository;
 import com.rbkmoney.analytics.domain.CashFlowResult;
-import com.rbkmoney.analytics.listener.MgInvoiceListener;
+import com.rbkmoney.analytics.listener.InvoiceListener;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,7 +44,7 @@ public class PostgresRepositoryTest {
     protected int port;
 
     @MockBean
-    private MgInvoiceListener mgInvoiceListener;
+    private InvoiceListener invoiceListener;
 
     @Autowired
     private PostgresBalanceChangesRepository postgresBalanceChangesRepository;
@@ -71,53 +71,53 @@ public class PostgresRepositoryTest {
         postgresBalanceChangesRepository.insertAdjustments(List.of(adjustment()));
     }
 
-    private MgPaymentSinkRow payment() {
-        MgPaymentSinkRow mgPaymentSinkRow = new MgPaymentSinkRow();
-        mgPaymentSinkRow.setInvoiceId("invoice_id");
-        mgPaymentSinkRow.setSequenceId(1L);
-        mgPaymentSinkRow.setEventTime(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
-        mgPaymentSinkRow.setCurrency("RUB");
-        mgPaymentSinkRow.setPartyId("party_id");
-        mgPaymentSinkRow.setShopId("shop_id");
-        mgPaymentSinkRow.setCashFlowResult(CashFlowResult.builder()
+    private PaymentRow payment() {
+        PaymentRow paymentRow = new PaymentRow();
+        paymentRow.setInvoiceId("invoice_id");
+        paymentRow.setSequenceId(1L);
+        paymentRow.setEventTime(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+        paymentRow.setCurrency("RUB");
+        paymentRow.setPartyId("party_id");
+        paymentRow.setShopId("shop_id");
+        paymentRow.setCashFlowResult(CashFlowResult.builder()
                 .amount(1000L)
                 .systemFee(100L)
                 .build());
 
-        return mgPaymentSinkRow;
+        return paymentRow;
     }
 
-    private MgRefundRow refund() {
-        MgRefundRow mgRefundRow = new MgRefundRow();
-        mgRefundRow.setInvoiceId("invoice_id");
-        mgRefundRow.setSequenceId(2L);
-        mgRefundRow.setEventTime(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
-        mgRefundRow.setCurrency("RUB");
-        mgRefundRow.setPartyId("party_id");
-        mgRefundRow.setShopId("shop_id");
-        mgRefundRow.setCashFlowResult(CashFlowResult.builder()
+    private RefundRow refund() {
+        RefundRow refundRow = new RefundRow();
+        refundRow.setInvoiceId("invoice_id");
+        refundRow.setSequenceId(2L);
+        refundRow.setEventTime(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+        refundRow.setCurrency("RUB");
+        refundRow.setPartyId("party_id");
+        refundRow.setShopId("shop_id");
+        refundRow.setCashFlowResult(CashFlowResult.builder()
                 .amount(500L)
                 .systemFee(50L)
                 .build());
 
-        return mgRefundRow;
+        return refundRow;
     }
 
-    private MgAdjustmentRow adjustment() {
-        MgAdjustmentRow mgAdjustmentRow = new MgAdjustmentRow();
-        mgAdjustmentRow.setInvoiceId("invoice_id");
-        mgAdjustmentRow.setSequenceId(3L);
-        mgAdjustmentRow.setEventTime(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
-        mgAdjustmentRow.setCurrency("RUB");
-        mgAdjustmentRow.setPartyId("party_id");
-        mgAdjustmentRow.setShopId("shop_id");
-        mgAdjustmentRow.setCashFlowResult(CashFlowResult.builder()
+    private AdjustmentRow adjustment() {
+        AdjustmentRow adjustmentRow = new AdjustmentRow();
+        adjustmentRow.setInvoiceId("invoice_id");
+        adjustmentRow.setSequenceId(3L);
+        adjustmentRow.setEventTime(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+        adjustmentRow.setCurrency("RUB");
+        adjustmentRow.setPartyId("party_id");
+        adjustmentRow.setShopId("shop_id");
+        adjustmentRow.setCashFlowResult(CashFlowResult.builder()
                 .systemFee(250L)
                 .build());
-        mgAdjustmentRow.setOldCashFlowResult(CashFlowResult.builder()
+        adjustmentRow.setOldCashFlowResult(CashFlowResult.builder()
                 .systemFee(100L)
                 .build());
 
-        return mgAdjustmentRow;
+        return adjustmentRow;
     }
 }

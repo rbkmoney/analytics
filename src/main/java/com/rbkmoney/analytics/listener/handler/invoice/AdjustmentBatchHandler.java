@@ -1,7 +1,7 @@
 package com.rbkmoney.analytics.listener.handler.invoice;
 
-import com.rbkmoney.analytics.dao.model.MgAdjustmentRow;
-import com.rbkmoney.analytics.dao.repository.MgRepositoryFacade;
+import com.rbkmoney.analytics.dao.model.AdjustmentRow;
+import com.rbkmoney.analytics.dao.repository.RepositoryFacade;
 import com.rbkmoney.analytics.listener.Processor;
 import com.rbkmoney.analytics.listener.handler.BatchHandler;
 import com.rbkmoney.analytics.listener.mapper.invoice.AdjustmentMapper;
@@ -20,7 +20,7 @@ import static java.util.stream.Collectors.toList;
 @RequiredArgsConstructor
 public class AdjustmentBatchHandler implements BatchHandler<InvoiceChange, MachineEvent> {
 
-    private final MgRepositoryFacade mgRepositoryFacade;
+    private final RepositoryFacade repositoryFacade;
     private final List<AdjustmentMapper> mappers;
 
     @Override
@@ -31,7 +31,7 @@ public class AdjustmentBatchHandler implements BatchHandler<InvoiceChange, Machi
 
     @Override
     public Processor handle(List<Map.Entry<MachineEvent, InvoiceChange>> changes) {
-        List<MgAdjustmentRow> invoiceEvents = changes.stream()
+        List<AdjustmentRow> invoiceEvents = changes.stream()
                 .map(changeWithParent -> {
                     InvoiceChange change = changeWithParent.getValue();
                     for (AdjustmentMapper mapper : getMappers()) {
@@ -44,6 +44,6 @@ public class AdjustmentBatchHandler implements BatchHandler<InvoiceChange, Machi
                 .filter(Objects::nonNull)
                 .collect(toList());
 
-        return () -> mgRepositoryFacade.insertAdjustments(invoiceEvents);
+        return () -> repositoryFacade.insertAdjustments(invoiceEvents);
     }
 }

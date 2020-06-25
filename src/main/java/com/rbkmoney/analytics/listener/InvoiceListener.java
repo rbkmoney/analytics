@@ -24,7 +24,7 @@ import static java.util.stream.Collectors.toList;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class MgInvoiceListener {
+public class InvoiceListener {
 
     @Value("${kafka.consumer.throttling-timeout-ms}")
     private int throttlingTimeout;
@@ -41,7 +41,7 @@ public class MgInvoiceListener {
             @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition,
             @Header(KafkaHeaders.OFFSET) int offsets,
             Acknowledgment ack) throws InterruptedException {
-        log.info("MgInvoiceListener listen offsets: {}, partition: {}, batch.size: {}", offsets, partition, batch.size());
+        log.info("InvoiceListener listen offsets: {}, partition: {}, batch.size: {}", offsets, partition, batch.size());
         handleMessages(batch);
         ack.acknowledge();
     }

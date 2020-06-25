@@ -1,6 +1,6 @@
 package com.rbkmoney.analytics.dao.repository.postgres;
 
-import com.rbkmoney.analytics.dao.model.MgRefundRow;
+import com.rbkmoney.analytics.dao.model.RefundRow;
 import com.rbkmoney.analytics.domain.CashFlowResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -12,11 +12,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PostgresRefundBatchPreparedStatementSetter implements BatchPreparedStatementSetter {
 
-    private final List<MgRefundRow> batch;
+    private final List<RefundRow> batch;
 
     @Override
     public void setValues(PreparedStatement ps, int i) throws SQLException {
-        MgRefundRow row = batch.get(i);
+        RefundRow row = batch.get(i);
         int l = 1;
         ps.setString(l++, row.getInvoiceId() + "-" + row.getSequenceId());
         ps.setObject(l++, row.getEventTime());

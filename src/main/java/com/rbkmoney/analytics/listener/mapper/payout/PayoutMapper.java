@@ -22,7 +22,6 @@ public class PayoutMapper implements Mapper<PayoutChange, Event, PayoutRow> {
 
     @Override
     public EventType getChangeType() {
-        // TODO [a.romanov]: impl
-        throw new UnsupportedOperationException();
+        return EventType.PAYOUT_STATUS_CHANGED;
     }
 }

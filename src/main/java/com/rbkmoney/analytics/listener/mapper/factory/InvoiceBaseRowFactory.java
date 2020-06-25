@@ -2,7 +2,7 @@ package com.rbkmoney.analytics.listener.mapper.factory;
 
 import com.rbkmoney.analytics.constant.ClickHouseUtilsValue;
 import com.rbkmoney.analytics.constant.PaymentToolType;
-import com.rbkmoney.analytics.dao.model.MgBaseRow;
+import com.rbkmoney.analytics.dao.model.InvoiceBaseRow;
 import com.rbkmoney.analytics.service.GeoProvider;
 import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.domain.Invoice;
@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
-public abstract class MgBaseRowFactory<T extends MgBaseRow> implements RowFactory<T> {
+public abstract class InvoiceBaseRowFactory<T extends InvoiceBaseRow> implements RowFactory<T> {
 
     private final GeoProvider geoProvider;
 

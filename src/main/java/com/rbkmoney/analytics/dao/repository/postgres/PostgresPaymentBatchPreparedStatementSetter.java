@@ -1,23 +1,22 @@
 package com.rbkmoney.analytics.dao.repository.postgres;
 
-import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
+import com.rbkmoney.analytics.dao.model.PaymentRow;
 import com.rbkmoney.analytics.domain.CashFlowResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.List;
 
 @RequiredArgsConstructor
 public class PostgresPaymentBatchPreparedStatementSetter implements BatchPreparedStatementSetter {
 
-    private final List<MgPaymentSinkRow> batch;
+    private final List<PaymentRow> batch;
 
     @Override
     public void setValues(PreparedStatement ps, int i) throws SQLException {
-        MgPaymentSinkRow row = batch.get(i);
+        PaymentRow row = batch.get(i);
         int l = 1;
         ps.setString(l++, row.getInvoiceId() + "-" + row.getSequenceId());
         ps.setObject(l++, row.getEventTime());

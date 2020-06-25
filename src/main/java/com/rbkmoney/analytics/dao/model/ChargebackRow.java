@@ -12,7 +12,7 @@ import lombok.ToString;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-public class MgChargebackRow extends MgBaseRow {
+public class ChargebackRow extends InvoiceBaseRow {
 
     private ChargebackStatus status;
     private String chargebackId;

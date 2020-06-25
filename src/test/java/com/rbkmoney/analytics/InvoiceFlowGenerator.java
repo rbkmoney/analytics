@@ -20,7 +20,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MgEventSinkFlowGenerator {
+public class InvoiceFlowGenerator {
 
     private static final String SOURCE_NS = "source_ns";
     private static final String PAYMENT_ID = "1";

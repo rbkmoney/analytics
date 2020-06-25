@@ -1,7 +1,7 @@
 package com.rbkmoney.analytics.listener.mapper.factory;
 
 import com.rbkmoney.analytics.computer.CashFlowComputer;
-import com.rbkmoney.analytics.dao.model.MgRefundRow;
+import com.rbkmoney.analytics.dao.model.RefundRow;
 import com.rbkmoney.analytics.domain.InvoicePaymentWrapper;
 import com.rbkmoney.analytics.exception.AdjustmentInfoNotFoundException;
 import com.rbkmoney.analytics.service.GeoProvider;
@@ -17,23 +17,23 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class MgRefundRowFactory extends MgBaseRowFactory<MgRefundRow> {
+public class RefundRowFactory extends InvoiceBaseRowFactory<RefundRow> {
 
     private final CashFlowComputer cashFlowComputer;
 
-    public MgRefundRowFactory(GeoProvider geoProvider, CashFlowComputer cashFlowComputer) {
+    public RefundRowFactory(GeoProvider geoProvider, CashFlowComputer cashFlowComputer) {
         super(geoProvider);
         this.cashFlowComputer = cashFlowComputer;
     }
 
     @Override
-    public MgRefundRow create(MachineEvent machineEvent, InvoicePaymentWrapper invoicePaymentWrapper, String refundId) {
-        MgRefundRow mgPaymentSinkRow = new MgRefundRow();
-        initInfo(machineEvent, mgPaymentSinkRow, invoicePaymentWrapper.getInvoicePayment(), invoicePaymentWrapper.getInvoice(), refundId);
-        return mgPaymentSinkRow;
+    public RefundRow create(MachineEvent machineEvent, InvoicePaymentWrapper invoicePaymentWrapper, String refundId) {
+        RefundRow refundRow = new RefundRow();
+        initInfo(machineEvent, refundRow, invoicePaymentWrapper.getInvoicePayment(), invoicePaymentWrapper.getInvoice(), refundId);
+        return refundRow;
     }
 
-    private void initInfo(MachineEvent machineEvent, MgRefundRow row, InvoicePayment payment, Invoice invoice, String refundId) {
+    private void initInfo(MachineEvent machineEvent, RefundRow row, InvoicePayment payment, Invoice invoice, String refundId) {
         payment.getRefunds().stream()
                 .filter(refund -> refund.getRefund().getId().equals(refundId))
                 .findFirst()
@@ -43,7 +43,7 @@ public class MgRefundRowFactory extends MgBaseRowFactory<MgRefundRow> {
                 );
     }
 
-    private void mapRow(MachineEvent machineEvent, MgRefundRow row, InvoicePayment payment, Invoice invoice,
+    private void mapRow(MachineEvent machineEvent, RefundRow row, InvoicePayment payment, Invoice invoice,
                         String refundId, InvoicePaymentRefund refund) {
         List<FinalCashFlowPosting> cashFlow = refund.isSetCashFlow() ? refund.getCashFlow() : payment.getCashFlow();
         row.setRefundId(refundId);

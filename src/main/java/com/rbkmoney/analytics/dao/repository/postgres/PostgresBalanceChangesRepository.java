@@ -1,9 +1,9 @@
 package com.rbkmoney.analytics.dao.repository.postgres;
 
-import com.rbkmoney.analytics.dao.model.MgAdjustmentRow;
-import com.rbkmoney.analytics.dao.model.MgChargebackRow;
-import com.rbkmoney.analytics.dao.model.MgPaymentSinkRow;
-import com.rbkmoney.analytics.dao.model.MgRefundRow;
+import com.rbkmoney.analytics.dao.model.AdjustmentRow;
+import com.rbkmoney.analytics.dao.model.ChargebackRow;
+import com.rbkmoney.analytics.dao.model.PaymentRow;
+import com.rbkmoney.analytics.dao.model.RefundRow;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -30,24 +30,24 @@ public class PostgresBalanceChangesRepository {
     private final JdbcTemplate postgresJdbcTemplate;
 
     @Retryable(value = SQLException.class, backoff = @Backoff(delay = 5000))
-    public void insertPayments(List<MgPaymentSinkRow> mgPaymentSinkRows) {
-        if (CollectionUtils.isEmpty(mgPaymentSinkRows)) return;
+    public void insertPayments(List<PaymentRow> paymentRows) {
+        if (CollectionUtils.isEmpty(paymentRows)) return;
 
-        log.info("Batch start insert mgPaymentSinkRows: {} firstElement: {}",
-                mgPaymentSinkRows.size(),
-                mgPaymentSinkRows.get(0).getInvoiceId());
+        log.info("Batch start insert paymentRows: {} firstElement: {}",
+                paymentRows.size(),
+                paymentRows.get(0).getInvoiceId());
 
         postgresJdbcTemplate.batchUpdate(
                 INSERT,
-                new PostgresPaymentBatchPreparedStatementSetter(mgPaymentSinkRows));
+                new PostgresPaymentBatchPreparedStatementSetter(paymentRows));
 
-        log.info("Batch inserted mgPaymentSinkRows: {} firstElement: {}",
-                mgPaymentSinkRows.size(),
-                mgPaymentSinkRows.get(0).getInvoiceId());
+        log.info("Batch inserted paymentRows: {} firstElement: {}",
+                paymentRows.size(),
+                paymentRows.get(0).getInvoiceId());
     }
 
     @Retryable(value = SQLException.class, backoff = @Backoff(delay = 5000))
-    public void insertAdjustments(List<MgAdjustmentRow> adjustmentRows) {
+    public void insertAdjustments(List<AdjustmentRow> adjustmentRows) {
         if (CollectionUtils.isEmpty(adjustmentRows)) return;
 
         log.info("Batch start insert adjustmentRows: {} firstElement: {}",
@@ -64,36 +64,36 @@ public class PostgresBalanceChangesRepository {
     }
 
     @Retryable(value = SQLException.class, backoff = @Backoff(delay = 5000))
-    public void insertChargebacks(List<MgChargebackRow> mgChargebackRows) {
-        if (CollectionUtils.isEmpty(mgChargebackRows)) return;
+    public void insertChargebacks(List<ChargebackRow> chargebackRows) {
+        if (CollectionUtils.isEmpty(chargebackRows)) return;
 
-        log.info("Batch start insert mgChargebackRows: {} firstElement: {}",
-                mgChargebackRows.size(),
-                mgChargebackRows.get(0).getInvoiceId());
+        log.info("Batch start insert chargebackRows: {} firstElement: {}",
+                chargebackRows.size(),
+                chargebackRows.get(0).getInvoiceId());
 
         postgresJdbcTemplate.batchUpdate(
                 INSERT,
-                new PostgresChargebackBatchPreparedStatementSetter(mgChargebackRows));
+                new PostgresChargebackBatchPreparedStatementSetter(chargebackRows));
 
-        log.info("Batch inserted mgChargebackRows: {} firstElement: {}",
-                mgChargebackRows.size(),
-                mgChargebackRows.get(0).getInvoiceId());
+        log.info("Batch inserted chargebackRows: {} firstElement: {}",
+                chargebackRows.size(),
+                chargebackRows.get(0).getInvoiceId());
     }
 
     @Retryable(value = SQLException.class, backoff = @Backoff(delay = 5000))
-    public void insertRefunds(List<MgRefundRow> mgRefundRows) {
-        if (CollectionUtils.isEmpty(mgRefundRows)) return;
+    public void insertRefunds(List<RefundRow> refundRows) {
+        if (CollectionUtils.isEmpty(refundRows)) return;
 
-        log.info("Batch start insert mgRefundRows: {} firstElement: {}",
-                mgRefundRows.size(),
-                mgRefundRows.get(0).getInvoiceId());
+        log.info("Batch start insert refundRows: {} firstElement: {}",
+                refundRows.size(),
+                refundRows.get(0).getInvoiceId());
 
         postgresJdbcTemplate.batchUpdate(
                 INSERT,
-                new PostgresRefundBatchPreparedStatementSetter(mgRefundRows));
+                new PostgresRefundBatchPreparedStatementSetter(refundRows));
 
-        log.info("Batch inserted mgRefundRows: {} firstElement: {}",
-                mgRefundRows.size(),
-                mgRefundRows.get(0).getInvoiceId());
+        log.info("Batch inserted refundRows: {} firstElement: {}",
+                refundRows.size(),
+                refundRows.get(0).getInvoiceId());
     }
 }
