@@ -2,6 +2,7 @@ package com.rbkmoney.analytics.config;
 
 import com.rbkmoney.analytics.config.properties.KafkaSslProperties;
 import com.rbkmoney.analytics.serde.MachineEventDeserializer;
+import com.rbkmoney.analytics.serde.PayoutEventDeserializer;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import com.rbkmoney.mg.event.sink.service.ConsumerGroupIdService;
 import com.rbkmoney.mg.event.sink.utils.SslKafkaUtils;
@@ -18,6 +19,8 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.SeekToCurrentBatchErrorHandler;
+import com.rbkmoney.damsel.payout_processing.Event;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,27 +61,33 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, MachineEvent> kafkaListenerContainerFactory() {
+    public ConcurrentKafkaListenerContainerFactory<String, MachineEvent> invoiceListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, MachineEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
         String consumerGroup = consumerGroupIdService.generateGroupId(RESULT_ANALYTICS);
         initDefaultListenerProperties(factory, consumerGroup, new MachineEventDeserializer());
+
         return factory;
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, MachineEvent> partyManagementContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, MachineEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    public ConcurrentKafkaListenerContainerFactory<String, Event> payoutListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, Event> factory = new ConcurrentKafkaListenerContainerFactory<>();
         String consumerGroup = consumerGroupIdService.generateGroupId(RESULT_ANALYTICS);
-        initDefaultListenerProperties(factory, consumerGroup, new MachineEventDeserializer());
+        initDefaultListenerProperties(factory, consumerGroup, new PayoutEventDeserializer());
+
         return factory;
     }
 
-    private <T> void initDefaultListenerProperties(ConcurrentKafkaListenerContainerFactory<String, T> factory,
-                                                   String consumerGroup, Deserializer<T> deserializer) {
+    private <T> void initDefaultListenerProperties(
+            ConcurrentKafkaListenerContainerFactory<String, T> factory,
+            String consumerGroup, Deserializer<T> deserializer) {
         final Map<String, Object> props = createDefaultProperties(consumerGroup);
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, maxPollRecords);
-        DefaultKafkaConsumerFactory<String, T> consumerFactory = new DefaultKafkaConsumerFactory<>(props,
-                new StringDeserializer(), deserializer);
+        DefaultKafkaConsumerFactory<String, T> consumerFactory = new DefaultKafkaConsumerFactory<>(
+                props,
+                new StringDeserializer(),
+                deserializer);
+
         factory.setConsumerFactory(consumerFactory);
         factory.setConcurrency(concurrencyListeners);
         factory.setBatchErrorHandler(new SeekToCurrentBatchErrorHandler());
@@ -96,6 +105,7 @@ public class KafkaConfig {
         props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, sessionTimeout);
         props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, maxPollInterval);
         props.putAll(createSslConfig());
+
         return props;
     }
 }

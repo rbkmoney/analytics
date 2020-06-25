@@ -49,13 +49,19 @@ kafka:
   topic:
     event.sink:
       initial: event_sink
+    payout:
+      initial: payout
   consumer:
       prefix: analytics
       concurrency: 7
       throttling-timeout-ms: 1000
   ssl.enabled: false
   event-flow.resolver.enabled: false
-  listener.event.sink.enabled: true
+  listener:
+    event.sink:
+      enabled: true
+    payout:
+      enabled: true
 
 service:
   invoicing:

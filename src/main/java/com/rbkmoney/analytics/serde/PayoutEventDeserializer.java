@@ -1,7 +1,6 @@
 package com.rbkmoney.analytics.serde;
 
-import com.rbkmoney.machinegun.eventsink.MachineEvent;
-import com.rbkmoney.machinegun.eventsink.SinkEvent;
+import com.rbkmoney.damsel.payout_processing.Event;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.thrift.TDeserializer;
@@ -10,7 +9,7 @@ import org.apache.thrift.protocol.TBinaryProtocol;
 import java.util.Map;
 
 @Slf4j
-public class MachineEventDeserializer implements Deserializer<MachineEvent> {
+public class PayoutEventDeserializer implements Deserializer<Event> {
 
     ThreadLocal<TDeserializer> tDeserializerThreadLocal = ThreadLocal.withInitial(() -> new TDeserializer(new TBinaryProtocol.Factory()));
 
@@ -19,17 +18,17 @@ public class MachineEventDeserializer implements Deserializer<MachineEvent> {
     }
 
     @Override
-    public MachineEvent deserialize(String topic, byte[] data) {
+    public Event deserialize(String topic, byte[] data) {
         log.debug("Message, topic: {}, byteLength: {}", topic, data.length);
-        SinkEvent machineEvent = new SinkEvent();
+        Event payoutEvent = new Event();
 
         try {
-            tDeserializerThreadLocal.get().deserialize(machineEvent, data);
+            tDeserializerThreadLocal.get().deserialize(payoutEvent, data);
         } catch (Exception e) {
             log.error("Error when deserialize ruleTemplate data: {} ", data, e);
         }
 
-        return machineEvent.getEvent();
+        return payoutEvent;
     }
 
     @Override
