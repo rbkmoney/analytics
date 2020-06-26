@@ -67,6 +67,9 @@ service:
   invoicing:
     url: http://hellgate:8022/v1/processing/invoicing
     networkTimeout: 5000
+  payouter:
+    url: http://changeit/
+    networkTimeout: 5000
 
 columbus.url: http://columbus:8022/repo
 repository.insert.enabled: true
