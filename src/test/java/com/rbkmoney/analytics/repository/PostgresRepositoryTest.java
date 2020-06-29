@@ -1,22 +1,23 @@
 package com.rbkmoney.analytics.repository;
 
 import com.rbkmoney.analytics.AnalyticsApplication;
+import com.rbkmoney.analytics.constant.PayoutStatus;
 import com.rbkmoney.analytics.dao.model.AdjustmentRow;
 import com.rbkmoney.analytics.dao.model.PaymentRow;
+import com.rbkmoney.analytics.dao.model.PayoutRow;
 import com.rbkmoney.analytics.dao.model.RefundRow;
 import com.rbkmoney.analytics.dao.repository.postgres.PostgresBalanceChangesRepository;
 import com.rbkmoney.analytics.domain.CashFlowResult;
-import com.rbkmoney.analytics.listener.InvoiceListener;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -28,6 +29,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @RunWith(SpringRunner.class)
@@ -37,17 +39,18 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 public class PostgresRepositoryTest {
 
     @ClassRule
+    @SuppressWarnings("rawtypes")
     public static PostgreSQLContainer postgres = (PostgreSQLContainer) new PostgreSQLContainer("postgres:9.6")
             .withStartupTimeout(Duration.ofMinutes(5));
 
     @LocalServerPort
     protected int port;
 
-    @MockBean
-    private InvoiceListener invoiceListener;
-
     @Autowired
     private PostgresBalanceChangesRepository postgresBalanceChangesRepository;
+
+    @Autowired
+    private JdbcTemplate postgresJdbcTemplate;
 
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         @Override
@@ -65,10 +68,16 @@ public class PostgresRepositoryTest {
     }
 
     @Test
-    public void shouldInsertBatch() {
+    public void testCount() {
         postgresBalanceChangesRepository.insertPayments(List.of(payment()));
         postgresBalanceChangesRepository.insertRefunds(List.of(refund()));
         postgresBalanceChangesRepository.insertAdjustments(List.of(adjustment()));
+        postgresBalanceChangesRepository.insertPayouts(List.of(payout()));
+
+        long count = postgresJdbcTemplate.queryForObject(
+                "SELECT count(*) AS count FROM analytics.balance_change",
+                (resultSet, i) -> resultSet.getLong("count"));
+        assertEquals(4L, count);
     }
 
     private PaymentRow payment() {
@@ -119,5 +128,19 @@ public class PostgresRepositoryTest {
                 .build());
 
         return adjustmentRow;
+    }
+
+    private PayoutRow payout() {
+        PayoutRow payoutRow = new PayoutRow();
+        payoutRow.setPayoutId("pauout_id");
+        payoutRow.setStatus(PayoutStatus.paid);
+        payoutRow.setEventTime(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+        payoutRow.setCurrency("RUB");
+        payoutRow.setPartyId("party_id");
+        payoutRow.setShopId("shop_id");
+        payoutRow.setAmount(10_000L);
+        payoutRow.setFee(1000L);
+
+        return payoutRow;
     }
 }
