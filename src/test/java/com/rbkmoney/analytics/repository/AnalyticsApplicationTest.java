@@ -141,4 +141,15 @@ public class AnalyticsApplicationTest extends ClickHouseAbstractTest {
                 }
         );
     }
+
+    @Test
+    public void testPayoutsAmount() {
+        long sum = clickHouseJdbcTemplate.queryForObject(
+                "SELECT shopId, sum(amount) as sum " +
+                        "from analytic.events_sink_payout where status = 'paid' " +
+                        "group by partyId, shopId, currency " +
+                        "having shopId = 'ca2e9162-eda2-4d17-bbfa-dc5e39b1772f' and currency = 'RUB'",
+                (resultSet, i) -> resultSet.getLong("sum"));
+        assertEquals(10000, sum);
+    }
 }
