@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import ru.yandex.clickhouse.except.ClickHouseException;
 
 import java.util.List;
@@ -20,10 +21,13 @@ public class ClickHousePayoutRepository {
 
     @Retryable(value = ClickHouseException.class, backoff = @Backoff(delay = 5000))
     public void insertBatch(List<PayoutRow> payoutRows) {
-        if (payoutRows != null && !payoutRows.isEmpty()) {
-            // TODO [a.romanov]: impl
-            throw new UnsupportedOperationException();
-        }
-    }
+        if (CollectionUtils.isEmpty(payoutRows)) return;
 
+        clickHouseJdbcTemplate.batchUpdate(
+                ClickHousePayoutBatchPreparedStatementSetter.INSERT,
+                new ClickHousePayoutBatchPreparedStatementSetter(payoutRows));
+
+        log.info("Batch inserted payoutRows: {} firstElement: {}", payoutRows.size(),
+                payoutRows.get(0).getPayoutId());
+    }
 }

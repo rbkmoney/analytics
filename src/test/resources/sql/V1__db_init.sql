@@ -214,3 +214,66 @@ create table analytic.events_sink_chargeback
 PARTITION BY toYYYYMM (timestamp)
 ORDER BY (eventTimeHour, partyId, shopId, category, status, stage, currency, providerName, fingerprint, cardToken,
 invoiceId, paymentId, chargebackId, sequenceId);
+
+DROP TABLE IF EXISTS analytic.events_sink_payout;
+
+CREATE TABLE analytic.events_sink_payout
+(
+    payoutId                                  String,
+    status                                    Enum8('unpaid' = 1, 'paid' = 2, 'cancelled' = 3, 'confirmed' = 4),
+    payoutType                                Enum8('bank_account' = 1, 'wallet' = 2),
+    statusCancelledDetails                    String,
+    isCancelledAfterBeingPaid                 UInt8,
+
+    timestamp                                 Date,
+    eventTime                                 UInt64,
+    eventTimeHour                             UInt64,
+    payoutTime                                UInt64,
+
+    shopId                                    String,
+    partyId                                   String,
+    contractId                                String,
+
+    amount                                    UInt64,
+    fee                                       UInt64,
+    currency                                  String,
+
+    walletId                                  String,
+
+    accountType                               Enum8('russian_payout_account' = 1, 'international_payout_account' = 2),
+    purpose                                   String,
+    legalAgreementSignedAt                    UInt64,
+    legalAgreementId                          String,
+    legalAgreementValidUntil                  UInt64,
+
+    russianAccount                            String,
+    russianBankName                           String,
+    russianBankPostAccount                    String,
+    russianBankBik                            String,
+    russianInn                                String,
+
+    internationalAccountHolder                String,
+    internationalBankName                     String,
+    internationalBankAddress                  String,
+    internationalIban                         String,
+    internationalBic                          String,
+    internationalLocalBankCode                String,
+    internationalLegalEntityLegalName         String,
+    internationalLegalEntityTradingName       String,
+    internationalLegalEntityRegisteredAddress String,
+    internationalLegalEntityActualAddress     String,
+    internationalLegalEntityRegisteredNumber  String,
+    internationalBankNumber                   String,
+    internationalBankAbaRtn                   String,
+    internationalBankCountryCode              String,
+    internationalCorrespondentBankNumber      String,
+    internationalCorrespondentBankAccount     String,
+    internationalCorrespondentBankName        String,
+    internationalCorrespondentBankAddress     String,
+    internationalCorrespondentBankBic         String,
+    internationalCorrespondentBankIban        String,
+    internationalCorrespondentBankAbaRtn      String,
+    internationalCorrespondentBankCountryCode String
+) ENGINE = ReplacingMergeTree()
+PARTITION BY toYYYYMM (timestamp)
+ORDER BY (eventTimeHour, partyId, shopId, status, payoutId);

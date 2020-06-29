@@ -72,18 +72,18 @@ public class PayoutRowFactory {
     private void fillRussianBankAccountDetails(PayoutRow payoutRow, PayoutAccount payoutAccount) {
         RussianPayoutAccount russianPayoutAccount = payoutAccount.getRussianPayoutAccount();
         RussianBankAccount russianBankAccount = russianPayoutAccount.getBankAccount();
-        payoutRow.setTypeAccountRussianAccount(russianBankAccount.getAccount());
-        payoutRow.setTypeAccountRussianBankName(russianBankAccount.getBankName());
-        payoutRow.setTypeAccountRussianBankPostAccount(russianBankAccount.getBankPostAccount());
-        payoutRow.setTypeAccountRussianBankBik(russianBankAccount.getBankBik());
-        payoutRow.setTypeAccountRussianInn(russianPayoutAccount.getInn());
-        payoutRow.setTypeAccountPurpose(russianPayoutAccount.getPurpose());
-        payoutRow.setTypeAccountLegalAgreementSignedAt(
+        payoutRow.setRussianAccount(russianBankAccount.getAccount());
+        payoutRow.setRussianBankName(russianBankAccount.getBankName());
+        payoutRow.setRussianBankPostAccount(russianBankAccount.getBankPostAccount());
+        payoutRow.setRussianBankBik(russianBankAccount.getBankBik());
+        payoutRow.setRussianInn(russianPayoutAccount.getInn());
+        payoutRow.setPurpose(russianPayoutAccount.getPurpose());
+        payoutRow.setLegalAgreementSignedAt(
                 TypeUtil.stringToLocalDateTime(russianPayoutAccount.getLegalAgreement().getSignedAt()));
-        payoutRow.setTypeAccountLegalAgreementId(russianPayoutAccount.getLegalAgreement().getLegalAgreementId());
+        payoutRow.setLegalAgreementId(russianPayoutAccount.getLegalAgreement().getLegalAgreementId());
 
         if (russianPayoutAccount.getLegalAgreement().isSetValidUntil()) {
-            payoutRow.setTypeAccountLegalAgreementValidUntil(
+            payoutRow.setLegalAgreementValidUntil(
                     TypeUtil.stringToLocalDateTime(russianPayoutAccount.getLegalAgreement().getValidUntil()));
         }
     }
@@ -91,49 +91,49 @@ public class PayoutRowFactory {
     private void fillInternationalBankAccountDetails(PayoutRow payoutRow, PayoutAccount payoutAccount) {
         InternationalPayoutAccount internationalPayoutAccount = payoutAccount.getInternationalPayoutAccount();
         InternationalBankAccount bankAccount = internationalPayoutAccount.getBankAccount();
-        payoutRow.setTypeAccountInternationalAccountHolder(bankAccount.getAccountHolder());
-        payoutRow.setTypeAccountInternationalIban(bankAccount.getIban());
-        payoutRow.setTypeAccountInternationalBankNumber(bankAccount.getNumber());
+        payoutRow.setInternationalAccountHolder(bankAccount.getAccountHolder());
+        payoutRow.setInternationalIban(bankAccount.getIban());
+        payoutRow.setInternationalBankNumber(bankAccount.getNumber());
 
         if (bankAccount.isSetBank()) {
             InternationalBankDetails bankDetails = bankAccount.getBank();
-            payoutRow.setTypeAccountInternationalBankName(bankDetails.getName());
-            payoutRow.setTypeAccountInternationalBankAddress(bankDetails.getAddress());
-            payoutRow.setTypeAccountInternationalBic(bankDetails.getBic());
-            payoutRow.setTypeAccountInternationalBankAbaRtn(bankDetails.getAbaRtn());
-            payoutRow.setTypeAccountInternationalBankCountryCode(
+            payoutRow.setInternationalBankName(bankDetails.getName());
+            payoutRow.setInternationalBankAddress(bankDetails.getAddress());
+            payoutRow.setInternationalBic(bankDetails.getBic());
+            payoutRow.setInternationalBankAbaRtn(bankDetails.getAbaRtn());
+            payoutRow.setInternationalBankCountryCode(
                     Optional.ofNullable(bankDetails.getCountry()).map(Enum::toString).orElse(null));
         }
 
         if (bankAccount.isSetCorrespondentAccount()) {
             InternationalBankAccount correspondentBankAccount = bankAccount.getCorrespondentAccount();
-            payoutRow.setTypeAccountInternationalCorrespondentBankAccount(correspondentBankAccount.getAccountHolder());
-            payoutRow.setTypeAccountInternationalCorrespondentBankIban(correspondentBankAccount.getIban());
-            payoutRow.setTypeAccountInternationalCorrespondentBankNumber(correspondentBankAccount.getNumber());
+            payoutRow.setInternationalCorrespondentBankAccount(correspondentBankAccount.getAccountHolder());
+            payoutRow.setInternationalCorrespondentBankIban(correspondentBankAccount.getIban());
+            payoutRow.setInternationalCorrespondentBankNumber(correspondentBankAccount.getNumber());
 
             if (correspondentBankAccount.isSetBank()) {
                 InternationalBankDetails correspondentBankDetails = correspondentBankAccount.getBank();
-                payoutRow.setTypeAccountInternationalCorrespondentBankName(correspondentBankDetails.getName());
-                payoutRow.setTypeAccountInternationalCorrespondentBankAddress(correspondentBankDetails.getAddress());
-                payoutRow.setTypeAccountInternationalCorrespondentBankBic(correspondentBankDetails.getBic());
-                payoutRow.setTypeAccountInternationalCorrespondentBankAbaRtn(correspondentBankDetails.getAbaRtn());
-                payoutRow.setTypeAccountInternationalCorrespondentBankCountryCode(
+                payoutRow.setInternationalCorrespondentBankName(correspondentBankDetails.getName());
+                payoutRow.setInternationalCorrespondentBankAddress(correspondentBankDetails.getAddress());
+                payoutRow.setInternationalCorrespondentBankBic(correspondentBankDetails.getBic());
+                payoutRow.setInternationalCorrespondentBankAbaRtn(correspondentBankDetails.getAbaRtn());
+                payoutRow.setInternationalCorrespondentBankCountryCode(
                         Optional.ofNullable(correspondentBankDetails.getCountry()).map(Enum::toString).orElse(null));
             }
         }
 
-        payoutRow.setTypeAccountInternationalLegalEntityLegalName(internationalPayoutAccount.getLegalEntity().getLegalName());
-        payoutRow.setTypeAccountInternationalLegalEntityTradingName(internationalPayoutAccount.getLegalEntity().getTradingName());
-        payoutRow.setTypeAccountInternationalLegalEntityRegisteredAddress(internationalPayoutAccount.getLegalEntity().getRegisteredAddress());
-        payoutRow.setTypeAccountInternationalLegalEntityActualAddress(internationalPayoutAccount.getLegalEntity().getActualAddress());
-        payoutRow.setTypeAccountInternationalLegalEntityRegisteredNumber(internationalPayoutAccount.getLegalEntity().getRegisteredNumber());
-        payoutRow.setTypeAccountPurpose(internationalPayoutAccount.getPurpose());
-        payoutRow.setTypeAccountLegalAgreementSignedAt(
+        payoutRow.setInternationalLegalEntityLegalName(internationalPayoutAccount.getLegalEntity().getLegalName());
+        payoutRow.setInternationalLegalEntityTradingName(internationalPayoutAccount.getLegalEntity().getTradingName());
+        payoutRow.setInternationalLegalEntityRegisteredAddress(internationalPayoutAccount.getLegalEntity().getRegisteredAddress());
+        payoutRow.setInternationalLegalEntityActualAddress(internationalPayoutAccount.getLegalEntity().getActualAddress());
+        payoutRow.setInternationalLegalEntityRegisteredNumber(internationalPayoutAccount.getLegalEntity().getRegisteredNumber());
+        payoutRow.setPurpose(internationalPayoutAccount.getPurpose());
+        payoutRow.setLegalAgreementSignedAt(
                 TypeUtil.stringToLocalDateTime(internationalPayoutAccount.getLegalAgreement().getSignedAt()));
-        payoutRow.setTypeAccountLegalAgreementId(internationalPayoutAccount.getLegalAgreement().getLegalAgreementId());
+        payoutRow.setLegalAgreementId(internationalPayoutAccount.getLegalAgreement().getLegalAgreementId());
 
         if (internationalPayoutAccount.getLegalAgreement().isSetValidUntil()) {
-            payoutRow.setTypeAccountLegalAgreementValidUntil(
+            payoutRow.setLegalAgreementValidUntil(
                     TypeUtil.stringToLocalDateTime(internationalPayoutAccount.getLegalAgreement().getValidUntil()));
         }
     }
