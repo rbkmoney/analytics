@@ -7,7 +7,7 @@ import com.rbkmoney.analytics.dao.mapper.SplitStatusRowsMapper;
 import com.rbkmoney.analytics.dao.repository.clickhouse.ClickHousePaymentRepository;
 import com.rbkmoney.analytics.dao.repository.clickhouse.ClickHouseRefundRepository;
 import com.rbkmoney.analytics.repository.ClickHouseAbstractTest;
-import com.rbkmoney.analytics.repository.PaymentRepositoryTest;
+import com.rbkmoney.analytics.repository.ClickHousePayoutRepositoryTest;
 import com.rbkmoney.damsel.analytics.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
@@ -25,7 +25,7 @@ import static org.junit.Assert.assertEquals;
 
 @Slf4j
 @RunWith(SpringRunner.class)
-@ContextConfiguration(initializers = PaymentRepositoryTest.Initializer.class,
+@ContextConfiguration(initializers = ClickHousePayoutRepositoryTest.Initializer.class,
         classes = {RawToNumModelConverter.class, RawToSplitNumberConverter.class, RawToSplitStatusConverter.class,
                 SplitRowsMapper.class, SplitStatusRowsMapper.class, RawToNamingDistributionConverter.class,
                 RawMapperConfig.class, ClickHousePaymentRepository.class, ClickHouseRefundRepository.class, AnalyticsHandler.class,

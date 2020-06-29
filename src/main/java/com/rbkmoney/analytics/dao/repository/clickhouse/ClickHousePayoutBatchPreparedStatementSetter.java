@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 public class ClickHousePayoutBatchPreparedStatementSetter implements BatchPreparedStatementSetter {
@@ -59,7 +60,9 @@ public class ClickHousePayoutBatchPreparedStatementSetter implements BatchPrepar
         ps.setString(l++, row.getPurpose());
         ps.setLong(l++, row.getLegalAgreementSignedAt().toEpochSecond(ZoneOffset.UTC));
         ps.setString(l++, row.getLegalAgreementId());
-        ps.setLong(l++, row.getLegalAgreementValidUntil().toEpochSecond(ZoneOffset.UTC));
+        ps.setLong(l++, Optional.ofNullable(row.getLegalAgreementValidUntil())
+                .map(ldt -> ldt.toEpochSecond(ZoneOffset.UTC))
+                .orElse(0L));
 
         ps.setString(l++, row.getRussianAccount());
         ps.setString(l++, row.getRussianBankName());

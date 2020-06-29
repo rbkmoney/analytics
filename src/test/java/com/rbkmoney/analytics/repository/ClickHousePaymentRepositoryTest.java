@@ -31,10 +31,10 @@ import static org.junit.Assert.assertTrue;
 
 @Slf4j
 @RunWith(SpringRunner.class)
-@ContextConfiguration(initializers = PaymentRepositoryTest.Initializer.class,
+@ContextConfiguration(initializers = ClickHousePayoutRepositoryTest.Initializer.class,
         classes = {RawToNumModelConverter.class, RawToSplitNumberConverter.class, RawToSplitStatusConverter.class,
                 SplitRowsMapper.class, SplitStatusRowsMapper.class, RawToNamingDistributionConverter.class, RawMapperConfig.class, ClickHousePaymentRepository.class})
-public class PaymentRepositoryTest extends ClickHouseAbstractTest {
+public class ClickHousePaymentRepositoryTest extends ClickHouseAbstractTest {
 
     public static final String RUB = "RUB";
     @Autowired
