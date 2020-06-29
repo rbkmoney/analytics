@@ -1,11 +1,10 @@
-package com.rbkmoney.analytics.listener.mapper;
+package com.rbkmoney.analytics.listener.mapper.invoice;
 
 import com.rbkmoney.analytics.InvoiceFlowGenerator;
 import com.rbkmoney.analytics.dao.model.PaymentRow;
 import com.rbkmoney.analytics.domain.CashFlowResult;
 import com.rbkmoney.analytics.domain.InvoicePaymentWrapper;
 import com.rbkmoney.analytics.listener.mapper.factory.PaymentRowFactory;
-import com.rbkmoney.analytics.listener.mapper.invoice.PaymentMapper;
 import com.rbkmoney.analytics.service.HgClientService;
 import com.rbkmoney.analytics.utils.EventRangeFactory;
 import com.rbkmoney.damsel.domain.Cash;
