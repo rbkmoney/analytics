@@ -18,8 +18,9 @@ public class PayoutRow {
 
     private String payoutId;
     private PayoutStatus status;
-    private String statusCancelledDetails;
     private PayoutType payoutType;
+    private String statusCancelledDetails;
+    private boolean isCancelledAfterBeingPaid;
 
     private LocalDateTime eventTime;
     private LocalDateTime payoutTime;

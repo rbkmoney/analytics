@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -37,13 +38,27 @@ public class PayoutMapper implements Mapper<PayoutChange, Event, PayoutRow> {
                 .findFirst()
                 .orElseThrow(() -> new PayoutInfoNotFoundException(payoutId));
 
-        // TODO [a.romanov]: cancelled after being paid
-
-        return payoutRowFactory.create(
+        PayoutRow payoutRow = payoutRowFactory.create(
                 event,
                 payoutCreated,
                 payoutId,
                 payoutStatus);
+
+        if (payoutStatus.isSetCancelled()) {
+            Optional<PayoutStatus> payoutPaid = events.stream()
+                    .flatMap(e -> e.getPayload().getPayoutChanges().stream())
+                    .filter(PayoutChange::isSetPayoutStatusChanged)
+                    .map(PayoutChange::getPayoutStatusChanged)
+                    .map(PayoutStatusChanged::getStatus)
+                    .filter(PayoutStatus::isSetPaid)
+                    .findFirst();
+
+            if (payoutPaid.isPresent()) {
+                payoutRow.setCancelledAfterBeingPaid(true);
+            }
+        }
+
+        return payoutRow;
     }
 
     @Override

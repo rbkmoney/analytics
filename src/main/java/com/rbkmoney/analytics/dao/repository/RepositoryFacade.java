@@ -71,8 +71,9 @@ public class RepositoryFacade {
 
     public void insertPayouts(List<PayoutRow> payoutRows) {
         List<PayoutRow> paidPayouts = payoutRows.stream()
-                .filter(payoutRow -> payoutRow.getStatus() == PayoutStatus.paid)
-                .collect(toList()); // TODO [a.romanov]: cancelled after being paid
+                .filter(payoutRow -> payoutRow.getStatus() == PayoutStatus.paid
+                        || (payoutRow.getStatus() == PayoutStatus.cancelled && payoutRow.isCancelledAfterBeingPaid()))
+                .collect(toList());
 
         postgresBalanceChangesRepository.insertPayouts(paidPayouts);
         log.info("RepositoryFacade PG inserted insertPayouts: {}", paidPayouts.size());
