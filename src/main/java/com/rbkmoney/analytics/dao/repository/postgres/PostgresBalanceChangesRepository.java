@@ -98,7 +98,16 @@ public class PostgresBalanceChangesRepository {
     public void insertPayouts(List<PayoutRow> payoutRows) {
         if (CollectionUtils.isEmpty(payoutRows)) return;
 
-        // TODO [a.romanov]: impl
-        throw new UnsupportedOperationException();
+        log.info("Batch start insert payoutRows: {} firstElement: {}",
+                payoutRows.size(),
+                payoutRows.get(0).getPayoutId());
+
+        postgresJdbcTemplate.batchUpdate(
+                INSERT,
+                new PostgresPayoutBatchPreparedStatementSetter(payoutRows));
+
+        log.info("Batch inserted payoutRows: {} firstElement: {}",
+                payoutRows.size(),
+                payoutRows.get(0).getPayoutId());
     }
 }
