@@ -1,6 +1,6 @@
 package com.rbkmoney.analytics.listener;
 
-import com.rbkmoney.analytics.listener.handler.HandlerManager;
+import com.rbkmoney.analytics.listener.handler.payout.PayoutBatchHandler;
 import com.rbkmoney.damsel.payout_processing.Event;
 import com.rbkmoney.damsel.payout_processing.PayoutChange;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class PayoutListener {
     @Value("${kafka.consumer.throttling-timeout-ms}")
     private int throttlingTimeout;
 
-    private final HandlerManager<PayoutChange, Event> handlerManager;
+    private final List<PayoutBatchHandler> payoutBatchHandlers;
 
     @KafkaListener(
             autoStartup = "${kafka.listener.payout.enabled}",
@@ -56,7 +56,7 @@ public class PayoutListener {
                             .collect(toList()))
                     .flatMap(List::stream)
                     .collect(groupingBy(
-                            entry -> Optional.ofNullable(handlerManager.getHandler(entry.getValue())),
+                            entry -> Optional.ofNullable(getHandler(entry.getValue())),
                             toList()))
                     .forEach((handler, entries) -> handler
                             .ifPresent(eventBatchHandler -> eventBatchHandler.handle(entries).execute()));
@@ -65,5 +65,15 @@ public class PayoutListener {
             Thread.sleep(throttlingTimeout);
             throw e;
         }
+    }
+
+    private PayoutBatchHandler getHandler(PayoutChange change) {
+        for (PayoutBatchHandler handler : payoutBatchHandlers) {
+            if (handler.accept(change)) {
+                return handler;
+            }
+        }
+
+        return null;
     }
 }

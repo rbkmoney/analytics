@@ -1,7 +1,7 @@
 package com.rbkmoney.analytics.listener;
 
 import com.rbkmoney.analytics.converter.SourceEventParser;
-import com.rbkmoney.analytics.listener.handler.HandlerManager;
+import com.rbkmoney.analytics.listener.handler.invoice.InvoiceBatchHandler;
 import com.rbkmoney.damsel.payment_processing.InvoiceChange;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,7 @@ public class InvoiceListener {
     private int throttlingTimeout;
 
     private final SourceEventParser eventParser;
-    private final HandlerManager<InvoiceChange, MachineEvent> handlerManager;
+    private final List<InvoiceBatchHandler> invoiceBatchHandlers;
 
     @KafkaListener(
             autoStartup = "${kafka.listener.event.sink.enabled}",
@@ -58,7 +58,7 @@ public class InvoiceListener {
                             .collect(toList()))
                     .flatMap(List::stream)
                     .collect(groupingBy(
-                            entry -> Optional.ofNullable(handlerManager.getHandler(entry.getValue())),
+                            entry -> Optional.ofNullable(getHandler(entry.getValue())),
                             toList()))
                     .forEach((handler, entries) -> handler
                             .ifPresent(eventBatchHandler -> eventBatchHandler.handle(entries).execute()));
@@ -67,5 +67,15 @@ public class InvoiceListener {
             Thread.sleep(throttlingTimeout);
             throw e;
         }
+    }
+
+    private InvoiceBatchHandler getHandler(InvoiceChange change) {
+        for (InvoiceBatchHandler handler : invoiceBatchHandlers) {
+            if (handler.accept(change)) {
+                return handler;
+            }
+        }
+
+        return null;
     }
 }
