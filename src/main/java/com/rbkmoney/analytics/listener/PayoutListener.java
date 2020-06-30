@@ -46,7 +46,7 @@ public class PayoutListener {
 
     private void handleMessages(List<Event> batch) throws InterruptedException {
         try {
-            if (!CollectionUtils.isEmpty(batch)) return;
+            if (CollectionUtils.isEmpty(batch)) return;
 
             batch.stream()
                     .map(payoutEvent -> Map.entry(payoutEvent, payoutEvent.getPayload()))
