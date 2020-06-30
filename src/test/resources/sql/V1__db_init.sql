@@ -276,4 +276,4 @@ CREATE TABLE analytic.events_sink_payout
     internationalCorrespondentBankCountryCode String
 ) ENGINE = ReplacingMergeTree()
 PARTITION BY toYYYYMM (timestamp)
-ORDER BY (eventTimeHour, partyId, shopId, status, payoutId);
+ORDER BY (eventTimeHour, partyId, shopId, status, payoutId, currency, accountType, payoutType, contractId, walletId);
