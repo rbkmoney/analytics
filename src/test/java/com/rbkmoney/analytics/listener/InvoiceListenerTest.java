@@ -1,5 +1,6 @@
-package com.rbkmoney.analytics;
+package com.rbkmoney.analytics.listener;
 
+import com.rbkmoney.analytics.AnalyticsApplication;
 import com.rbkmoney.analytics.dao.repository.postgres.PostgresBalanceChangesRepository;
 import com.rbkmoney.analytics.service.HgClientService;
 import com.rbkmoney.analytics.utils.BuildUtils;
@@ -45,10 +46,10 @@ import static org.junit.Assert.assertTrue;
 @ContextConfiguration(initializers = InvoiceListenerTest.Initializer.class)
 public class InvoiceListenerTest extends KafkaAbstractTest {
 
-    public static final long MESSAGE_TIMEOUT = 4_000L;
-    public static final String SOURCE_ID = "sourceID";
-    public static final String FIRST = "1";
-    public static final String SELECT_SUM = "SELECT shopId, sum(amount) as sum " +
+    private static final long MESSAGE_TIMEOUT = 4_000L;
+    private static final String SOURCE_ID = "sourceID";
+    private static final String FIRST = "1";
+    private static final String SELECT_SUM = "SELECT shopId, sum(amount) as sum " +
             "from %1s " +
             "group by shopId, currency, status " +
             "having shopId = '";
@@ -69,13 +70,13 @@ public class InvoiceListenerTest extends KafkaAbstractTest {
     }
 
     @MockBean
-    GeoIpServiceSrv.Iface iface;
+    private GeoIpServiceSrv.Iface iface;
 
     @MockBean
-    InvoicingSrv.Iface invoicingClient;
+    private InvoicingSrv.Iface invoicingClient;
 
     @MockBean
-    PostgresBalanceChangesRepository postgresBalanceChangesRepository;
+    private PostgresBalanceChangesRepository postgresBalanceChangesRepository;
 
     @Autowired
     private JdbcTemplate clickHouseJdbcTemplate;
@@ -84,7 +85,7 @@ public class InvoiceListenerTest extends KafkaAbstractTest {
     private EventRangeFactory eventRangeFactory;
 
     @Before
-    public void init() throws SQLException, IOException, TException {
+    public void init() throws SQLException {
         try (Connection connection = getSystemConn()) {
             String sql = FileUtil.getFile("sql/V1__db_init.sql");
             String[] split = sql.split(";");
@@ -223,5 +224,4 @@ public class InvoiceListenerTest extends KafkaAbstractTest {
                         sourceId, "1", "1", chargebackId, "1",
                         InvoiceStatus.paid(new InvoicePaid()), InvoicePaymentStatus.charged_back(new InvoicePaymentChargedBack())));
     }
-
 }

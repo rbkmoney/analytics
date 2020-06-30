@@ -1,6 +1,8 @@
-package com.rbkmoney.analytics;
+package com.rbkmoney.analytics.listener;
 
 import com.rbkmoney.analytics.serde.MachineEventDeserializer;
+import com.rbkmoney.analytics.serde.PayoutEventDeserializer;
+import com.rbkmoney.damsel.payout_processing.Event;
 import com.rbkmoney.kafka.common.serialization.ThriftSerializer;
 import com.rbkmoney.machinegun.eventsink.SinkEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +35,8 @@ public abstract class KafkaAbstractTest {
     private static final String CONFLUENT_PLATFORM_VERSION = "5.0.1";
     private static final String AGGR = "aggr";
 
-    public static final String EVENT_SINK = "event_sink";
+    public static final String EVENT_SINK_TOPIC = "event_sink";
+    public static final String PAYOUT_TOPIC = "payout";
 
     @ClassRule
     public static KafkaContainer kafka = new KafkaContainer(CONFLUENT_PLATFORM_VERSION).withEmbeddedZookeeper();
@@ -41,12 +44,16 @@ public abstract class KafkaAbstractTest {
     @Value("${kafka.topic.event.sink.initial}")
     public String eventSinkTopic;
 
-    public static Producer<String, SinkEvent> createProducerAggr() {
+    @Value("${kafka.topic.payout.initial}")
+    public String payoutTopic;
+
+    public static <T> Producer<String, T> createProducerAggr() {
         Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafka.getBootstrapServers());
         props.put(ProducerConfig.CLIENT_ID_CONFIG, AGGR);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ThriftSerializer.class.getName());
+
         return new KafkaProducer<>(props);
     }
 
@@ -58,18 +65,20 @@ public abstract class KafkaAbstractTest {
                     "kafka.bootstrap.servers=" + kafka.getBootstrapServers(),
                     "spring.flyway.enabled=false")
                     .applyTo(configurableApplicationContext.getEnvironment());
-            initTopic(EVENT_SINK);
+            initTopic(EVENT_SINK_TOPIC, MachineEventDeserializer.class);
+            initTopic(PAYOUT_TOPIC, PayoutEventDeserializer.class);
         }
 
         @NotNull
-        private <T> Consumer<String, T> initTopic(String topicName) {
-            Consumer<String, T> consumer = createConsumer(MachineEventDeserializer.class);
+        private <T> Consumer<String, T> initTopic(String topicName, Class clazz) {
+            Consumer<String, T> consumer = createConsumer(clazz);
             try {
                 consumer.subscribe(Collections.singletonList(topicName));
                 consumer.poll(Duration.ofMillis(500L));
             } catch (Exception e) {
                 log.error("KafkaAbstractTest initialize e: ", e);
             }
+
             consumer.close();
             return consumer;
         }
@@ -82,17 +91,33 @@ public abstract class KafkaAbstractTest {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, clazz);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "test");
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
         return new KafkaConsumer<>(props);
     }
 
     void produceMessageToEventSink(SinkEvent sinkEvent) {
         try (Producer<String, SinkEvent> producer = createProducerAggr()) {
-            ProducerRecord<String, SinkEvent> producerRecord = new ProducerRecord<>(eventSinkTopic,
-                    sinkEvent.getEvent().getSourceId(), sinkEvent);
+            ProducerRecord<String, SinkEvent> producerRecord = new ProducerRecord<>(
+                    eventSinkTopic,
+                    sinkEvent.getEvent().getSourceId(),
+                    sinkEvent);
             producer.send(producerRecord).get();
             log.info("produceMessageToEventSink() sinkEvent: {}", sinkEvent);
         } catch (Exception e) {
             log.error("Error when produceMessageToEventSink e:", e);
+        }
+    }
+
+    void produceMessageToPayout(Event payoutEvent) {
+        try (Producer<String, Event> producer = createProducerAggr()) {
+            ProducerRecord<String, Event> producerRecord = new ProducerRecord<>(
+                    payoutTopic,
+                    payoutEvent.getSource().getPayoutId(),
+                    payoutEvent);
+            producer.send(producerRecord).get();
+            log.info("produceMessageToPayout() payoutEvent: {}", payoutEvent);
+        } catch (Exception e) {
+            log.error("Error when produceMessageToPayout e:", e);
         }
     }
 }
