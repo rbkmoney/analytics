@@ -1,11 +1,9 @@
 package com.rbkmoney.analytics.listener.handler;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
 @RequiredArgsConstructor
 public class HandlerManager<C, P> {
 

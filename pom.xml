@@ -202,6 +202,17 @@
             <version>1.12.3</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.github.benas</groupId>
+            <artifactId>random-beans</artifactId>
+            <version>3.7.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+            <version>4.0.3</version>
+        </dependency>
     </dependencies>
 
     <build>

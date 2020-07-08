@@ -1,9 +1,9 @@
 package com.rbkmoney.analytics.listener;
 
+import com.rbkmoney.analytics.listener.handler.BatchHandler;
 import com.rbkmoney.analytics.listener.handler.HandlerManager;
 import com.rbkmoney.damsel.payout_processing.Event;
 import com.rbkmoney.damsel.payout_processing.PayoutChange;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -22,13 +22,16 @@ import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class PayoutListener {
 
     @Value("${kafka.consumer.throttling-timeout-ms}")
     private int throttlingTimeout;
 
     private final HandlerManager<PayoutChange, Event> handlerManager;
+
+    public PayoutListener(List<BatchHandler<PayoutChange, Event>> handlers) {
+        this.handlerManager = new HandlerManager<>(handlers);
+    }
 
     @KafkaListener(
             autoStartup = "${kafka.listener.payout.enabled}",

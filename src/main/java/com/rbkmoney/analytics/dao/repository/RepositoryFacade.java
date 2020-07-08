@@ -24,6 +24,9 @@ public class RepositoryFacade {
     private final ClickHouseAdjustmentRepository clickHouseAdjustmentRepository;
     private final ClickHouseChargebackRepository clickHouseChargebackRepository;
     private final ClickHousePayoutRepository clickHousePayoutRepository;
+    private final ClickHousePartyRepository clickHousePartyRepository;
+    private final ClickHouseShopRepository clickHouseShopRepository;
+    private final ClickHouseContractorRepository clickHouseContractorRepository;
 
     public void insertPayments(List<PaymentRow> paymentRows) {
         List<PaymentRow> capturedPayments = paymentRows.stream()
@@ -80,4 +83,20 @@ public class RepositoryFacade {
         clickHousePayoutRepository.insertBatch(payoutRows);
         log.info("RepositoryFacade CH inserted insertPayouts: {}", payoutRows.size());
     }
+
+    public void insertParties(List<PartyRow> partyRows) {
+        clickHousePartyRepository.insertBatch(partyRows);
+        log.info("RepositoryFacade CH inserted insertParties: {}", partyRows.size());
+    }
+
+    public void insertShops(List<ShopRow> shopRows) {
+        clickHouseShopRepository.insertBatch(shopRows);
+        log.info("RepositoryFacade CH inserted insertShops: {}", shopRows.size());
+    }
+
+    public void insertContractor(List<ContractorRow> contractorRows) {
+        clickHouseContractorRepository.insertBatch(contractorRows);
+        log.info("RepositoryFacade CH inserted insertContractor: {}", contractorRows.size());
+    }
+
 }

@@ -35,6 +35,8 @@ public class KafkaConfig {
 
     private static final String RESULT_ANALYTICS = "result-analytics";
 
+    private static final String PARTY_RESULT_ANALYTICS = "party-result-analytics";
+
     @Value("${kafka.max.poll.records}")
     private String maxPollRecords;
     @Value("${kafka.max.poll.interval.ms}")
@@ -74,6 +76,15 @@ public class KafkaConfig {
         ConcurrentKafkaListenerContainerFactory<String, Event> factory = new ConcurrentKafkaListenerContainerFactory<>();
         String consumerGroup = consumerGroupIdService.generateGroupId(RESULT_ANALYTICS);
         initDefaultListenerProperties(factory, consumerGroup, new PayoutEventDeserializer());
+
+        return factory;
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, MachineEvent> partyListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, MachineEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        String consumerGroup = consumerGroupIdService.generateGroupId(PARTY_RESULT_ANALYTICS);
+        initDefaultListenerProperties(factory, consumerGroup, new MachineEventDeserializer());
 
         return factory;
     }
