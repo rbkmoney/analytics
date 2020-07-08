@@ -3,7 +3,6 @@ package com.rbkmoney.analytics.listener.handler.invoice;
 import com.rbkmoney.analytics.dao.model.ChargebackRow;
 import com.rbkmoney.analytics.dao.repository.RepositoryFacade;
 import com.rbkmoney.analytics.listener.Processor;
-import com.rbkmoney.analytics.listener.handler.BatchHandler;
 import com.rbkmoney.analytics.listener.mapper.invoice.ChargebackMapper;
 import com.rbkmoney.damsel.payment_processing.InvoiceChange;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
@@ -18,7 +17,7 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 @RequiredArgsConstructor
-public class ChargebackBatchHandler implements BatchHandler<InvoiceChange, MachineEvent> {
+public class ChargebackBatchHandler implements InvoiceBatchHandler {
 
     private final RepositoryFacade repositoryFacade;
     private final List<ChargebackMapper> mappers;

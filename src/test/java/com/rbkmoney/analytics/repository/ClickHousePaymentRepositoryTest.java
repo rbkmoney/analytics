@@ -83,6 +83,13 @@ public class ClickHousePaymentRepositoryTest extends ClickHouseAbstractTest {
 
         costs = clickHousePaymentRepository.getPaymentsSplitAmount("ca2e9162-eda2-4d17-bbfa-dc5e39b1772d", null,
                 Instant.ofEpochMilli(1575554400000L).atZone(ZoneOffset.UTC).toLocalDateTime(), Instant.ofEpochMilli(1579666000698L).atZone(ZoneOffset.UTC).toLocalDateTime(),
+                SplitUnit.WEEK);
+        assertEquals(1, costs.size());
+        numberModel = findCost(costs, RUB);
+        assertEquals(3000L, numberModel.getNumber().longValue());
+
+        costs = clickHousePaymentRepository.getPaymentsSplitAmount("ca2e9162-eda2-4d17-bbfa-dc5e39b1772d", null,
+                Instant.ofEpochMilli(1575554400000L).atZone(ZoneOffset.UTC).toLocalDateTime(), Instant.ofEpochMilli(1579666000698L).atZone(ZoneOffset.UTC).toLocalDateTime(),
                 SplitUnit.MONTH);
         numberModel = findCost(costs, RUB);
         assertEquals(3000L, numberModel.getNumber().longValue());
@@ -117,6 +124,13 @@ public class ClickHousePaymentRepositoryTest extends ClickHouseAbstractTest {
         assertEquals(3, costs.size());
         numberModel = findCost(costs, RUB);
         assertEquals(1, numberModel.getNumber().longValue());
+
+        costs = clickHousePaymentRepository.getPaymentsSplitCount("ca2e9162-eda2-4d17-bbfa-dc5e39b1772d", null,
+                Instant.ofEpochMilli(1575554400000L).atZone(ZoneOffset.UTC).toLocalDateTime(), Instant.ofEpochMilli(1579666000698L).atZone(ZoneOffset.UTC).toLocalDateTime(),
+                SplitUnit.WEEK);
+        assertEquals(1, costs.size());
+        numberModel = findCost(costs, RUB);
+        assertEquals(3, numberModel.getNumber().longValue());
 
         costs = clickHousePaymentRepository.getPaymentsSplitCount("ca2e9162-eda2-4d17-bbfa-dc5e39b1772d", null,
                 Instant.ofEpochMilli(1575554400000L).atZone(ZoneOffset.UTC).toLocalDateTime(), Instant.ofEpochMilli(1579666000698L).atZone(ZoneOffset.UTC).toLocalDateTime(),

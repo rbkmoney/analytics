@@ -240,7 +240,7 @@ CREATE TABLE analytic.events_sink_payout
 
     walletId                                  String,
 
-    accountType                               Enum8('russian_payout_account' = 1, 'international_payout_account' = 2),
+    accountType                               Enum8('russian_payout_account' = 1, 'international_payout_account' = 2, 'UNKNOWN' = 3),
     purpose                                   String,
     legalAgreementSignedAt                    UInt64,
     legalAgreementId                          String,

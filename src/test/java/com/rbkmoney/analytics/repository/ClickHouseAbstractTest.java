@@ -24,7 +24,7 @@ import java.sql.SQLException;
 public class ClickHouseAbstractTest {
 
     @ClassRule
-    public static ClickHouseContainer clickHouseContainer = new ClickHouseContainer();
+    public static ClickHouseContainer clickHouseContainer = new ClickHouseContainer("yandex/clickhouse-server:19.17.6.36");
 
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         @Override

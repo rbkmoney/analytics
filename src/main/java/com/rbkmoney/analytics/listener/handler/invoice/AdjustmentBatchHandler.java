@@ -3,7 +3,6 @@ package com.rbkmoney.analytics.listener.handler.invoice;
 import com.rbkmoney.analytics.dao.model.AdjustmentRow;
 import com.rbkmoney.analytics.dao.repository.RepositoryFacade;
 import com.rbkmoney.analytics.listener.Processor;
-import com.rbkmoney.analytics.listener.handler.BatchHandler;
 import com.rbkmoney.analytics.listener.mapper.invoice.AdjustmentMapper;
 import com.rbkmoney.damsel.payment_processing.InvoiceChange;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
@@ -18,7 +17,7 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 @RequiredArgsConstructor
-public class AdjustmentBatchHandler implements BatchHandler<InvoiceChange, MachineEvent> {
+public class AdjustmentBatchHandler implements InvoiceBatchHandler {
 
     private final RepositoryFacade repositoryFacade;
     private final List<AdjustmentMapper> mappers;

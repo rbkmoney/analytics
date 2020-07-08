@@ -1,10 +1,10 @@
 package com.rbkmoney.analytics.listener;
 
 import com.rbkmoney.analytics.converter.SourceEventParser;
-import com.rbkmoney.analytics.listener.handler.BatchHandler;
-import com.rbkmoney.analytics.listener.handler.HandlerManager;
+import com.rbkmoney.analytics.listener.handler.invoice.InvoiceBatchHandler;
 import com.rbkmoney.damsel.payment_processing.InvoiceChange;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -23,19 +23,14 @@ import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class InvoiceListener {
 
     @Value("${kafka.consumer.throttling-timeout-ms}")
     private int throttlingTimeout;
 
     private final SourceEventParser eventParser;
-    private final HandlerManager<InvoiceChange, MachineEvent> handlerManager;
-
-    public InvoiceListener(SourceEventParser eventParser,
-                           List<BatchHandler<InvoiceChange, MachineEvent>> handlers) {
-        this.eventParser = eventParser;
-        this.handlerManager = new HandlerManager<>(handlers);
-    }
+    private final List<InvoiceBatchHandler> invoiceBatchHandlers;
 
     @KafkaListener(
             autoStartup = "${kafka.listener.event.sink.enabled}",
@@ -63,7 +58,7 @@ public class InvoiceListener {
                             .collect(toList()))
                     .flatMap(List::stream)
                     .collect(groupingBy(
-                            entry -> Optional.ofNullable(handlerManager.getHandler(entry.getValue())),
+                            entry -> Optional.ofNullable(getHandler(entry.getValue())),
                             toList()))
                     .forEach((handler, entries) -> handler
                             .ifPresent(eventBatchHandler -> eventBatchHandler.handle(entries).execute()));
@@ -72,5 +67,15 @@ public class InvoiceListener {
             Thread.sleep(throttlingTimeout);
             throw e;
         }
+    }
+
+    private InvoiceBatchHandler getHandler(InvoiceChange change) {
+        for (InvoiceBatchHandler handler : invoiceBatchHandlers) {
+            if (handler.accept(change)) {
+                return handler;
+            }
+        }
+
+        return null;
     }
 }

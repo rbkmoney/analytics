@@ -1,9 +1,9 @@
 package com.rbkmoney.analytics.listener;
 
-import com.rbkmoney.analytics.listener.handler.BatchHandler;
-import com.rbkmoney.analytics.listener.handler.HandlerManager;
+import com.rbkmoney.analytics.listener.handler.payout.PayoutBatchHandler;
 import com.rbkmoney.damsel.payout_processing.Event;
 import com.rbkmoney.damsel.payout_processing.PayoutChange;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -22,16 +22,13 @@ import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class PayoutListener {
 
     @Value("${kafka.consumer.throttling-timeout-ms}")
     private int throttlingTimeout;
 
-    private final HandlerManager<PayoutChange, Event> handlerManager;
-
-    public PayoutListener(List<BatchHandler<PayoutChange, Event>> handlers) {
-        this.handlerManager = new HandlerManager<>(handlers);
-    }
+    private final List<PayoutBatchHandler> payoutBatchHandlers;
 
     @KafkaListener(
             autoStartup = "${kafka.listener.payout.enabled}",
@@ -49,7 +46,7 @@ public class PayoutListener {
 
     private void handleMessages(List<Event> batch) throws InterruptedException {
         try {
-            if (!CollectionUtils.isEmpty(batch)) return;
+            if (CollectionUtils.isEmpty(batch)) return;
 
             batch.stream()
                     .map(payoutEvent -> Map.entry(payoutEvent, payoutEvent.getPayload()))
@@ -59,7 +56,7 @@ public class PayoutListener {
                             .collect(toList()))
                     .flatMap(List::stream)
                     .collect(groupingBy(
-                            entry -> Optional.ofNullable(handlerManager.getHandler(entry.getValue())),
+                            entry -> Optional.ofNullable(getHandler(entry.getValue())),
                             toList()))
                     .forEach((handler, entries) -> handler
                             .ifPresent(eventBatchHandler -> eventBatchHandler.handle(entries).execute()));
@@ -68,5 +65,15 @@ public class PayoutListener {
             Thread.sleep(throttlingTimeout);
             throw e;
         }
+    }
+
+    private PayoutBatchHandler getHandler(PayoutChange change) {
+        for (PayoutBatchHandler handler : payoutBatchHandlers) {
+            if (handler.accept(change)) {
+                return handler;
+            }
+        }
+
+        return null;
     }
 }

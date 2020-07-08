@@ -1,6 +1,6 @@
 package com.rbkmoney.analytics.listener.mapper.invoice;
 
-import com.rbkmoney.analytics.InvoiceFlowGenerator;
+import com.rbkmoney.analytics.listener.InvoiceFlowGenerator;
 import com.rbkmoney.analytics.dao.model.PaymentRow;
 import com.rbkmoney.analytics.domain.CashFlowResult;
 import com.rbkmoney.analytics.domain.InvoicePaymentWrapper;

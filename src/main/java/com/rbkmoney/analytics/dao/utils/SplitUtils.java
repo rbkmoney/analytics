@@ -14,6 +14,7 @@ public class SplitUtils {
     public static final String HOUR = "hour";
     public static final String MINUTES = "minutes";
     public static final String DAY = "day";
+    public static final String WEEK = "week";
     public static final String YEAR = "year";
     public static final String MONTHS = "months";
 
@@ -43,6 +44,13 @@ public class SplitUtils {
             }
             case DAY: {
                 Date date = (Date) row.get(DAY);
+                return date.toLocalDate()
+                        .atStartOfDay()
+                        .atZone(UTC)
+                        .toInstant().toEpochMilli();
+            }
+            case WEEK: {
+                Date date = (Date) row.get(WEEK);
                 return date.toLocalDate()
                         .atStartOfDay()
                         .atZone(UTC)
@@ -79,6 +87,9 @@ public class SplitUtils {
                 break;
             case DAY:
                 groupBy = "timestamp as day";
+                break;
+            case WEEK:
+                groupBy = "toStartOfWeek(timestamp, 1) as week";
                 break;
             case MONTH:
                 groupBy = "toYear(timestamp) as year, toMonth(timestamp) as months";

@@ -1,5 +1,6 @@
 package com.rbkmoney.analytics.dao.repository.clickhouse;
 
+import com.rbkmoney.analytics.constant.ClickHouseUtilsValue;
 import com.rbkmoney.analytics.dao.model.PayoutRow;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -56,9 +57,11 @@ public class ClickHousePayoutBatchPreparedStatementSetter implements BatchPrepar
 
         ps.setString(l++, row.getWalletId());
 
-        ps.setString(l++, row.getAccountType().name());
+        ps.setString(l++, row.getAccountType() != null ? row.getAccountType().name() : ClickHouseUtilsValue.UNKNOWN);
         ps.setString(l++, row.getPurpose());
-        ps.setLong(l++, row.getLegalAgreementSignedAt().toEpochSecond(ZoneOffset.UTC));
+        ps.setLong(l++, Optional.ofNullable(row.getLegalAgreementSignedAt())
+                .map(ldt -> ldt.toEpochSecond(ZoneOffset.UTC))
+                .orElse(0L));
         ps.setString(l++, row.getLegalAgreementId());
         ps.setLong(l++, Optional.ofNullable(row.getLegalAgreementValidUntil())
                 .map(ldt -> ldt.toEpochSecond(ZoneOffset.UTC))

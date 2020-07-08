@@ -1,4 +1,4 @@
-package com.rbkmoney.analytics;
+package com.rbkmoney.analytics.listener;
 
 
 import com.rbkmoney.damsel.base.Content;
