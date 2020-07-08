@@ -1,10 +1,10 @@
-package com.rbkmoney.analytics;
+package com.rbkmoney.analytics.listener;
 
+import com.rbkmoney.analytics.AnalyticsApplication;
 import com.rbkmoney.analytics.utils.FileUtil;
 import com.rbkmoney.machinegun.eventsink.SinkEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -17,7 +17,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.StringUtils;
 import org.testcontainers.containers.ClickHouseContainer;
 import ru.yandex.clickhouse.ClickHouseDataSource;
 import ru.yandex.clickhouse.settings.ClickHouseProperties;
