@@ -7,7 +7,12 @@ import com.rbkmoney.analytics.dao.model.PaymentRow;
 import com.rbkmoney.analytics.dao.model.PayoutRow;
 import com.rbkmoney.analytics.dao.model.RefundRow;
 import com.rbkmoney.analytics.dao.repository.postgres.PostgresBalanceChangesRepository;
+import com.rbkmoney.analytics.dao.repository.postgres.PostgresPartyDao;
 import com.rbkmoney.analytics.domain.CashFlowResult;
+import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
+import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
+import io.github.benas.randombeans.api.EnhancedRandom;
+import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,6 +55,9 @@ public class PostgresRepositoryTest {
     private PostgresBalanceChangesRepository postgresBalanceChangesRepository;
 
     @Autowired
+    private PostgresPartyDao postgresPartyDao;
+
+    @Autowired
     private JdbcTemplate postgresJdbcTemplate;
 
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
@@ -78,6 +86,45 @@ public class PostgresRepositoryTest {
                 "SELECT count(*) AS count FROM analytics.balance_change",
                 (resultSet, i) -> resultSet.getLong("count"));
         assertEquals(4L, count);
+    }
+
+    @Test
+    public void testPartySave() {
+        Party party = EnhancedRandom.random(Party.class);
+        postgresPartyDao.saveParty(party);
+        Party savedParty = postgresPartyDao.getParty(party.getPartyId());
+        Assert.assertEquals(party, savedParty);
+    }
+
+    @Test
+    public void testShopSave() {
+        Shop shop = EnhancedRandom.random(Shop.class);
+        postgresPartyDao.saveShop(shop);
+        Shop savedShop = postgresPartyDao.getShop(shop.getPartyId(), shop.getShopId());
+        Assert.assertEquals(shop, savedShop);
+    }
+
+    @Test
+    public void testDuplicatePartySave() {
+        Party firstParty = EnhancedRandom.random(Party.class);
+        postgresPartyDao.saveParty(firstParty);
+        Party secondParty = EnhancedRandom.random(Party.class);
+        secondParty.setPartyId(firstParty.getPartyId());
+        postgresPartyDao.saveParty(secondParty);
+        Party savedParty = postgresPartyDao.getParty(secondParty.getPartyId());
+        Assert.assertEquals(secondParty, savedParty);
+    }
+
+    @Test
+    public void testDuplicateShopSave() {
+        Shop firstShop = EnhancedRandom.random(Shop.class);
+        postgresPartyDao.saveShop(firstShop);
+        Shop secondShop = EnhancedRandom.random(Shop.class);
+        secondShop.setPartyId(firstShop.getPartyId());
+        secondShop.setShopId(firstShop.getShopId());
+        postgresPartyDao.saveShop(secondShop);
+        Shop savedShop = postgresPartyDao.getShop(secondShop.getPartyId(), secondShop.getShopId());
+        Assert.assertEquals(secondShop, savedShop);
     }
 
     private PaymentRow payment() {
@@ -143,4 +190,5 @@ public class PostgresRepositoryTest {
 
         return payoutRow;
     }
+
 }

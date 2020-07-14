@@ -1,43 +1,60 @@
 package com.rbkmoney.analytics.listener.mapper.party;
 
-import com.rbkmoney.analytics.dao.model.ShopRow;
+import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
+import com.rbkmoney.analytics.listener.mapper.LocalStorage;
+import com.rbkmoney.analytics.service.PartyService;
 import com.rbkmoney.damsel.domain.ShopLocation;
 import com.rbkmoney.damsel.payment_processing.ClaimEffect;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
 import com.rbkmoney.damsel.payment_processing.ShopEffectUnit;
-import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
-public class ShopLocationChangedMapper extends AbstractClaimChangeMapper<ShopRow> {
+@Component
+@RequiredArgsConstructor
+public class ShopLocationChangedMapper extends AbstractClaimChangeMapper<Shop> {
+
+    private final PartyService partyService;
 
     @Override
-    public ShopRow map(PartyChange change, MachineEvent event) {
+    public boolean accept(PartyChange change) {
+        boolean accept = super.accept(change);
+        if (accept) {
+            List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
+            return claimEffects.stream()
+                    .anyMatch(claimEffect -> claimEffect.isSetShopEffect()
+                            && claimEffect.getShopEffect().getEffect().isSetLocationChanged());
+        }
+        return false;
+    }
+
+    @Override
+    public Shop map(PartyChange change, MachineEvent event, LocalStorage<Shop> storage) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
         ClaimEffect contractorEffect = claimEffects.stream()
-                .filter(claimEffect -> claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetDetailsChanged())
+                .filter(claimEffect -> claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetLocationChanged())
                 .findFirst().orElse(null);
         if (contractorEffect != null) {
-            return mapEvent(event, contractorEffect);
+            return mapEvent(event, contractorEffect, storage);
         }
         return null;
     }
 
-    private ShopRow mapEvent(MachineEvent event, ClaimEffect effect) {
+    private Shop mapEvent(MachineEvent event, ClaimEffect effect, LocalStorage<Shop> storage) {
         ShopEffectUnit shopEffect = effect.getShopEffect();
         ShopLocation locationChanged = shopEffect.getEffect().getLocationChanged();
-        LocalDateTime eventCreatedAt = TypeUtil.stringToLocalDateTime(event.getCreatedAt());
         String shopId = shopEffect.getShopId();
         String partyId = event.getSourceId();
 
-        ShopRow shopRow = new ShopRow();
-        shopRow.setEventTime(eventCreatedAt);
-        shopRow.setShopdId(shopId);
-        shopRow.setPartyId(partyId);
-        shopRow.setLocationUrl(locationChanged.getUrl());
+        Shop shop = partyService.getShop(partyId, shopId, storage);
+        if (shop == null) {
+            throw new IllegalStateException(String.format("Shop not found. partyId=%s, shopId=%s", partyId, shopId));
+        }
+        shop.setLocationUrl(locationChanged.getUrl());
 
-        return shopRow;
+        return shop;
     }
 }

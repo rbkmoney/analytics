@@ -1,7 +1,7 @@
 package com.rbkmoney.analytics.listener.mapper.party;
 
 import com.rbkmoney.analytics.constant.EventType;
-import com.rbkmoney.analytics.listener.mapper.Mapper;
+import com.rbkmoney.analytics.listener.mapper.AdvancedMapper;
 import com.rbkmoney.damsel.payment_processing.ClaimStatus;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
 import com.rbkmoney.geck.filter.Filter;
@@ -10,7 +10,7 @@ import com.rbkmoney.geck.filter.condition.IsNullCondition;
 import com.rbkmoney.geck.filter.rule.PathConditionRule;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 
-public abstract class AbstractClaimChangeMapper<T> implements Mapper<PartyChange, MachineEvent, T> {
+public abstract class AbstractClaimChangeMapper<T> implements AdvancedMapper<PartyChange, MachineEvent, T> {
 
     private static final Filter CLAIM_CREATED_FILTER = new PathConditionFilter(
             new PathConditionRule("claim_created.status.accepted", new IsNullCondition().not()));
@@ -19,7 +19,7 @@ public abstract class AbstractClaimChangeMapper<T> implements Mapper<PartyChange
             new PathConditionRule("claim_status_changed.status.accepted", new IsNullCondition().not()));
 
     @Override
-    public final boolean accept(PartyChange change) {
+    public boolean accept(PartyChange change) {
         return CLAIM_CREATED_FILTER.match(change) || CLAIM_STATUS_CHANGED_FILTER.match(change);
     }
 

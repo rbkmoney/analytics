@@ -1,6 +1,7 @@
 package com.rbkmoney.analytics.listener;
 
 import com.rbkmoney.analytics.AnalyticsApplication;
+import com.rbkmoney.analytics.dao.repository.postgres.PostgresPartyDao;
 import com.rbkmoney.analytics.utils.FileUtil;
 import com.rbkmoney.machinegun.eventsink.SinkEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -18,14 +19,17 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.ClickHouseContainer;
+import org.testcontainers.containers.PostgreSQLContainer;
 import ru.yandex.clickhouse.ClickHouseDataSource;
 import ru.yandex.clickhouse.settings.ClickHouseProperties;
 
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.List;
 
+import static com.rbkmoney.analytics.listener.PartyFlowGenerator.SETTLEMENT_ID;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 
@@ -37,39 +41,30 @@ import static org.awaitility.Awaitility.await;
 public class PartyListenerTest extends KafkaAbstractTest {
 
     @ClassRule
-    public static ClickHouseContainer clickHouseContainer = new ClickHouseContainer();
+    @SuppressWarnings("rawtypes")
+    public static PostgreSQLContainer postgres = (PostgreSQLContainer) new PostgreSQLContainer("postgres:9.6")
+            .withStartupTimeout(Duration.ofMinutes(5));
 
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         @Override
         public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-            log.info("clickhouse.db.url={}", clickHouseContainer.getJdbcUrl());
             TestPropertyValues.of(
-                    "clickhouse.db.url=" + clickHouseContainer.getJdbcUrl(),
-                    "clickhouse.db.user=" + clickHouseContainer.getUsername(),
-                    "clickhouse.db.password=" + clickHouseContainer.getPassword())
+                    "postgres.db.url=" + postgres.getJdbcUrl(),
+                    "postgres.db.user=" + postgres.getUsername(),
+                    "postgres.db.password=" + postgres.getPassword(),
+                    "spring.flyway.url=" + postgres.getJdbcUrl(),
+                    "spring.flyway.user=" + postgres.getUsername(),
+                    "spring.flyway.password=" + postgres.getPassword(),
+                    "spring.flyway.enabled=true")
                     .applyTo(configurableApplicationContext.getEnvironment());
         }
     }
 
     @Autowired
-    private JdbcTemplate clickHouseJdbcTemplate;
+    private PostgresPartyDao postgresPartyDao;
 
-    @Before
-    public void init() throws SQLException, IOException, TException {
-        try (Connection connection = getSystemConn()) {
-            String sql = FileUtil.getFile("sql/V1__db_init.sql");
-            String[] split = sql.split(";");
-            for (String exec : split) {
-                connection.createStatement().execute(exec);
-            }
-        }
-    }
-
-    private Connection getSystemConn() throws SQLException {
-        ClickHouseProperties properties = new ClickHouseProperties();
-        ClickHouseDataSource dataSource = new ClickHouseDataSource(clickHouseContainer.getJdbcUrl(), properties);
-        return dataSource.getConnection();
-    }
+    @Autowired
+    private JdbcTemplate postgresJdbcTemplate;
 
     @Test
     public void testPartyEventSink() throws IOException {
@@ -77,12 +72,19 @@ public class PartyListenerTest extends KafkaAbstractTest {
 
         sinkEvents.forEach(this::produceMessageToEventSink);
 
-        await().atMost(10, SECONDS).until(() -> {
-            Integer count = clickHouseJdbcTemplate.queryForObject("SELECT count(*) FROM analytic.events_sink_contractor" +
-                    " WHERE contractorIdentificationLevel = 'partial'", Integer.class);
-            return count != null && count > 0;
+        await().atMost(60, SECONDS).until(() -> {
+            Integer partyCount = postgresJdbcTemplate.queryForObject("SELECT count(*) FROM analytics.party" +
+                    " WHERE contractor_identification_level = 'partial'", Integer.class);
+            boolean isLastPartyChange = partyCount != null && partyCount > 0;
+            Integer shopCount = postgresJdbcTemplate.queryForObject(String.format("SELECT count(*) FROM analytics.shop" +
+                    " WHERE account_settlement = '%s'", SETTLEMENT_ID), Integer.class);
+            boolean isLastShopChange = shopCount != null && shopCount > 0;
+            if (isLastPartyChange && isLastShopChange) {
+                return true;
+            }
+            Thread.sleep(1000);
+            return false;
         });
-
     }
 
 }

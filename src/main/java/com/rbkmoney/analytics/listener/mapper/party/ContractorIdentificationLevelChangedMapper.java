@@ -1,50 +1,62 @@
 package com.rbkmoney.analytics.listener.mapper.party;
 
-import com.rbkmoney.analytics.dao.model.ContractorRow;
+import com.rbkmoney.analytics.domain.db.enums.ContractorIdentificationLvl;
+import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
+import com.rbkmoney.analytics.listener.mapper.LocalStorage;
+import com.rbkmoney.analytics.service.PartyService;
 import com.rbkmoney.damsel.domain.ContractorIdentificationLevel;
 import com.rbkmoney.damsel.payment_processing.ClaimEffect;
 import com.rbkmoney.damsel.payment_processing.ContractorEffectUnit;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
-import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
 @Component
-public class ContractorIdentificationLevelChangedMapper extends AbstractClaimChangeMapper<ContractorRow> {
+@RequiredArgsConstructor
+public class ContractorIdentificationLevelChangedMapper extends AbstractClaimChangeMapper<Party> {
+
+    private final PartyService partyService;
 
     @Override
-    public ContractorRow map(PartyChange change, MachineEvent event) {
+    public boolean accept(PartyChange change) {
+        boolean accept = super.accept(change);
+        if (accept) {
+            List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
+            return claimEffects.stream()
+                    .anyMatch(claimEffect -> claimEffect.isSetContractorEffect()
+                            && claimEffect.getContractorEffect().getEffect().isSetIdentificationLevelChanged());
+        }
+        return false;
+    }
+
+    @Override
+    public Party map(PartyChange change, MachineEvent event, LocalStorage<Party> storage) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
         ClaimEffect contractorEffect = claimEffects.stream()
                 .filter(claimEffect -> claimEffect.isSetContractorEffect() && claimEffect.getContractorEffect().getEffect().isSetIdentificationLevelChanged())
                 .findFirst().orElse(null);
         if (contractorEffect != null) {
-            return mapEvent(event, contractorEffect);
+            return mapEvent(event, contractorEffect, storage);
         }
         return null;
     }
 
-    private ContractorRow mapEvent(MachineEvent event, ClaimEffect effect) {
+    private Party mapEvent(MachineEvent event, ClaimEffect effect, LocalStorage<Party> storage) {
         ContractorEffectUnit contractorEffect = effect.getContractorEffect();
         ContractorIdentificationLevel identificationLevelChanged = contractorEffect.getEffect().getIdentificationLevelChanged();
         String contractorId = contractorEffect.getId();
         String partyId = event.getSourceId();
-        com.rbkmoney.analytics.constant.ContractorIdentificationLevel contractorIdentificationLevel =
-                com.rbkmoney.analytics.constant.ContractorIdentificationLevel.valueOf(identificationLevelChanged.name());
-        LocalDateTime eventCreatedAt = TypeUtil.stringToLocalDateTime(event.getCreatedAt());
 
-        ContractorRow contractorRow = new ContractorRow();
-        contractorRow.setPartyId(partyId);
-        contractorRow.setContractorId(contractorId);
-        contractorRow.setContractorIdentificationLevel(contractorIdentificationLevel);
-        contractorRow.setEventTime(eventCreatedAt);
+        Party party = partyService.getParty(partyId, storage);
+        party.setContractorId(contractorId);
+        party.setContractorIdentificationLevel(ContractorIdentificationLvl.valueOf(identificationLevelChanged.name()));
 
-        return contractorRow;
+        return party;
     }
 
 }

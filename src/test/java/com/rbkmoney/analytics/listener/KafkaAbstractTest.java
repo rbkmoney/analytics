@@ -64,8 +64,7 @@ public abstract class KafkaAbstractTest {
         @Override
         public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
             TestPropertyValues.of(
-                    "kafka.bootstrap.servers=" + kafka.getBootstrapServers(),
-                    "spring.flyway.enabled=false")
+                    "kafka.bootstrap.servers=" + kafka.getBootstrapServers())
                     .applyTo(configurableApplicationContext.getEnvironment());
             initTopic(EVENT_SINK_TOPIC, MachineEventDeserializer.class);
             initTopic(PAYOUT_TOPIC, PayoutEventDeserializer.class);

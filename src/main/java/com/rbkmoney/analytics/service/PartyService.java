@@ -1,0 +1,83 @@
+package com.rbkmoney.analytics.service;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.rbkmoney.analytics.dao.repository.postgres.PostgresPartyDao;
+import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
+import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
+import com.rbkmoney.analytics.listener.mapper.LocalStorage;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class PartyService {
+
+    private final PostgresPartyDao postgresPartyDao;
+
+    private final Cache<String, Party> partyCache;
+
+    private final Cache<String, Shop> shopCache;
+
+    public Party getParty(String partyId, LocalStorage<Party> localStorage) {
+        Party party = localStorage.get(partyId);
+        if (party != null) {
+            return copy(party);
+        }
+        party = partyCache.getIfPresent(partyId);
+        if (party != null) {
+            return copy(party);
+        }
+        Party partyFromDb = postgresPartyDao.getParty(partyId);
+        if (partyFromDb == null) {
+            throw new IllegalStateException(String.format("Party not found. partyId=%s", partyId));
+        }
+
+        return partyFromDb;
+    }
+
+    public void saveParty(Party party) {
+        postgresPartyDao.saveParty(party);
+        partyCache.put(party.getPartyId(), party);
+    }
+
+    public Shop getShop(String partyId, String shopId, LocalStorage<Shop> localStorage) {
+        Shop shop = localStorage.get(partyId + shopId);
+        if (shop != null) {
+            return copy(shop);
+        }
+        String key = partyId + shopId;
+        shop = shopCache.getIfPresent(key);
+        if (shop != null) {
+            return copy(shop);
+        }
+        Shop shopFromDb = postgresPartyDao.getShop(partyId, shopId);
+        if (shopFromDb == null) {
+            throw new IllegalStateException(String.format("Shop not found. partyId=%s; shopId=%s", partyId, shopId));
+        }
+
+        return shopFromDb;
+    }
+
+    public void saveShop(Shop shop) {
+        postgresPartyDao.saveShop(shop);
+        String key = shop.getPartyId() + shop.getShopId();
+        shopCache.put(key, shop);
+    }
+
+    private Party copy(Party party) {
+        Party targetParty = new Party();
+        BeanUtils.copyProperties(party, targetParty);
+
+        return targetParty;
+    }
+
+    private Shop copy(Shop shop) {
+        Shop targetShop = new Shop();
+        BeanUtils.copyProperties(shop, targetShop);
+
+        return targetShop;
+    }
+
+
+}

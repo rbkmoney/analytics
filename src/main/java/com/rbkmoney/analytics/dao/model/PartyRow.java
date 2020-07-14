@@ -12,8 +12,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class PartyRow {
 
-    private LocalDateTime eventTime;
-
     private String partyId;
     private LocalDateTime createdAt;
     private String email;
@@ -27,5 +25,33 @@ public class PartyRow {
     private LocalDateTime suspensionSuspendedSince;
     private String revisionId;
     private LocalDateTime revisionChangedAt;
+
+    private String contractorId;
+    private ContractorType contractorType;
+    private String regUserEmail;
+    private LegalEntityType legalEntityType;
+    private String russianLegalEntityName;
+    private String russianLegalEntityRegisteredNumber;
+    private String russianLegalEntityInn;
+    private String russianLegalEntityActualAddress;
+    private String russianLegalEntityPostAddress;
+    private String russianLegalEntityRepresentativePosition;
+    private String russianLegalEntityRepresentativeFullName;
+    private String russianLegalEntityRepresentativeDocument;
+    private String russianLegalEntityBankAccount;
+    private String russianLegalEntityBankName;
+    private String russianLegalEntityBankPostAccount;
+    private String russianLegalEntityBankBik;
+    private String internationalLegalEntityName;
+    private String internationalLegalEntityTradingName;
+    private String internationalLegalEntityRegisteredAddress;
+    private String internationalLegalEntityRegisteredNumber;
+    private PrivateEntityType privateEntityType;
+    private String russianPrivateEntityFirstName;
+    private String russianPrivateEntitySecondName;
+    private String russianPrivateEntityMiddleName;
+    private String russianPrivateEntityPhoneNumber;
+    private String russianPrivateEntityEmail;
+    private ContractorIdentificationLevel contractorIdentificationLevel;
 
 }

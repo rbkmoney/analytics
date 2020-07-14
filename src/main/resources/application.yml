@@ -73,3 +73,9 @@ service:
 
 columbus.url: http://columbus:8022/repo
 repository.insert.enabled: true
+
+cache:
+  party:
+    size: 10000
+  shop:
+    size: 10000

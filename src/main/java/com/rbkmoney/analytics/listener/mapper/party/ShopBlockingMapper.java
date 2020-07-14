@@ -1,40 +1,41 @@
 package com.rbkmoney.analytics.listener.mapper.party;
 
-import com.rbkmoney.analytics.constant.BlockingType;
 import com.rbkmoney.analytics.constant.EventType;
-import com.rbkmoney.analytics.dao.model.ShopRow;
-import com.rbkmoney.analytics.listener.mapper.Mapper;
+import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
+import com.rbkmoney.analytics.listener.mapper.AdvancedMapper;
+import com.rbkmoney.analytics.listener.mapper.LocalStorage;
+import com.rbkmoney.analytics.service.PartyService;
 import com.rbkmoney.damsel.domain.Blocking;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
 import com.rbkmoney.geck.common.util.TBaseUtil;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+@Component
+@RequiredArgsConstructor
+public class ShopBlockingMapper implements AdvancedMapper<PartyChange, MachineEvent, Shop> {
 
-public class ShopBlockingMapper implements Mapper<PartyChange, MachineEvent, ShopRow> {
+    private final PartyService partyService;
 
     @Override
-    public ShopRow map(PartyChange change, MachineEvent event) {
+    public Shop map(PartyChange change, MachineEvent event, LocalStorage<Shop> storage) {
         Blocking blocking = change.getShopBlocking().getBlocking();
-        LocalDateTime eventCreatedAt = TypeUtil.stringToLocalDateTime(event.getCreatedAt());
         String shopId = change.getShopBlocking().getShopId();
         String partyId = event.getSourceId();
 
-        ShopRow shopRow = new ShopRow();
-        shopRow.setEventTime(eventCreatedAt);
-        shopRow.setShopdId(shopId);
-        shopRow.setPartyId(partyId);
-        shopRow.setBlocking(TBaseUtil.unionFieldToEnum(change.getShopBlocking().getBlocking(), BlockingType.class));
+        Shop shop = partyService.getShop(partyId, shopId, storage);
+        shop.setBlocking(TBaseUtil.unionFieldToEnum(change.getShopBlocking().getBlocking(), com.rbkmoney.analytics.domain.db.enums.Blocking.class));
         if (blocking.isSetUnblocked()) {
-            shopRow.setUnblockedReason(blocking.getUnblocked().getReason());
-            shopRow.setUnblockedSince(TypeUtil.stringToLocalDateTime(blocking.getUnblocked().getSince()));
+            shop.setUnblockedReason(blocking.getUnblocked().getReason());
+            shop.setUnblockedSince(TypeUtil.stringToLocalDateTime(blocking.getUnblocked().getSince()));
         } else if (blocking.isSetBlocked()) {
-            shopRow.setBlockedReason(blocking.getBlocked().getReason());
-            shopRow.setBlockedSince(TypeUtil.stringToLocalDateTime(blocking.getBlocked().getSince()));
+            shop.setBlockedReason(blocking.getBlocked().getReason());
+            shop.setBlockedSince(TypeUtil.stringToLocalDateTime(blocking.getBlocked().getSince()));
         }
 
-        return shopRow;
+        return shop;
     }
 
     @Override

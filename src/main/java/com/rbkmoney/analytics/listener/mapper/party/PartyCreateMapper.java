@@ -1,9 +1,11 @@
 package com.rbkmoney.analytics.listener.mapper.party;
 
-import com.rbkmoney.analytics.constant.BlockingType;
 import com.rbkmoney.analytics.constant.EventType;
-import com.rbkmoney.analytics.constant.SuspensionType;
-import com.rbkmoney.analytics.dao.model.PartyRow;
+import com.rbkmoney.analytics.domain.db.enums.Blocking;
+import com.rbkmoney.analytics.domain.db.enums.Suspension;
+import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
+import com.rbkmoney.analytics.listener.mapper.AdvancedMapper;
+import com.rbkmoney.analytics.listener.mapper.LocalStorage;
 import com.rbkmoney.analytics.listener.mapper.Mapper;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
 import com.rbkmoney.damsel.payment_processing.PartyCreated;
@@ -16,27 +18,25 @@ import java.time.LocalDateTime;
 
 @Slf4j
 @Component
-public class PartyCreateMapper implements Mapper<PartyChange, MachineEvent, PartyRow> {
+public class PartyCreateMapper implements AdvancedMapper<PartyChange, MachineEvent, Party> {
 
     @Override
-    public PartyRow map(PartyChange change, MachineEvent event) {
+    public Party map(PartyChange change, MachineEvent event, LocalStorage<Party> storage) {
         PartyCreated partyCreated = change.getPartyCreated();
-        LocalDateTime eventCreatedAt = TypeUtil.stringToLocalDateTime(event.getCreatedAt());
         LocalDateTime partyCreatedAt = TypeUtil.stringToLocalDateTime(partyCreated.getCreatedAt());
-        PartyRow partyRow = new PartyRow();
-        partyRow.setPartyId(partyCreated.getId());
-        partyRow.setEventTime(eventCreatedAt);
-        partyRow.setCreatedAt(partyCreatedAt);
-        partyRow.setEmail(partyCreated.getContactInfo().getEmail());
-        partyRow.setBlocking(BlockingType.unblocked);
-        partyRow.setBlockedSince(partyCreatedAt);
-        partyRow.setSuspension(SuspensionType.active);
-        partyRow.setUnblockedSince(partyCreatedAt);
-        partyRow.setSuspensionActiveSince(partyCreatedAt);
-        partyRow.setRevisionId("0");
-        partyRow.setRevisionChangedAt(partyCreatedAt);
+        Party party = new Party();
+        party.setPartyId(partyCreated.getId());
+        party.setCreatedAt(partyCreatedAt);
+        party.setEmail(partyCreated.getContactInfo().getEmail());
+        party.setBlocking(Blocking.unblocked);
+        party.setBlockedSince(partyCreatedAt);
+        party.setSuspension(Suspension.active);
+        party.setUnblockedSince(partyCreatedAt);
+        party.setSuspensionActiveSince(partyCreatedAt);
+        party.setRevisionId("0");
+        party.setRevisionChangedAt(partyCreatedAt);
 
-        return partyRow;
+        return party;
     }
 
     @Override

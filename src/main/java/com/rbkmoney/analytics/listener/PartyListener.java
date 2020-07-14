@@ -1,11 +1,10 @@
 package com.rbkmoney.analytics.listener;
 
 import com.rbkmoney.analytics.converter.SourceEventParser;
-import com.rbkmoney.analytics.listener.handler.BatchHandler;
+import com.rbkmoney.analytics.listener.handler.AdvancedBatchHandler;
 import com.rbkmoney.analytics.listener.handler.HandlerManager;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -15,6 +14,7 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,9 +31,9 @@ public class PartyListener {
     private final HandlerManager<PartyChange, MachineEvent> handlerManager;
 
     public PartyListener(SourceEventParser eventParser,
-                         List<BatchHandler<PartyChange, MachineEvent>> handlers) {
+                         List<AdvancedBatchHandler<PartyChange, MachineEvent>> handlers) {
         this.eventParser = eventParser;
-        this.handlerManager = new HandlerManager<>(handlers);
+        this.handlerManager = new HandlerManager<>(Collections.emptyList(), handlers);
     }
 
     @KafkaListener(autoStartup = "${kafka.listener.event.sink.enabled}",
@@ -60,7 +60,7 @@ public class PartyListener {
                             .collect(Collectors.toList()))
                     .flatMap(List::stream)
                     .collect(Collectors.groupingBy(
-                            entry -> Optional.ofNullable(handlerManager.getHandler(entry.getValue())),
+                            entry -> Optional.ofNullable(handlerManager.getAdvancedHandler(entry.getValue())),
                             Collectors.toList()))
                     .forEach((handler, entries) -> {
                         handler.ifPresent(eventBatchHandler -> eventBatchHandler.handle(entries).execute());

@@ -64,7 +64,8 @@ public class InvoiceListenerTest extends KafkaAbstractTest {
             TestPropertyValues.of(
                     "clickhouse.db.url=" + clickHouseContainer.getJdbcUrl(),
                     "clickhouse.db.user=" + clickHouseContainer.getUsername(),
-                    "clickhouse.db.password=" + clickHouseContainer.getPassword())
+                    "clickhouse.db.password=" + clickHouseContainer.getPassword(),
+                    "spring.flyway.enabled=false")
                     .applyTo(configurableApplicationContext.getEnvironment());
         }
     }

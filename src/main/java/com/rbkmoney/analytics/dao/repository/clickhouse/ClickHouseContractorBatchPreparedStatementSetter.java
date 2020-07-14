@@ -1,13 +1,11 @@
 package com.rbkmoney.analytics.dao.repository.clickhouse;
 
-import com.rbkmoney.analytics.dao.model.ContractorRow;
+import com.rbkmoney.analytics.dao.model.PartyRow;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -23,16 +21,13 @@ public class ClickHouseContractorBatchPreparedStatementSetter implements BatchPr
             " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 
-    private final List<ContractorRow> batch;
+    private final List<PartyRow> batch;
 
     @Override
     public void setValues(PreparedStatement ps, int i) throws SQLException {
-        ContractorRow row = batch.get(i);
+        PartyRow row = batch.get(i);
         int l = 1;
 
-        ps.setObject(l++, row.getEventTime().toLocalDate());
-        ps.setLong(l++, row.getEventTime().toEpochSecond(ZoneOffset.UTC));
-        ps.setLong(l++, row.getEventTime().toInstant(ZoneOffset.UTC).truncatedTo(ChronoUnit.HOURS).toEpochMilli());
         ps.setString(l++, row.getPartyId());
         ps.setString(l++, row.getContractorId());
         ps.setString(l++, row.getContractorType().name());

@@ -23,7 +23,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PartyFlowGenerator {
 
-    public static final String SOURCE_ID = "testSourceId";
+    public static final String SOURCE_ID = "testPartyId";
     public static final String PARTY_ID = "testPartyId";
     public static final String SHOP_ID = "testShopId";
     public static final String PARTY_EMAIL = "testPartyEmail";
@@ -52,6 +52,8 @@ public class PartyFlowGenerator {
         sinkEvents.add(buildSinkEvent(buildMessagePartyBlocking(sequenceId++)));
         sinkEvents.add(buildSinkEvent(buildMessagePartySuspension(sequenceId++)));
         sinkEvents.add(buildSinkEvent(buildMessagePartyRevisionChanged(sequenceId++)));
+        sinkEvents.add(buildSinkEvent(buildContractorCreatedMapper(sequenceId++)));
+        sinkEvents.add(buildSinkEvent(buildContractorIdentificationLevelChanged(sequenceId++)));
         sinkEvents.add(buildSinkEvent(buildMessageShopCreated(sequenceId++)));
         sinkEvents.add(buildSinkEvent(buildMessageShopBlocking(sequenceId++)));
         sinkEvents.add(buildSinkEvent(buildMessageShopSuspension(sequenceId++)));
@@ -61,8 +63,6 @@ public class PartyFlowGenerator {
         sinkEvents.add(buildSinkEvent(buildMessageShopPayoutScheduleChanged(sequenceId++)));
         sinkEvents.add(buildSinkEvent(buildMessageShopPayoutToolChanged(sequenceId++)));
         sinkEvents.add(buildSinkEvent(buildMessageShopAccountCreated(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildContractorCreatedMapper(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildContractorIdentificationLevelChanged(sequenceId++)));
 
         return sinkEvents;
     }
@@ -271,6 +271,11 @@ public class PartyFlowGenerator {
     private static Shop buildShopCreated() throws IOException {
         Shop shop = new Shop();
         shop = new MockTBaseProcessor(MockMode.ALL).process(shop, new TBaseHandler<>(Shop.class));
+        shop.setCreatedAt(TypeUtil.temporalToString(LocalDateTime.now()));
+        Blocking blocking = new Blocking();
+        blocking.setBlocked(new Blocked(PARTY_BLOCK_REASON, TypeUtil.temporalToString(LocalDateTime.now())));
+        shop.setBlocking(blocking);
+        shop.setSuspension(buildPartySuspension());
         return shop;
     }
 

@@ -4,6 +4,9 @@ import com.rbkmoney.analytics.constant.*;
 import com.rbkmoney.analytics.dao.model.*;
 import com.rbkmoney.analytics.dao.repository.clickhouse.*;
 import com.rbkmoney.analytics.dao.repository.postgres.PostgresBalanceChangesRepository;
+import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
+import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
+import com.rbkmoney.analytics.service.PartyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,15 +21,13 @@ import static java.util.stream.Collectors.toList;
 public class RepositoryFacade {
 
     private final PostgresBalanceChangesRepository postgresBalanceChangesRepository;
+    private final PartyService partyService;
 
     private final ClickHousePaymentRepository clickHousePaymentRepository;
     private final ClickHouseRefundRepository clickHouseRefundRepository;
     private final ClickHouseAdjustmentRepository clickHouseAdjustmentRepository;
     private final ClickHouseChargebackRepository clickHouseChargebackRepository;
     private final ClickHousePayoutRepository clickHousePayoutRepository;
-    private final ClickHousePartyRepository clickHousePartyRepository;
-    private final ClickHouseShopRepository clickHouseShopRepository;
-    private final ClickHouseContractorRepository clickHouseContractorRepository;
 
     public void insertPayments(List<PaymentRow> paymentRows) {
         List<PaymentRow> capturedPayments = paymentRows.stream()
@@ -84,19 +85,18 @@ public class RepositoryFacade {
         log.info("RepositoryFacade CH inserted insertPayouts: {}", payoutRows.size());
     }
 
-    public void insertParties(List<PartyRow> partyRows) {
-        clickHousePartyRepository.insertBatch(partyRows);
-        log.info("RepositoryFacade CH inserted insertParties: {}", partyRows.size());
+    public void insertParties(List<Party> parties) {
+        for (Party party : parties) {
+            partyService.saveParty(party);
+        }
+        log.info("RepositoryFacade PG inserted insertParties: {}", parties.size());
     }
 
-    public void insertShops(List<ShopRow> shopRows) {
-        clickHouseShopRepository.insertBatch(shopRows);
-        log.info("RepositoryFacade CH inserted insertShops: {}", shopRows.size());
-    }
-
-    public void insertContractor(List<ContractorRow> contractorRows) {
-        clickHouseContractorRepository.insertBatch(contractorRows);
-        log.info("RepositoryFacade CH inserted insertContractor: {}", contractorRows.size());
+    public void insertShops(List<Shop> shops) {
+        for (Shop shop : shops) {
+            partyService.saveShop(shop);
+        }
+        log.info("RepositoryFacade PG inserted insertShops: {}", shops.size());
     }
 
 }

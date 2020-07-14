@@ -11,8 +11,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class ShopRow {
 
-    private LocalDateTime eventTime;
-
     private String partyId;
     private String shopdId;
     private String categoryId;
