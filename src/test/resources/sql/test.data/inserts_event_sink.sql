@@ -76,11 +76,3 @@ VALUES ('payoutId', 'paid', 'wallet', '', 0, '2019-12-05', 1575556887, 157555440
         'legalAgreementId', 1575556887, 'russianAccount', 'russianBankName', 'russianBankPostAccount',
         'russianBankBik', 'russianInn', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
         '', '');
-
-INSERT INTO analytic.events_sink_party (timestamp, eventTime, eventTimeHour,
-                                        partyId, createdAt, email, blocking, blockedReason, blockedSince,
-                                        unblockedReason, unblockedSince,
-                                        suspension, suspensionActiveSince, suspensionSuspendedSince, revisionId,
-                                        revisionChangedAt)
-VALUES ('2019-12-05', 1575556887, 1575554400000, 'ad8b7bfd-0760-4781-a400-51903ee8e509', 1594027295, 'test@mail.ru',
-        'unblocked', 'testReason', 0, '', 1594027295, 'active', 1594027295, 0, '', 1594027295)
