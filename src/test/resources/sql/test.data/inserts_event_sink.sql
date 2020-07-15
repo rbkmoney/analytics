@@ -75,4 +75,4 @@ VALUES ('payoutId', 'paid', 'wallet', '', 0, '2019-12-05', 1575556887, 157555440
         10000, 1000, 'RUB', 'ca2e9162-eda2-4d17-bbfa-dc5e39b1772f', 'russian_payout_account', 'purpose', 1575556887,
         'legalAgreementId', 1575556887, 'russianAccount', 'russianBankName', 'russianBankPostAccount',
         'russianBankBik', 'russianInn', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
-        '', '');
+        '', '')
