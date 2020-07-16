@@ -20,7 +20,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class ShopCreatedMapper extends AbstractClaimChangeMapper<Shop> {
+public class ShopCreatedHandler extends AbstractClaimChangeHandler<Shop> {
 
     private final PartyService partyService;
 

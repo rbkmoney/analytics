@@ -20,7 +20,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ContractorCreatedMapper extends AbstractClaimChangeMapper<Party> {
+public class ContractorCreatedHandler extends AbstractClaimChangeHandler<Party> {
 
     private final PartyService partyService;
 
@@ -42,7 +42,7 @@ public class ContractorCreatedMapper extends AbstractClaimChangeMapper<Party> {
         }
     }
 
-    private Party handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage<Party> storage) {
+    private void handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage<Party> storage) {
         ContractorEffectUnit contractorEffect = effect.getContractorEffect();
         PartyContractor partyContractor = contractorEffect.getEffect().getCreated();
         Contractor contractor = partyContractor.getContractor();
@@ -96,7 +96,5 @@ public class ContractorCreatedMapper extends AbstractClaimChangeMapper<Party> {
 
         partyService.saveParty(party);
         storage.put(partyId, party);
-
-        return party;
     }
 }

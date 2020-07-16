@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class PartyCreateMapper implements ChangeHandler<PartyChange, MachineEvent, Party> {
+public class PartyCreateHandler implements ChangeHandler<PartyChange, MachineEvent, Party> {
 
     private final PartyService partyService;
 

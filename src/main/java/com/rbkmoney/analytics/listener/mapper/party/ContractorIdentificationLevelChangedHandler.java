@@ -20,7 +20,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ContractorIdentificationLevelChangedMapper extends AbstractClaimChangeMapper<Party> {
+public class ContractorIdentificationLevelChangedHandler extends AbstractClaimChangeHandler<Party> {
 
     private final PartyService partyService;
 
@@ -42,7 +42,7 @@ public class ContractorIdentificationLevelChangedMapper extends AbstractClaimCha
         }
     }
 
-    private Party handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage<Party> storage) {
+    private void handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage<Party> storage) {
         ContractorEffectUnit contractorEffect = effect.getContractorEffect();
         ContractorIdentificationLevel identificationLevelChanged = contractorEffect.getEffect().getIdentificationLevelChanged();
         String contractorId = contractorEffect.getId();
@@ -54,8 +54,6 @@ public class ContractorIdentificationLevelChangedMapper extends AbstractClaimCha
 
         partyService.saveParty(party);
         storage.put(partyId, party);
-
-        return party;
     }
 
 }

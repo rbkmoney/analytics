@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-public class PartyRevisionChangedMapper implements ChangeHandler<PartyChange, MachineEvent, Party> {
+public class PartyRevisionChangedHandler implements ChangeHandler<PartyChange, MachineEvent, Party> {
 
     private final PartyService partyService;
 

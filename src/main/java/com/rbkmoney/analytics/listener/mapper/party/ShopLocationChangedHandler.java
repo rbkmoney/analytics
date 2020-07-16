@@ -3,6 +3,7 @@ package com.rbkmoney.analytics.listener.mapper.party;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
 import com.rbkmoney.analytics.listener.mapper.LocalStorage;
 import com.rbkmoney.analytics.service.PartyService;
+import com.rbkmoney.damsel.domain.ShopLocation;
 import com.rbkmoney.damsel.payment_processing.ClaimEffect;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
 import com.rbkmoney.damsel.payment_processing.ShopEffectUnit;
@@ -16,14 +17,14 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class ShopPayoutToolChangedMapper extends AbstractClaimChangeMapper<Shop> {
+public class ShopLocationChangedHandler extends AbstractClaimChangeHandler<Shop> {
 
     private final PartyService partyService;
 
     @Override
     public boolean accept(PartyChange change) {
         return isClaimEffect(change, claimEffect -> {
-            return claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetPayoutToolChanged();
+            return claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetLocationChanged();
         });
     }
 
@@ -32,7 +33,7 @@ public class ShopPayoutToolChangedMapper extends AbstractClaimChangeMapper<Shop>
     public void handleChange(PartyChange change, MachineEvent event, LocalStorage<Shop> storage) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
         for (ClaimEffect claimEffect : claimEffects) {
-            if (claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetPayoutToolChanged()) {
+            if (claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetLocationChanged()) {
                 handleEvent(event, claimEffect, storage);
             }
         }
@@ -40,15 +41,14 @@ public class ShopPayoutToolChangedMapper extends AbstractClaimChangeMapper<Shop>
 
     private void handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage<Shop> storage) {
         ShopEffectUnit shopEffect = effect.getShopEffect();
-        String payoutToolChanged = shopEffect.getEffect().getPayoutToolChanged();
+        ShopLocation locationChanged = shopEffect.getEffect().getLocationChanged();
         String shopId = shopEffect.getShopId();
         String partyId = event.getSourceId();
 
         Shop shop = partyService.getShop(partyId, shopId, storage);
-        shop.setPayoutToolId(payoutToolChanged);
+        shop.setLocationUrl(locationChanged.getUrl());
 
         partyService.saveShop(shop);
         storage.put(partyId + shopId, shop);
     }
-
 }
