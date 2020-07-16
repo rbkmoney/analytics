@@ -4,24 +4,31 @@ import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.domain.db.enums.Blocking;
 import com.rbkmoney.analytics.domain.db.enums.Suspension;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
-import com.rbkmoney.analytics.listener.mapper.AdvancedMapper;
+import com.rbkmoney.analytics.listener.mapper.ChangeHandler;
 import com.rbkmoney.analytics.listener.mapper.LocalStorage;
-import com.rbkmoney.analytics.listener.mapper.Mapper;
+import com.rbkmoney.analytics.service.PartyService;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
 import com.rbkmoney.damsel.payment_processing.PartyCreated;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
 @Slf4j
 @Component
-public class PartyCreateMapper implements AdvancedMapper<PartyChange, MachineEvent, Party> {
+@RequiredArgsConstructor
+public class PartyCreateMapper implements ChangeHandler<PartyChange, MachineEvent, Party> {
+
+    private final PartyService partyService;
 
     @Override
-    public Party map(PartyChange change, MachineEvent event, LocalStorage<Party> storage) {
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void handleChange(PartyChange change, MachineEvent event, LocalStorage<Party> storage) {
         PartyCreated partyCreated = change.getPartyCreated();
         LocalDateTime partyCreatedAt = TypeUtil.stringToLocalDateTime(partyCreated.getCreatedAt());
         Party party = new Party();
@@ -36,7 +43,8 @@ public class PartyCreateMapper implements AdvancedMapper<PartyChange, MachineEve
         party.setRevisionId("0");
         party.setRevisionChangedAt(partyCreatedAt);
 
-        return party;
+        partyService.saveParty(party);
+        storage.put(partyCreated.getId(), party);
     }
 
     @Override

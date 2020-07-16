@@ -3,6 +3,7 @@ package com.rbkmoney.analytics.config;
 import com.rbkmoney.analytics.config.properties.KafkaSslProperties;
 import com.rbkmoney.analytics.serde.MachineEventDeserializer;
 import com.rbkmoney.analytics.serde.PayoutEventDeserializer;
+import com.rbkmoney.damsel.payout_processing.Event;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import com.rbkmoney.mg.event.sink.service.ConsumerGroupIdService;
 import com.rbkmoney.mg.event.sink.utils.SslKafkaUtils;
@@ -19,8 +20,6 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.SeekToCurrentBatchErrorHandler;
-import com.rbkmoney.damsel.payout_processing.Event;
-
 
 import java.util.HashMap;
 import java.util.Map;

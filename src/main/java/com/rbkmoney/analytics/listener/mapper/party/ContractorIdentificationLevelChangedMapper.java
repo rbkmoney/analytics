@@ -12,6 +12,8 @@ import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,29 +26,23 @@ public class ContractorIdentificationLevelChangedMapper extends AbstractClaimCha
 
     @Override
     public boolean accept(PartyChange change) {
-        boolean accept = super.accept(change);
-        if (accept) {
-            List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
-            return claimEffects.stream()
-                    .anyMatch(claimEffect -> claimEffect.isSetContractorEffect()
-                            && claimEffect.getContractorEffect().getEffect().isSetIdentificationLevelChanged());
-        }
-        return false;
+        return isClaimEffect(change, claimEffect -> {
+            return claimEffect.isSetContractorEffect() && claimEffect.getContractorEffect().getEffect().isSetIdentificationLevelChanged();
+        });
     }
 
     @Override
-    public Party map(PartyChange change, MachineEvent event, LocalStorage<Party> storage) {
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void handleChange(PartyChange change, MachineEvent event, LocalStorage<Party> storage) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
-        ClaimEffect contractorEffect = claimEffects.stream()
-                .filter(claimEffect -> claimEffect.isSetContractorEffect() && claimEffect.getContractorEffect().getEffect().isSetIdentificationLevelChanged())
-                .findFirst().orElse(null);
-        if (contractorEffect != null) {
-            return mapEvent(event, contractorEffect, storage);
+        for (ClaimEffect claimEffect : claimEffects) {
+            if (claimEffect.isSetContractorEffect() && claimEffect.getContractorEffect().getEffect().isSetIdentificationLevelChanged()) {
+                handleEvent(event, claimEffect, storage);
+            }
         }
-        return null;
     }
 
-    private Party mapEvent(MachineEvent event, ClaimEffect effect, LocalStorage<Party> storage) {
+    private Party handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage<Party> storage) {
         ContractorEffectUnit contractorEffect = effect.getContractorEffect();
         ContractorIdentificationLevel identificationLevelChanged = contractorEffect.getEffect().getIdentificationLevelChanged();
         String contractorId = contractorEffect.getId();
@@ -55,6 +51,9 @@ public class ContractorIdentificationLevelChangedMapper extends AbstractClaimCha
         Party party = partyService.getParty(partyId, storage);
         party.setContractorId(contractorId);
         party.setContractorIdentificationLevel(ContractorIdentificationLvl.valueOf(identificationLevelChanged.name()));
+
+        partyService.saveParty(party);
+        storage.put(partyId, party);
 
         return party;
     }

@@ -12,6 +12,8 @@ import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,29 +26,23 @@ public class ContractorCreatedMapper extends AbstractClaimChangeMapper<Party> {
 
     @Override
     public boolean accept(PartyChange change) {
-        boolean accept = super.accept(change);
-        if (accept) {
-            List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
-            return claimEffects.stream()
-                    .anyMatch(claimEffect -> claimEffect.isSetContractorEffect()
-                            && claimEffect.getContractorEffect().getEffect().isSetCreated());
-        }
-        return false;
+        return isClaimEffect(change, claimEffect -> {
+            return claimEffect.isSetContractorEffect() && claimEffect.getContractorEffect().getEffect().isSetCreated();
+        });
     }
 
     @Override
-    public Party map(PartyChange change, MachineEvent event, LocalStorage<Party> storage) {
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void handleChange(PartyChange change, MachineEvent event, LocalStorage<Party> storage) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
-        ClaimEffect contractorEffect = claimEffects.stream()
-                .filter(claimEffect -> claimEffect.isSetContractorEffect() && claimEffect.getContractorEffect().getEffect().isSetCreated())
-                .findFirst().orElse(null);
-        if (contractorEffect != null) {
-            return mapEvent(event, contractorEffect, storage);
+        for (ClaimEffect claimEffect : claimEffects) {
+            if (claimEffect.isSetContractorEffect() && claimEffect.getContractorEffect().getEffect().isSetCreated()) {
+                handleEvent(event, claimEffect, storage);
+            }
         }
-        return null;
     }
 
-    private Party mapEvent(MachineEvent event, ClaimEffect effect, LocalStorage<Party> storage) {
+    private Party handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage<Party> storage) {
         ContractorEffectUnit contractorEffect = effect.getContractorEffect();
         PartyContractor partyContractor = contractorEffect.getEffect().getCreated();
         Contractor contractor = partyContractor.getContractor();
@@ -97,6 +93,9 @@ public class ContractorCreatedMapper extends AbstractClaimChangeMapper<Party> {
                 party.setRussianPrivateEntityMiddleName(russianPrivateEntity.getMiddleName());
             }
         }
+
+        partyService.saveParty(party);
+        storage.put(partyId, party);
 
         return party;
     }

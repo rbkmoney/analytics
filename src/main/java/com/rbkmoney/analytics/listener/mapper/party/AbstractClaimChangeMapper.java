@@ -1,7 +1,8 @@
 package com.rbkmoney.analytics.listener.mapper.party;
 
 import com.rbkmoney.analytics.constant.EventType;
-import com.rbkmoney.analytics.listener.mapper.AdvancedMapper;
+import com.rbkmoney.analytics.listener.mapper.ChangeHandler;
+import com.rbkmoney.damsel.payment_processing.ClaimEffect;
 import com.rbkmoney.damsel.payment_processing.ClaimStatus;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
 import com.rbkmoney.geck.filter.Filter;
@@ -10,7 +11,10 @@ import com.rbkmoney.geck.filter.condition.IsNullCondition;
 import com.rbkmoney.geck.filter.rule.PathConditionRule;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 
-public abstract class AbstractClaimChangeMapper<T> implements AdvancedMapper<PartyChange, MachineEvent, T> {
+import java.util.List;
+import java.util.function.Predicate;
+
+public abstract class AbstractClaimChangeMapper<T> implements ChangeHandler<PartyChange, MachineEvent, T> {
 
     private static final Filter CLAIM_CREATED_FILTER = new PathConditionFilter(
             new PathConditionRule("claim_created.status.accepted", new IsNullCondition().not()));
@@ -36,5 +40,13 @@ public abstract class AbstractClaimChangeMapper<T> implements AdvancedMapper<Par
     @Override
     public EventType getChangeType() {
         return null;
+    }
+
+    protected boolean isClaimEffect(PartyChange change, Predicate<ClaimEffect> predicate) {
+        if (CLAIM_CREATED_FILTER.match(change) || CLAIM_STATUS_CHANGED_FILTER.match(change)) {
+            List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
+            return claimEffects.stream().anyMatch(predicate);
+        }
+        return false;
     }
 }

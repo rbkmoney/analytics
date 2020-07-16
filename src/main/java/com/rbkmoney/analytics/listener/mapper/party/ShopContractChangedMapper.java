@@ -10,6 +10,8 @@ import com.rbkmoney.damsel.payment_processing.ShopEffectUnit;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,29 +23,24 @@ public class ShopContractChangedMapper extends AbstractClaimChangeMapper<Shop> {
 
     @Override
     public boolean accept(PartyChange change) {
-        boolean accept = super.accept(change);
-        if (accept) {
-            List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
-            return claimEffects.stream()
-                    .anyMatch(claimEffect -> claimEffect.isSetShopEffect()
-                            && claimEffect.getShopEffect().getEffect().isSetContractChanged());
-        }
-        return false;
+        return isClaimEffect(change, claimEffect -> {
+            return claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetContractChanged();
+        });
+
     }
 
     @Override
-    public Shop map(PartyChange change, MachineEvent event, LocalStorage<Shop> storage) {
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void handleChange(PartyChange change, MachineEvent event, LocalStorage<Shop> storage) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
-        ClaimEffect contractorEffect = claimEffects.stream()
-                .filter(claimEffect -> claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetContractChanged())
-                .findFirst().orElse(null);
-        if (contractorEffect != null) {
-            return mapEvent(event, contractorEffect, storage);
+        for (ClaimEffect claimEffect : claimEffects) {
+            if (claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetContractChanged()) {
+                handleEvent(event, claimEffect, storage);
+            }
         }
-        return null;
     }
 
-    private Shop mapEvent(MachineEvent event, ClaimEffect effect, LocalStorage<Shop> storage) {
+    private void handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage<Shop> storage) {
         ShopEffectUnit shopEffect = effect.getShopEffect();
         ShopContractChanged contractChanged = shopEffect.getEffect().getContractChanged();
         String shopId = shopEffect.getShopId();
@@ -53,7 +50,8 @@ public class ShopContractChangedMapper extends AbstractClaimChangeMapper<Shop> {
         shop.setContractId(contractChanged.getContractId());
         shop.setPayoutToolId(contractChanged.getPayoutToolId());
 
-        return shop;
+        partyService.saveShop(shop);
+        storage.put(partyId + shopId, shop);
     }
 
 }

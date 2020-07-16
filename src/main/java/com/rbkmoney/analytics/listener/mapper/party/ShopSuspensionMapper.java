@@ -2,7 +2,7 @@ package com.rbkmoney.analytics.listener.mapper.party;
 
 import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
-import com.rbkmoney.analytics.listener.mapper.AdvancedMapper;
+import com.rbkmoney.analytics.listener.mapper.ChangeHandler;
 import com.rbkmoney.analytics.listener.mapper.LocalStorage;
 import com.rbkmoney.analytics.service.PartyService;
 import com.rbkmoney.damsel.domain.Suspension;
@@ -11,15 +11,18 @@ import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-public class ShopSuspensionMapper implements AdvancedMapper<PartyChange, MachineEvent, Shop> {
+public class ShopSuspensionMapper implements ChangeHandler<PartyChange, MachineEvent, Shop> {
 
     private final PartyService partyService;
 
     @Override
-    public Shop map(PartyChange change, MachineEvent event, LocalStorage<Shop> storage) {
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void handleChange(PartyChange change, MachineEvent event, LocalStorage<Shop> storage) {
         Suspension suspension = change.getShopSuspension().getSuspension();
         String shopId = change.getShopSuspension().getShopId();
         String partyId = event.getSourceId();
@@ -31,7 +34,8 @@ public class ShopSuspensionMapper implements AdvancedMapper<PartyChange, Machine
             shop.setSuspensionSuspendedSince(TypeUtil.stringToLocalDateTime(suspension.getSuspended().getSince()));
         }
 
-        return shop;
+        partyService.saveShop(shop);
+        storage.put(partyId + shopId, shop);
     }
 
     @Override

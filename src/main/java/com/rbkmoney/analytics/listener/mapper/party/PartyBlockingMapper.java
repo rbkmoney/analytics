@@ -2,7 +2,7 @@ package com.rbkmoney.analytics.listener.mapper.party;
 
 import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
-import com.rbkmoney.analytics.listener.mapper.AdvancedMapper;
+import com.rbkmoney.analytics.listener.mapper.ChangeHandler;
 import com.rbkmoney.analytics.listener.mapper.LocalStorage;
 import com.rbkmoney.analytics.service.PartyService;
 import com.rbkmoney.damsel.domain.Blocking;
@@ -12,15 +12,18 @@ import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-public class PartyBlockingMapper implements AdvancedMapper<PartyChange, MachineEvent, Party> {
+public class PartyBlockingMapper implements ChangeHandler<PartyChange, MachineEvent, Party> {
 
     private final PartyService partyService;
 
     @Override
-    public Party map(PartyChange change, MachineEvent event, LocalStorage<Party> storage) {
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void handleChange(PartyChange change, MachineEvent event, LocalStorage<Party> storage) {
         Blocking partyBlocking = change.getPartyBlocking();
         String partyId = event.getSourceId();
 
@@ -34,7 +37,8 @@ public class PartyBlockingMapper implements AdvancedMapper<PartyChange, MachineE
             party.setUnblockedSince(TypeUtil.stringToLocalDateTime(partyBlocking.getUnblocked().getSince()));
         }
 
-        return party;
+        partyService.saveParty(party);
+        storage.put(partyId, party);
     }
 
     @Override

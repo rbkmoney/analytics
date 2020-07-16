@@ -2,7 +2,7 @@ package com.rbkmoney.analytics.listener.mapper.party;
 
 import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
-import com.rbkmoney.analytics.listener.mapper.AdvancedMapper;
+import com.rbkmoney.analytics.listener.mapper.ChangeHandler;
 import com.rbkmoney.analytics.listener.mapper.LocalStorage;
 import com.rbkmoney.analytics.service.PartyService;
 import com.rbkmoney.damsel.domain.Blocking;
@@ -12,15 +12,18 @@ import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-public class ShopBlockingMapper implements AdvancedMapper<PartyChange, MachineEvent, Shop> {
+public class ShopBlockingMapper implements ChangeHandler<PartyChange, MachineEvent, Shop> {
 
     private final PartyService partyService;
 
     @Override
-    public Shop map(PartyChange change, MachineEvent event, LocalStorage<Shop> storage) {
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void handleChange(PartyChange change, MachineEvent event, LocalStorage<Shop> storage) {
         Blocking blocking = change.getShopBlocking().getBlocking();
         String shopId = change.getShopBlocking().getShopId();
         String partyId = event.getSourceId();
@@ -35,7 +38,8 @@ public class ShopBlockingMapper implements AdvancedMapper<PartyChange, MachineEv
             shop.setBlockedSince(TypeUtil.stringToLocalDateTime(blocking.getBlocked().getSince()));
         }
 
-        return shop;
+        partyService.saveShop(shop);
+        storage.put(partyId + shopId, shop);
     }
 
     @Override

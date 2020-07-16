@@ -4,44 +4,45 @@ import com.rbkmoney.analytics.domain.db.enums.Blocking;
 import com.rbkmoney.analytics.domain.db.enums.Suspension;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
 import com.rbkmoney.analytics.listener.mapper.LocalStorage;
+import com.rbkmoney.analytics.service.PartyService;
 import com.rbkmoney.damsel.payment_processing.ClaimEffect;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
 import com.rbkmoney.damsel.payment_processing.ShopEffectUnit;
 import com.rbkmoney.geck.common.util.TBaseUtil;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class ShopCreatedMapper extends AbstractClaimChangeMapper<Shop> {
+
+    private final PartyService partyService;
 
     @Override
     public boolean accept(PartyChange change) {
-        boolean accept = super.accept(change);
-        if (accept) {
-            List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
-            return claimEffects.stream()
-                    .anyMatch(claimEffect -> claimEffect.isSetShopEffect()
-                            && claimEffect.getShopEffect().getEffect().isSetCreated());
-        }
-        return false;
+        return isClaimEffect(change, claimEffect -> {
+            return claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetCreated();
+        });
     }
 
     @Override
-    public Shop map(PartyChange change, MachineEvent event, LocalStorage<Shop> storage) {
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void handleChange(PartyChange change, MachineEvent event, LocalStorage<Shop> storage) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
-        ClaimEffect contractorEffect = claimEffects.stream()
-                .filter(claimEffect -> claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetCreated())
-                .findFirst().orElse(null);
-        if (contractorEffect != null) {
-            return mapEvent(event, contractorEffect, storage);
+        for (ClaimEffect claimEffect : claimEffects) {
+            if (claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetCreated()) {
+                handleEvent(event, claimEffect, storage);
+            }
         }
-        return null;
     }
 
-    private Shop mapEvent(MachineEvent event, ClaimEffect effect, LocalStorage<Shop> storage) {
+    private void handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage<Shop> storage) {
         ShopEffectUnit shopEffect = effect.getShopEffect();
         com.rbkmoney.damsel.domain.Shop shopCreated = shopEffect.getEffect().getCreated();
         String shopId = shopEffect.getShopId();
@@ -83,7 +84,8 @@ public class ShopCreatedMapper extends AbstractClaimChangeMapper<Shop> {
            shop.setPayoutScheduleId(shopCreated.getPayoutSchedule().getId());
        }
 
-       return shop;
+        partyService.saveShop(shop);
+        storage.put(partyId + shopId, shop);
     }
 
 

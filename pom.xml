@@ -35,6 +35,7 @@
         <analytics-proto.version>1.22-692755b</analytics-proto.version>
         <mg-event-sink-listener-spring-boot-starter.version>0.0.5-SNAPSHOT</mg-event-sink-listener-spring-boot-starter.version>
         <db-common-lib.version>0.0.3</db-common-lib.version>
+        <sink-common-lib.version>0.0.4</sink-common-lib.version>
         <db.port>5432</db.port>
         <db.user>postgres</db.user>
         <db.password>postgres</db.password>
@@ -94,6 +95,16 @@
             <groupId>com.rbkmoney.geck</groupId>
             <artifactId>filter</artifactId>
             <version>0.6.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.rbkmoney</groupId>
+            <artifactId>sink-common-lib</artifactId>
+            <version>${sink-common-lib.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.rbkmoney</groupId>
+            <artifactId>db-common-lib</artifactId>
+            <version>${db-common-lib.version}</version>
         </dependency>
 
         <!--spring-->
@@ -177,11 +188,6 @@
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
             <version>2.5.5</version>
-        </dependency>
-        <dependency>
-            <groupId>com.rbkmoney</groupId>
-            <artifactId>db-common-lib</artifactId>
-            <version>${db-common-lib.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jooq</groupId>
