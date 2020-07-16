@@ -10,6 +10,7 @@ import com.rbkmoney.kafka.common.serialization.ThriftSerializer;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import com.rbkmoney.machinegun.eventsink.SinkEvent;
 import com.rbkmoney.machinegun.msgpack.Value;
+import com.rbkmoney.sink.common.serialization.impl.PartyEventDataSerializer;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -314,19 +315,17 @@ public class PartyFlowGenerator {
 
     private static MachineEvent buildMachineEvent(PartyChange partyChange, String sourceId, Long sequenceId) {
         MachineEvent message = new MachineEvent();
-        EventPayload payload = new EventPayload();
         ArrayList<PartyChange> partyChanges = new ArrayList<>();
         partyChanges.add(partyChange);
-        payload.setPartyChanges(partyChanges);
 
         message.setCreatedAt(TypeUtil.temporalToString(Instant.now()));
         message.setEventId(sequenceId);
         message.setSourceNs(SOURCE_NS);
         message.setSourceId(sourceId);
 
-        ThriftSerializer<EventPayload> eventPayloadThriftSerializer = new ThriftSerializer<>();
+        PartyEventDataSerializer partyEventDataSerializer = new PartyEventDataSerializer();
         Value data = new Value();
-        data.setBin(eventPayloadThriftSerializer.serialize("", payload));
+        data.setBin(partyEventDataSerializer.serialize(new PartyEventData(partyChanges)));
         message.setData(data);
         return message;
     }

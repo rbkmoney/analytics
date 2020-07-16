@@ -49,6 +49,9 @@ public abstract class KafkaAbstractTest {
     @Value("${kafka.topic.payout.initial}")
     public String payoutTopic;
 
+    @Value("${kafka.topic.party.initial}")
+    public String partyTopic;
+
     public static <T> Producer<String, T> createProducerAggr() {
         Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafka.getBootstrapServers());
@@ -121,4 +124,18 @@ public abstract class KafkaAbstractTest {
             log.error("Error when produceMessageToPayout e:", e);
         }
     }
+
+    void produceMessageToParty(SinkEvent partyEvent) {
+        try (Producer<String, SinkEvent> producer = createProducerAggr()) {
+            ProducerRecord<String, SinkEvent> producerRecord = new ProducerRecord<>(
+                    partyTopic,
+                    partyEvent.getEvent().getSourceId(),
+                    partyEvent);
+            producer.send(producerRecord).get();
+            log.info("produceMessageToParty() partyEvent: {}", partyEvent);
+        } catch (Exception e) {
+            log.error("Error when produceMessageToParty e:", e);
+        }
+    }
+
 }

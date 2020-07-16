@@ -70,7 +70,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
     public void testPartyEventSink() throws IOException {
         List<SinkEvent> sinkEvents = PartyFlowGenerator.generatePartyFlow();
 
-        sinkEvents.forEach(this::produceMessageToEventSink);
+        sinkEvents.forEach(this::produceMessageToParty);
 
         await().atMost(60, SECONDS).until(() -> {
             Integer partyCount = postgresJdbcTemplate.queryForObject("SELECT count(*) FROM analytics.party" +
