@@ -85,18 +85,4 @@ public class RepositoryFacade {
         log.info("RepositoryFacade CH inserted insertPayouts: {}", payoutRows.size());
     }
 
-    public void insertParties(List<Party> parties) {
-        for (Party party : parties) {
-            partyService.saveParty(party);
-        }
-        log.info("RepositoryFacade PG inserted insertParties: {}", parties.size());
-    }
-
-    public void insertShops(List<Shop> shops) {
-        for (Shop shop : shops) {
-            partyService.saveShop(shop);
-        }
-        log.info("RepositoryFacade PG inserted insertShops: {}", shops.size());
-    }
-
 }

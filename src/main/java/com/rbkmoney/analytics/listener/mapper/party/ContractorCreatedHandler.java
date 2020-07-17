@@ -45,7 +45,6 @@ public class ContractorCreatedHandler extends AbstractClaimChangeHandler<Party> 
         ContractorEffectUnit contractorEffect = effect.getContractorEffect();
         PartyContractor partyContractor = contractorEffect.getEffect().getCreated();
         Contractor contractor = partyContractor.getContractor();
-        com.rbkmoney.damsel.domain.Contractor contractorCreated = partyContractor.getContractor();
 
         String contractorId = contractorEffect.getId();
         String partyId = event.getSourceId();
@@ -54,7 +53,7 @@ public class ContractorCreatedHandler extends AbstractClaimChangeHandler<Party> 
         party.setContractorId(contractorId);
         party.setContractorType(TBaseUtil.unionFieldToEnum(contractor, com.rbkmoney.analytics.domain.db.enums.Contractor.class));
         if (contractor.isSetRegisteredUser()) {
-            party.setRegUserEmail(partyContractor.getContractor().getRegisteredUser().getEmail());
+            party.setRegUserEmail(contractor.getRegisteredUser().getEmail());
         } else if (contractor.isSetLegalEntity()) {
             party.setLegalEntityType(TBaseUtil.unionFieldToEnum(contractor.getLegalEntity(), com.rbkmoney.analytics.domain.db.enums.LegalEntity.class));
             if (contractor.getLegalEntity().isSetRussianLegalEntity()) {
