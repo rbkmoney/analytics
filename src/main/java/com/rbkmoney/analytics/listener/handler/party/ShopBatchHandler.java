@@ -18,8 +18,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ShopBatchHandler implements AdvancedBatchHandler<PartyChange, MachineEvent> {
 
-    private final RepositoryFacade repositoryFacade;
-
     @Getter
     private final List<ChangeHandler<PartyChange, MachineEvent, Shop>> handlers;
 

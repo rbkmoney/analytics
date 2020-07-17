@@ -21,9 +21,8 @@ public class ShopPayoutToolChangedHandler extends AbstractClaimChangeHandler<Sho
 
     @Override
     public boolean accept(PartyChange change) {
-        return isClaimEffect(change, claimEffect -> {
-            return claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetPayoutToolChanged();
-        });
+        return isClaimEffect(change, claimEffect -> claimEffect.isSetShopEffect()
+                && claimEffect.getShopEffect().getEffect().isSetPayoutToolChanged());
     }
 
     @Override

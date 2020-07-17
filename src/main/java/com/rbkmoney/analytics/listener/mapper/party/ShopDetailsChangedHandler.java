@@ -22,9 +22,8 @@ public class ShopDetailsChangedHandler extends AbstractClaimChangeHandler<Shop> 
 
     @Override
     public boolean accept(PartyChange change) {
-        return isClaimEffect(change, claimEffect -> {
-            return claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetDetailsChanged();
-        });
+        return isClaimEffect(change, claimEffect -> claimEffect.isSetShopEffect()
+                && claimEffect.getShopEffect().getEffect().isSetDetailsChanged());
     }
 
     @Override

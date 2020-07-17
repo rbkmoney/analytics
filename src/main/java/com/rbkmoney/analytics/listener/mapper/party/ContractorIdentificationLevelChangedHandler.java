@@ -25,9 +25,8 @@ public class ContractorIdentificationLevelChangedHandler extends AbstractClaimCh
 
     @Override
     public boolean accept(PartyChange change) {
-        return isClaimEffect(change, claimEffect -> {
-            return claimEffect.isSetContractorEffect() && claimEffect.getContractorEffect().getEffect().isSetIdentificationLevelChanged();
-        });
+        return isClaimEffect(change, claimEffect -> claimEffect.isSetContractorEffect()
+                && claimEffect.getContractorEffect().getEffect().isSetIdentificationLevelChanged());
     }
 
     @Override

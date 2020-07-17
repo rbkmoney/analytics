@@ -25,9 +25,8 @@ public class ContractorCreatedHandler extends AbstractClaimChangeHandler<Party> 
 
     @Override
     public boolean accept(PartyChange change) {
-        return isClaimEffect(change, claimEffect -> {
-            return claimEffect.isSetContractorEffect() && claimEffect.getContractorEffect().getEffect().isSetCreated();
-        });
+        return isClaimEffect(change, claimEffect -> claimEffect.isSetContractorEffect()
+                && claimEffect.getContractorEffect().getEffect().isSetCreated());
     }
 
     @Override
