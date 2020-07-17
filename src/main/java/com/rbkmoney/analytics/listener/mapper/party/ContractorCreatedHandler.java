@@ -1,7 +1,6 @@
 package com.rbkmoney.analytics.listener.mapper.party;
 
 import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
-import com.rbkmoney.analytics.listener.mapper.LocalStorage;
 import com.rbkmoney.analytics.service.PartyService;
 import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.payment_processing.ClaimEffect;
@@ -33,16 +32,16 @@ public class ContractorCreatedHandler extends AbstractClaimChangeHandler<Party> 
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void handleChange(PartyChange change, MachineEvent event, LocalStorage<Party> storage) {
+    public void handleChange(PartyChange change, MachineEvent event) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
         for (ClaimEffect claimEffect : claimEffects) {
             if (claimEffect.isSetContractorEffect() && claimEffect.getContractorEffect().getEffect().isSetCreated()) {
-                handleEvent(event, claimEffect, storage);
+                handleEvent(event, claimEffect);
             }
         }
     }
 
-    private void handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage<Party> storage) {
+    private void handleEvent(MachineEvent event, ClaimEffect effect) {
         ContractorEffectUnit contractorEffect = effect.getContractorEffect();
         PartyContractor partyContractor = contractorEffect.getEffect().getCreated();
         Contractor contractor = partyContractor.getContractor();
@@ -51,7 +50,7 @@ public class ContractorCreatedHandler extends AbstractClaimChangeHandler<Party> 
         String contractorId = contractorEffect.getId();
         String partyId = event.getSourceId();
 
-        Party party = partyService.getParty(partyId, storage);
+        Party party = partyService.getParty(partyId);
         party.setContractorId(contractorId);
         party.setContractorType(TBaseUtil.unionFieldToEnum(contractor, com.rbkmoney.analytics.domain.db.enums.Contractor.class));
         if (contractor.isSetRegisteredUser()) {
@@ -95,6 +94,5 @@ public class ContractorCreatedHandler extends AbstractClaimChangeHandler<Party> 
         }
 
         partyService.saveParty(party);
-        storage.put(partyId, party);
     }
 }

@@ -5,7 +5,6 @@ import com.rbkmoney.analytics.domain.db.enums.Blocking;
 import com.rbkmoney.analytics.domain.db.enums.Suspension;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
 import com.rbkmoney.analytics.listener.mapper.ChangeHandler;
-import com.rbkmoney.analytics.listener.mapper.LocalStorage;
 import com.rbkmoney.analytics.service.PartyService;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
 import com.rbkmoney.damsel.payment_processing.PartyCreated;
@@ -28,7 +27,7 @@ public class PartyCreateHandler implements ChangeHandler<PartyChange, MachineEve
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void handleChange(PartyChange change, MachineEvent event, LocalStorage<Party> storage) {
+    public void handleChange(PartyChange change, MachineEvent event) {
         PartyCreated partyCreated = change.getPartyCreated();
         LocalDateTime partyCreatedAt = TypeUtil.stringToLocalDateTime(partyCreated.getCreatedAt());
         Party party = new Party();
@@ -44,7 +43,6 @@ public class PartyCreateHandler implements ChangeHandler<PartyChange, MachineEve
         party.setRevisionChangedAt(partyCreatedAt);
 
         partyService.saveParty(party);
-        storage.put(partyCreated.getId(), party);
     }
 
     @Override

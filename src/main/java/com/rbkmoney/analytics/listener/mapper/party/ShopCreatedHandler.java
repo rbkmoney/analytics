@@ -3,7 +3,6 @@ package com.rbkmoney.analytics.listener.mapper.party;
 import com.rbkmoney.analytics.domain.db.enums.Blocking;
 import com.rbkmoney.analytics.domain.db.enums.Suspension;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
-import com.rbkmoney.analytics.listener.mapper.LocalStorage;
 import com.rbkmoney.analytics.service.PartyService;
 import com.rbkmoney.damsel.payment_processing.ClaimEffect;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
@@ -33,16 +32,16 @@ public class ShopCreatedHandler extends AbstractClaimChangeHandler<Shop> {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void handleChange(PartyChange change, MachineEvent event, LocalStorage<Shop> storage) {
+    public void handleChange(PartyChange change, MachineEvent event) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
         for (ClaimEffect claimEffect : claimEffects) {
             if (claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetCreated()) {
-                handleEvent(event, claimEffect, storage);
+                handleEvent(event, claimEffect);
             }
         }
     }
 
-    private void handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage<Shop> storage) {
+    private void handleEvent(MachineEvent event, ClaimEffect effect) {
         ShopEffectUnit shopEffect = effect.getShopEffect();
         com.rbkmoney.damsel.domain.Shop shopCreated = shopEffect.getEffect().getCreated();
         String shopId = shopEffect.getShopId();
@@ -85,7 +84,6 @@ public class ShopCreatedHandler extends AbstractClaimChangeHandler<Shop> {
        }
 
         partyService.saveShop(shop);
-        storage.put(partyId + shopId, shop);
     }
 
 

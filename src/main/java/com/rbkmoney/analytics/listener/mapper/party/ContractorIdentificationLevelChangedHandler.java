@@ -2,7 +2,6 @@ package com.rbkmoney.analytics.listener.mapper.party;
 
 import com.rbkmoney.analytics.domain.db.enums.ContractorIdentificationLvl;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
-import com.rbkmoney.analytics.listener.mapper.LocalStorage;
 import com.rbkmoney.analytics.service.PartyService;
 import com.rbkmoney.damsel.domain.ContractorIdentificationLevel;
 import com.rbkmoney.damsel.payment_processing.ClaimEffect;
@@ -33,27 +32,26 @@ public class ContractorIdentificationLevelChangedHandler extends AbstractClaimCh
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void handleChange(PartyChange change, MachineEvent event, LocalStorage<Party> storage) {
+    public void handleChange(PartyChange change, MachineEvent event) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
         for (ClaimEffect claimEffect : claimEffects) {
             if (claimEffect.isSetContractorEffect() && claimEffect.getContractorEffect().getEffect().isSetIdentificationLevelChanged()) {
-                handleEvent(event, claimEffect, storage);
+                handleEvent(event, claimEffect);
             }
         }
     }
 
-    private void handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage<Party> storage) {
+    private void handleEvent(MachineEvent event, ClaimEffect effect) {
         ContractorEffectUnit contractorEffect = effect.getContractorEffect();
         ContractorIdentificationLevel identificationLevelChanged = contractorEffect.getEffect().getIdentificationLevelChanged();
         String contractorId = contractorEffect.getId();
         String partyId = event.getSourceId();
 
-        Party party = partyService.getParty(partyId, storage);
+        Party party = partyService.getParty(partyId);
         party.setContractorId(contractorId);
         party.setContractorIdentificationLevel(ContractorIdentificationLvl.valueOf(identificationLevelChanged.name()));
 
         partyService.saveParty(party);
-        storage.put(partyId, party);
     }
 
 }

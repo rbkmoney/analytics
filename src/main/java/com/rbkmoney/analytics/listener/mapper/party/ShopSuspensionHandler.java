@@ -3,7 +3,6 @@ package com.rbkmoney.analytics.listener.mapper.party;
 import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
 import com.rbkmoney.analytics.listener.mapper.ChangeHandler;
-import com.rbkmoney.analytics.listener.mapper.LocalStorage;
 import com.rbkmoney.analytics.service.PartyService;
 import com.rbkmoney.damsel.domain.Suspension;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
@@ -22,12 +21,12 @@ public class ShopSuspensionHandler implements ChangeHandler<PartyChange, Machine
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void handleChange(PartyChange change, MachineEvent event, LocalStorage<Shop> storage) {
+    public void handleChange(PartyChange change, MachineEvent event) {
         Suspension suspension = change.getShopSuspension().getSuspension();
         String shopId = change.getShopSuspension().getShopId();
         String partyId = event.getSourceId();
 
-        Shop shop = partyService.getShop(partyId, shopId, storage);
+        Shop shop = partyService.getShop(partyId, shopId);
         if (suspension.isSetActive()) {
             shop.setSuspensionActiveSince(TypeUtil.stringToLocalDateTime(suspension.getActive().getSince()));
         } else if (suspension.isSetSuspended()) {
@@ -35,7 +34,6 @@ public class ShopSuspensionHandler implements ChangeHandler<PartyChange, Machine
         }
 
         partyService.saveShop(shop);
-        storage.put(partyId + shopId, shop);
     }
 
     @Override

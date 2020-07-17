@@ -5,7 +5,6 @@ import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
 import com.rbkmoney.analytics.listener.Processor;
 import com.rbkmoney.analytics.listener.handler.AdvancedBatchHandler;
 import com.rbkmoney.analytics.listener.mapper.ChangeHandler;
-import com.rbkmoney.analytics.listener.mapper.LocalStorage;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.Getter;
@@ -27,18 +26,17 @@ public class PartyBatchHandler implements AdvancedBatchHandler<PartyChange, Mach
     @Override
     public Processor handle(List<Map.Entry<MachineEvent, PartyChange>> changes) {
         return () -> {
-            LocalStorage<Party> storage = new LocalStorage<>();
             for (Map.Entry<MachineEvent, PartyChange> change : changes) {
-                handlePartyChange(change, storage);
+                handlePartyChange(change);
             }
         };
     }
 
-    private void handlePartyChange(Map.Entry<MachineEvent, PartyChange> changeEntry, LocalStorage<Party> storage) {
+    private void handlePartyChange(Map.Entry<MachineEvent, PartyChange> changeEntry) {
         PartyChange change = changeEntry.getValue();
         for (ChangeHandler<PartyChange, MachineEvent, Party> partyHandler : getHandlers()) {
             if (partyHandler.accept(change)) {
-                partyHandler.handleChange(change, changeEntry.getKey(), storage);
+                partyHandler.handleChange(change, changeEntry.getKey());
             }
         }
     }

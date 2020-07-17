@@ -4,7 +4,6 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.rbkmoney.analytics.dao.repository.postgres.PostgresPartyDao;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
-import com.rbkmoney.analytics.listener.mapper.LocalStorage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -19,12 +18,8 @@ public class PartyService {
 
     private final Cache<String, Shop> shopCache;
 
-    public Party getParty(String partyId, LocalStorage<Party> localStorage) {
-        Party party = localStorage.get(partyId);
-        if (party != null) {
-            return copy(party);
-        }
-        party = partyCache.getIfPresent(partyId);
+    public Party getParty(String partyId) {
+        Party party = partyCache.getIfPresent(partyId);
         if (party != null) {
             return copy(party);
         }
@@ -41,13 +36,9 @@ public class PartyService {
         partyCache.put(party.getPartyId(), party);
     }
 
-    public Shop getShop(String partyId, String shopId, LocalStorage<Shop> localStorage) {
-        Shop shop = localStorage.get(partyId + shopId);
-        if (shop != null) {
-            return copy(shop);
-        }
+    public Shop getShop(String partyId, String shopId) {
         String key = partyId + shopId;
-        shop = shopCache.getIfPresent(key);
+        Shop shop = shopCache.getIfPresent(key);
         if (shop != null) {
             return copy(shop);
         }

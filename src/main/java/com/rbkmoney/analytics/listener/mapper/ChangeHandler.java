@@ -8,7 +8,7 @@ public interface ChangeHandler<C, P, R>  {
         return getChangeType().getFilter().match(change);
     }
 
-    void handleChange(C change, P parent, LocalStorage<R> localStorage);
+    void handleChange(C change, P parent);
 
     EventType getChangeType();
 

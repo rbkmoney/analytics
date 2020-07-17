@@ -1,7 +1,6 @@
 package com.rbkmoney.analytics.listener.mapper.party;
 
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
-import com.rbkmoney.analytics.listener.mapper.LocalStorage;
 import com.rbkmoney.analytics.service.PartyService;
 import com.rbkmoney.damsel.payment_processing.ClaimEffect;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
@@ -30,28 +29,27 @@ public class ShopPayoutScheduleChangedHandler extends AbstractClaimChangeHandler
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void handleChange(PartyChange change, MachineEvent event, LocalStorage<Shop> storage) {
+    public void handleChange(PartyChange change, MachineEvent event) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
         for (ClaimEffect claimEffect : claimEffects) {
             if (claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetPayoutScheduleChanged()) {
-                handleEvent(event, claimEffect, storage);
+                handleEvent(event, claimEffect);
             }
         }
     }
 
-    private void handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage<Shop> storage) {
+    private void handleEvent(MachineEvent event, ClaimEffect effect) {
         ShopEffectUnit shopEffect = effect.getShopEffect();
         ScheduleChanged payoutScheduleChanged = shopEffect.getEffect().getPayoutScheduleChanged();
         String shopId = shopEffect.getShopId();
         String partyId = event.getSourceId();
 
-        Shop shop = partyService.getShop(partyId, shopId, storage);
+        Shop shop = partyService.getShop(partyId, shopId);
         if (payoutScheduleChanged.isSetSchedule()) {
             shop.setPayoutScheduleId(payoutScheduleChanged.getSchedule().getId());
         }
 
         partyService.saveShop(shop);
-        storage.put(partyId + shopId, shop);
     }
 
 }

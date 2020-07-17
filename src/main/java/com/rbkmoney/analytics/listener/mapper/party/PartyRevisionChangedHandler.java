@@ -3,7 +3,6 @@ package com.rbkmoney.analytics.listener.mapper.party;
 import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
 import com.rbkmoney.analytics.listener.mapper.ChangeHandler;
-import com.rbkmoney.analytics.listener.mapper.LocalStorage;
 import com.rbkmoney.analytics.service.PartyService;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
 import com.rbkmoney.damsel.payment_processing.PartyRevisionChanged;
@@ -22,16 +21,15 @@ public class PartyRevisionChangedHandler implements ChangeHandler<PartyChange, M
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void handleChange(PartyChange change, MachineEvent event, LocalStorage<Party> storage) {
+    public void handleChange(PartyChange change, MachineEvent event) {
         PartyRevisionChanged partyRevisionChanged = change.getRevisionChanged();
         String partyId = event.getSourceId();
 
-        Party party = partyService.getParty(partyId, storage);
+        Party party = partyService.getParty(partyId);
         party.setRevisionId(String.valueOf(partyRevisionChanged.getRevision()));
         party.setRevisionChangedAt(TypeUtil.stringToLocalDateTime(partyRevisionChanged.getTimestamp()));
 
         partyService.saveParty(party);
-        storage.put(partyId, party);
     }
 
     @Override

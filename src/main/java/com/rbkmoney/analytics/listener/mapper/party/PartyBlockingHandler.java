@@ -3,7 +3,6 @@ package com.rbkmoney.analytics.listener.mapper.party;
 import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
 import com.rbkmoney.analytics.listener.mapper.ChangeHandler;
-import com.rbkmoney.analytics.listener.mapper.LocalStorage;
 import com.rbkmoney.analytics.service.PartyService;
 import com.rbkmoney.damsel.domain.Blocking;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
@@ -23,11 +22,11 @@ public class PartyBlockingHandler implements ChangeHandler<PartyChange, MachineE
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void handleChange(PartyChange change, MachineEvent event, LocalStorage<Party> storage) {
+    public void handleChange(PartyChange change, MachineEvent event) {
         Blocking partyBlocking = change.getPartyBlocking();
         String partyId = event.getSourceId();
 
-        Party party = partyService.getParty(partyId, storage);
+        Party party = partyService.getParty(partyId);
         party.setBlocking(TBaseUtil.unionFieldToEnum(partyBlocking, com.rbkmoney.analytics.domain.db.enums.Blocking.class));
         if (partyBlocking.isSetBlocked()) {
             party.setBlockedReason(partyBlocking.getBlocked().getReason());
@@ -38,7 +37,6 @@ public class PartyBlockingHandler implements ChangeHandler<PartyChange, MachineE
         }
 
         partyService.saveParty(party);
-        storage.put(partyId, party);
     }
 
     @Override
