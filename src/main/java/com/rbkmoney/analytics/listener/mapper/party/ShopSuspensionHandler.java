@@ -27,6 +27,8 @@ public class ShopSuspensionHandler implements ChangeHandler<PartyChange, Machine
         String partyId = event.getSourceId();
 
         Shop shop = partyService.getShop(partyId, shopId);
+        shop.setEventId(event.getEventId());
+        shop.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         if (suspension.isSetActive()) {
             shop.setSuspensionActiveSince(TypeUtil.stringToLocalDateTime(suspension.getActive().getSince()));
         } else if (suspension.isSetSuspended()) {

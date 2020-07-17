@@ -27,6 +27,8 @@ public class PartySuspensionHandler implements ChangeHandler<PartyChange, Machin
         String partyId = event.getSourceId();
 
         Party party = partyService.getParty(partyId);
+        party.setEventId(event.getEventId());
+        party.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         party.setSuspension(TBaseUtil.unionFieldToEnum(partySuspension, com.rbkmoney.analytics.domain.db.enums.Suspension.class));
         if (partySuspension.isSetActive()) {
             party.setSuspensionActiveSince(TypeUtil.stringToLocalDateTime(partySuspension.getActive().getSince()));

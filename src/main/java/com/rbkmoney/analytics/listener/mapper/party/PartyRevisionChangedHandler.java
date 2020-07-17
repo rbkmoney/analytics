@@ -26,6 +26,8 @@ public class PartyRevisionChangedHandler implements ChangeHandler<PartyChange, M
         String partyId = event.getSourceId();
 
         Party party = partyService.getParty(partyId);
+        party.setEventId(event.getEventId());
+        party.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         party.setRevisionId(String.valueOf(partyRevisionChanged.getRevision()));
         party.setRevisionChangedAt(TypeUtil.stringToLocalDateTime(partyRevisionChanged.getTimestamp()));
 

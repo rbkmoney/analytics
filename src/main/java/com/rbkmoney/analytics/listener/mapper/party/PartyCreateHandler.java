@@ -31,6 +31,8 @@ public class PartyCreateHandler implements ChangeHandler<PartyChange, MachineEve
         PartyCreated partyCreated = change.getPartyCreated();
         LocalDateTime partyCreatedAt = TypeUtil.stringToLocalDateTime(partyCreated.getCreatedAt());
         Party party = new Party();
+        party.setEventId(event.getEventId());
+        party.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         party.setPartyId(partyCreated.getId());
         party.setCreatedAt(partyCreatedAt);
         party.setEmail(partyCreated.getContactInfo().getEmail());

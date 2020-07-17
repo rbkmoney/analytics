@@ -5,6 +5,7 @@ import com.rbkmoney.analytics.service.PartyService;
 import com.rbkmoney.damsel.payment_processing.ClaimEffect;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
 import com.rbkmoney.damsel.payment_processing.ShopEffectUnit;
+import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -43,6 +44,8 @@ public class ShopCategoryChangedHandler extends AbstractClaimChangeHandler<Shop>
         String partyId = event.getSourceId();
 
         Shop shop = partyService.getShop(partyId, shopId);
+        shop.setEventId(event.getEventId());
+        shop.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         shop.setCategoryId(categoryId);
 
         partyService.saveShop(shop);

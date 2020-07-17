@@ -27,6 +27,8 @@ public class PartyBlockingHandler implements ChangeHandler<PartyChange, MachineE
         String partyId = event.getSourceId();
 
         Party party = partyService.getParty(partyId);
+        party.setEventId(event.getEventId());
+        party.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         party.setBlocking(TBaseUtil.unionFieldToEnum(partyBlocking, com.rbkmoney.analytics.domain.db.enums.Blocking.class));
         if (partyBlocking.isSetBlocked()) {
             party.setBlockedReason(partyBlocking.getBlocked().getReason());

@@ -7,6 +7,7 @@ import com.rbkmoney.damsel.payment_processing.ClaimEffect;
 import com.rbkmoney.damsel.payment_processing.ContractorEffectUnit;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
 import com.rbkmoney.geck.common.util.TBaseUtil;
+import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +50,8 @@ public class ContractorCreatedHandler extends AbstractClaimChangeHandler<Party> 
         String partyId = event.getSourceId();
 
         Party party = partyService.getParty(partyId);
+        party.setEventId(event.getEventId());
+        party.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         party.setContractorId(contractorId);
         party.setContractorType(TBaseUtil.unionFieldToEnum(contractor, com.rbkmoney.analytics.domain.db.enums.Contractor.class));
         if (contractor.isSetRegisteredUser()) {

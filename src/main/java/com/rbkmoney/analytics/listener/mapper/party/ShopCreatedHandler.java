@@ -47,6 +47,8 @@ public class ShopCreatedHandler extends AbstractClaimChangeHandler<Shop> {
         String partyId = event.getSourceId();
 
         Shop shop = new Shop();
+        shop.setEventId(event.getEventId());
+        shop.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         shop.setShopId(shopId);
         shop.setPartyId(partyId);
         shop.setCreatedAt(TypeUtil.stringToLocalDateTime(shopCreated.getCreatedAt()));

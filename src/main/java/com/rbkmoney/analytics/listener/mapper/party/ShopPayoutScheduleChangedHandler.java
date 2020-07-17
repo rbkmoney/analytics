@@ -6,6 +6,7 @@ import com.rbkmoney.damsel.payment_processing.ClaimEffect;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
 import com.rbkmoney.damsel.payment_processing.ScheduleChanged;
 import com.rbkmoney.damsel.payment_processing.ShopEffectUnit;
+import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -44,6 +45,8 @@ public class ShopPayoutScheduleChangedHandler extends AbstractClaimChangeHandler
         String partyId = event.getSourceId();
 
         Shop shop = partyService.getShop(partyId, shopId);
+        shop.setEventId(event.getEventId());
+        shop.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         if (payoutScheduleChanged.isSetSchedule()) {
             shop.setPayoutScheduleId(payoutScheduleChanged.getSchedule().getId());
         }

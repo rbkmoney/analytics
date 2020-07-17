@@ -9,6 +9,8 @@ CREATE TYPE analytics.contractor_identification_lvl AS ENUM ('none', 'partial', 
 CREATE TABLE analytics.party
 (
     id                                            BIGSERIAL                   NOT NULL,
+    event_id                                      BIGINT                      NOT NULL,
+    event_time                                    TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     party_id                                      CHARACTER VARYING           NOT NULL,
     created_at                                    TIMESTAMP WITHOUT TIME ZONE NOT NULL NOT NULL,
     email                                         CHARACTER VARYING,
@@ -61,9 +63,11 @@ CREATE INDEX contract_contract_id_idx ON analytics.party (contractor_id);
 
 CREATE TABLE analytics.shop
 (
-    id                         BIGSERIAL         NOT NULL,
-    party_id                   CHARACTER VARYING NOT NULL,
-    shop_id                    CHARACTER VARYING NOT NULL,
+    id                         BIGSERIAL                   NOT NULL,
+    event_id                   BIGINT                      NOT NULL,
+    event_time                 TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    party_id                   CHARACTER VARYING           NOT NULL,
+    shop_id                    CHARACTER VARYING           NOT NULL,
     category_id                INT,
     contract_id                CHARACTER VARYING,
     payout_tool_id             CHARACTER VARYING,
