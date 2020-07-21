@@ -14,21 +14,19 @@ import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class PartyCreateHandler implements ChangeHandler<PartyChange, MachineEvent> {
+public class PartyCreateHandler implements ChangeHandler<PartyChange, MachineEvent, List<Party>> {
 
     private final PartyService partyService;
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void handleChange(PartyChange change, MachineEvent event, LocalStorage localStorage) {
+    public List<Party> handleChange(PartyChange change, MachineEvent event, LocalStorage localStorage) {
         PartyCreated partyCreated = change.getPartyCreated();
         LocalDateTime partyCreatedAt = TypeUtil.stringToLocalDateTime(partyCreated.getCreatedAt());
         Party party = new Party();
@@ -45,7 +43,9 @@ public class PartyCreateHandler implements ChangeHandler<PartyChange, MachineEve
         party.setRevisionId("0");
         party.setRevisionChangedAt(partyCreatedAt);
 
-        localStorage.putParty(partyCreated.getId(), party);
+        localStorage.putParty(party.getPartyId(), party);
+
+        return List.of(party);
     }
 
     @Override

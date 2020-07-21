@@ -16,7 +16,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -28,37 +30,38 @@ public class PartyMachineEventHandler {
 
     private final MachineEventParser<PartyEventData> eventParser;
 
-    private final List<ChangeHandler<PartyChange, MachineEvent>> handlers;
+    private final List<ChangeHandler<PartyChange, MachineEvent, List<Party>>> partyHandlers;
+
+    private final List<ChangeHandler<PartyChange, MachineEvent, List<Shop>>> shopHandlers;
 
     private final PartyService partyService;
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void handleMessages(List<MachineEvent> batch) throws InterruptedException {
-        LocalStorage localStorage = new LocalStorage();
         try {
             if (CollectionUtils.isEmpty(batch)) return;
 
+            LocalStorage localStorage = new LocalStorage();
             for (MachineEvent machineEvent : batch) {
                 PartyEventData eventData = eventParser.parse(machineEvent);
                 if (eventData.isSetChanges()) {
                     for (PartyChange change : eventData.getChanges()) {
-                        handlers.stream()
+                        List<Party> changedParties = partyHandlers.stream()
                                 .filter(changeHandler -> changeHandler.accept(change))
-                                .forEach(changeHandler -> {
-                                    changeHandler.handleChange(change, machineEvent, localStorage);
-                                });
+                                .flatMap(changeHandler -> changeHandler.handleChange(change, machineEvent, localStorage).stream())
+                                .collect(Collectors.toList());
+                        List<Shop> changedShops = shopHandlers.stream()
+                                .filter(changeHandler -> changeHandler.accept(change))
+                                .flatMap(changeHandler -> changeHandler.handleChange(change, machineEvent, localStorage).stream())
+                                .collect(Collectors.toList());
+                        if (!changedParties.isEmpty()) {
+                            partyService.saveParty(changedParties);
+                        }
+                        if (!changedShops.isEmpty()) {
+                            partyService.saveShop(changedShops);
+                        }
                     }
                 }
-            }
-            List<Party> parties = localStorage.getParties();
-            if (!parties.isEmpty()) {
-                log.debug("Save parties: size={}", parties.size());
-                partyService.saveParty(parties);
-            }
-            List<Shop> shops = localStorage.getShops();
-            if (!shops.isEmpty()) {
-                log.debug("Save shops: size={}", shops.size());
-                partyService.saveShop(shops);
             }
         } catch (Exception e) {
             log.error("Exception during PartyListener process", e);

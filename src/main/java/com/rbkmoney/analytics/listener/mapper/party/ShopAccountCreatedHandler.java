@@ -1,5 +1,6 @@
 package com.rbkmoney.analytics.listener.mapper.party;
 
+import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
 import com.rbkmoney.analytics.listener.handler.party.LocalStorage;
 import com.rbkmoney.analytics.service.PartyService;
@@ -19,7 +20,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class ShopAccountCreatedHandler extends AbstractClaimChangeHandler {
+public class ShopAccountCreatedHandler extends AbstractClaimChangeHandler<List<Shop>> {
 
     private final PartyService partyService;
 
@@ -31,17 +32,19 @@ public class ShopAccountCreatedHandler extends AbstractClaimChangeHandler {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void handleChange(PartyChange change, MachineEvent event, LocalStorage localStorage) {
+    public List<Shop> handleChange(PartyChange change, MachineEvent event, LocalStorage localStorage) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
         for (ClaimEffect claimEffect : claimEffects) {
             if (claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetAccountCreated()) {
-                handleEvent(event, claimEffect, localStorage);
+                Shop shop = handleEvent(event, claimEffect, localStorage);
+                localStorage.putShop(new ShopKey(shop.getPartyId(), shop.getShopId()), shop);
             }
         }
+
+        return localStorage.getShops();
     }
 
-    private void handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage localStorage) {
+    private Shop handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage localStorage) {
         ShopEffectUnit shopEffect = effect.getShopEffect();
         ShopAccount accountCreated = shopEffect.getEffect().getAccountCreated();
         String shopId = shopEffect.getShopId();
@@ -56,7 +59,7 @@ public class ShopAccountCreatedHandler extends AbstractClaimChangeHandler {
         shop.setAccountSettlement(String.valueOf(accountCreated.getSettlement()));
         shop.setAccountPayout(String.valueOf(accountCreated.getPayout()));
 
-        localStorage.putShop(shopKey, shop);
+        return shop;
     }
 
 }

@@ -13,15 +13,13 @@ import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ContractorIdentificationLevelChangedHandler extends AbstractClaimChangeHandler {
+public class ContractorIdentificationLevelChangedHandler extends AbstractClaimChangeHandler<List<Party>> {
 
     private final PartyService partyService;
 
@@ -32,17 +30,19 @@ public class ContractorIdentificationLevelChangedHandler extends AbstractClaimCh
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void handleChange(PartyChange change, MachineEvent event, LocalStorage localStorage) {
+    public List<Party> handleChange(PartyChange change, MachineEvent event, LocalStorage localStorage) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
         for (ClaimEffect claimEffect : claimEffects) {
             if (claimEffect.isSetContractorEffect() && claimEffect.getContractorEffect().getEffect().isSetIdentificationLevelChanged()) {
-                handleEvent(event, claimEffect, localStorage);
+                Party party = handleEvent(event, claimEffect, localStorage);
+                localStorage.putParty(party.getPartyId(), party);
             }
         }
+
+        return localStorage.getParties();
     }
 
-    private void handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage localStorage) {
+    private Party handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage localStorage) {
         ContractorEffectUnit contractorEffect = effect.getContractorEffect();
         ContractorIdentificationLevel identificationLevelChanged = contractorEffect.getEffect().getIdentificationLevelChanged();
         String contractorId = contractorEffect.getId();
@@ -54,7 +54,7 @@ public class ContractorIdentificationLevelChangedHandler extends AbstractClaimCh
         party.setContractorId(contractorId);
         party.setContractorIdentificationLevel(ContractorIdentificationLvl.valueOf(identificationLevelChanged.name()));
 
-        localStorage.putParty(partyId, party);
+        return party;
     }
 
 }

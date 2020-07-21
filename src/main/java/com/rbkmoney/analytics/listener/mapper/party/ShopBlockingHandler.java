@@ -13,18 +13,17 @@ import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class ShopBlockingHandler implements ChangeHandler<PartyChange, MachineEvent> {
+public class ShopBlockingHandler implements ChangeHandler<PartyChange, MachineEvent, List<Shop>> {
 
     private final PartyService partyService;
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void handleChange(PartyChange change, MachineEvent event, LocalStorage localStorage) {
+    public List<Shop> handleChange(PartyChange change, MachineEvent event, LocalStorage localStorage) {
         Blocking blocking = change.getShopBlocking().getBlocking();
         String shopId = change.getShopBlocking().getShopId();
         String partyId = event.getSourceId();
@@ -42,7 +41,9 @@ public class ShopBlockingHandler implements ChangeHandler<PartyChange, MachineEv
             shop.setBlockedSince(TypeUtil.stringToLocalDateTime(blocking.getBlocked().getSince()));
         }
 
-        localStorage.putShop(shopKey, shop);
+        localStorage.putShop(new ShopKey(shop.getPartyId(), shop.getShopId()), shop);
+
+        return List.of(shop);
     }
 
     @Override

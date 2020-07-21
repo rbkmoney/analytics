@@ -28,8 +28,9 @@ public class PartyFlowGenerator {
     public static final String SHOP_ID = "testShopId";
     public static final String PARTY_EMAIL = "testPartyEmail";
     public static final String SOURCE_NS = "source_ns";
-    public static final String PARTY_BLOCK_REASON = "testBlockReason";
-    public static final String SHOP_UNBLOCK_REASON = "testUnblockReason";
+    public static final String PARTY_BLOCK_REASON = "testPartyBlockReason";
+    public static final String SHOP_BLOCK_REASON = "testShopBlockReason";
+    public static final String SHOP_UNBLOCK_REASON = "testShopUnblockReason";
     public static final Long PARTY_REVISION_ID = 12345L;
     public static final Long CLAIM_ID = 524523L;
     public static final Integer REVISION_ID = 431531;
@@ -318,7 +319,7 @@ public class PartyFlowGenerator {
         shop = new MockTBaseProcessor(MockMode.ALL).process(shop, new TBaseHandler<>(Shop.class));
         shop.setCreatedAt(TypeUtil.temporalToString(LocalDateTime.now()));
         Blocking blocking = new Blocking();
-        blocking.setBlocked(new Blocked(PARTY_BLOCK_REASON, TypeUtil.temporalToString(LocalDateTime.now())));
+        blocking.setBlocked(new Blocked(SHOP_BLOCK_REASON, TypeUtil.temporalToString(LocalDateTime.now())));
         shop.setBlocking(blocking);
         shop.setSuspension(buildPartySuspension());
         return shop;

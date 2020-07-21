@@ -14,14 +14,12 @@ import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class ShopCreatedHandler extends AbstractClaimChangeHandler {
+public class ShopCreatedHandler extends AbstractClaimChangeHandler<List<Shop>> {
 
     private final PartyService partyService;
 
@@ -32,23 +30,26 @@ public class ShopCreatedHandler extends AbstractClaimChangeHandler {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void handleChange(PartyChange change, MachineEvent event, LocalStorage localStorage) {
+    public List<Shop> handleChange(PartyChange change, MachineEvent event, LocalStorage localStorage) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
         for (ClaimEffect claimEffect : claimEffects) {
             if (claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetCreated()) {
-                handleEvent(event, claimEffect, localStorage);
+                Shop shop = handleEvent(event, claimEffect, localStorage);
+                localStorage.putShop(new ShopKey(shop.getPartyId(), shop.getShopId()), shop);
             }
         }
+
+        return localStorage.getShops();
     }
 
-    private void handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage localStorage) {
+    private Shop handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage localStorage) {
         ShopEffectUnit shopEffect = effect.getShopEffect();
         com.rbkmoney.damsel.domain.Shop shopCreated = shopEffect.getEffect().getCreated();
         String shopId = shopEffect.getShopId();
         String partyId = event.getSourceId();
 
-        Shop shop = new Shop();
+        ShopKey shopKey = new ShopKey(partyId, shopId);
+        Shop shop = localStorage.getShop(shopKey) != null ? localStorage.getShop(shopKey) : new Shop();
         shop.setEventId(event.getEventId());
         shop.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         shop.setShopId(shopId);
@@ -86,8 +87,7 @@ public class ShopCreatedHandler extends AbstractClaimChangeHandler {
            shop.setPayoutScheduleId(shopCreated.getPayoutSchedule().getId());
        }
 
-        ShopKey shopKey = new ShopKey(partyId, shopId);
-        localStorage.putShop(shopKey, shop);
+        return shop;
     }
 
 

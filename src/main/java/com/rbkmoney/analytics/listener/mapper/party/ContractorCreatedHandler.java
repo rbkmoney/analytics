@@ -22,7 +22,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ContractorCreatedHandler extends AbstractClaimChangeHandler {
+public class ContractorCreatedHandler extends AbstractClaimChangeHandler<List<Party>> {
 
     private final PartyService partyService;
 
@@ -34,16 +34,18 @@ public class ContractorCreatedHandler extends AbstractClaimChangeHandler {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void handleChange(PartyChange change, MachineEvent event, LocalStorage localStorage) {
+    public List<Party> handleChange(PartyChange change, MachineEvent event, LocalStorage localStorage) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
         for (ClaimEffect claimEffect : claimEffects) {
             if (claimEffect.isSetContractorEffect() && claimEffect.getContractorEffect().getEffect().isSetCreated()) {
-                handleEvent(event, claimEffect, localStorage);
+                Party party = handleEvent(event, claimEffect, localStorage);
+                localStorage.putParty(party.getPartyId(), party);
             }
         }
+        return localStorage.getParties();
     }
 
-    private void handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage localStorage) {
+    private Party handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage localStorage) {
         ContractorEffectUnit contractorEffect = effect.getContractorEffect();
         PartyContractor partyContractor = contractorEffect.getEffect().getCreated();
         Contractor contractor = partyContractor.getContractor();
@@ -97,6 +99,6 @@ public class ContractorCreatedHandler extends AbstractClaimChangeHandler {
         }
         party.setContractorIdentificationLevel(ContractorIdentificationLvl.valueOf(partyContractor.getStatus().name()));
 
-        localStorage.putParty(partyId, party);
+        return party;
     }
 }

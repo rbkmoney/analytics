@@ -14,7 +14,7 @@ import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import java.util.List;
 import java.util.function.Predicate;
 
-public abstract class AbstractClaimChangeHandler implements ChangeHandler<PartyChange, MachineEvent> {
+public abstract class AbstractClaimChangeHandler<T> implements ChangeHandler<PartyChange, MachineEvent, T> {
 
     private static final Filter CLAIM_CREATED_FILTER = new PathConditionFilter(
             new PathConditionRule("claim_created.status.accepted", new IsNullCondition().not()));

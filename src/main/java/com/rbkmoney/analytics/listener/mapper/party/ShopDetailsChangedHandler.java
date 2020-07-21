@@ -12,14 +12,12 @@ import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class ShopDetailsChangedHandler extends AbstractClaimChangeHandler {
+public class ShopDetailsChangedHandler extends AbstractClaimChangeHandler<List<Shop>> {
 
     private final PartyService partyService;
 
@@ -30,17 +28,19 @@ public class ShopDetailsChangedHandler extends AbstractClaimChangeHandler {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void handleChange(PartyChange change, MachineEvent event, LocalStorage localStorage) {
+    public List<Shop> handleChange(PartyChange change, MachineEvent event, LocalStorage localStorage) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
         for (ClaimEffect claimEffect : claimEffects) {
             if (claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetDetailsChanged()) {
-                handleEvent(event, claimEffect, localStorage);
+                Shop shop = handleEvent(event, claimEffect, localStorage);
+                localStorage.putShop(new ShopKey(shop.getPartyId(), shop.getShopId()), shop);
             }
         }
+
+        return localStorage.getShops();
     }
 
-    private void handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage localStorage) {
+    private Shop handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage localStorage) {
         ShopEffectUnit shopEffect = effect.getShopEffect();
         ShopDetails detailsChanged = shopEffect.getEffect().getDetailsChanged();
         String shopId = shopEffect.getShopId();
@@ -53,7 +53,7 @@ public class ShopDetailsChangedHandler extends AbstractClaimChangeHandler {
         shop.setDetailsName(detailsChanged.getName());
         shop.setDetailsDescription(detailsChanged.getDescription());
 
-        localStorage.putShop(shopKey, shop);
+        return shop;
     }
 
 }

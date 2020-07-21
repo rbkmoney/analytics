@@ -11,14 +11,12 @@ import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class ShopCategoryChangedHandler extends AbstractClaimChangeHandler {
+public class ShopCategoryChangedHandler extends AbstractClaimChangeHandler<List<Shop>> {
 
     private final PartyService partyService;
 
@@ -29,17 +27,19 @@ public class ShopCategoryChangedHandler extends AbstractClaimChangeHandler {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void handleChange(PartyChange change, MachineEvent event, LocalStorage localStorage) {
+    public List<Shop> handleChange(PartyChange change, MachineEvent event, LocalStorage localStorage) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
         for (ClaimEffect claimEffect : claimEffects) {
             if (claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetCategoryChanged()) {
-                handleEvent(event, claimEffect, localStorage);
+                Shop shop = handleEvent(event, claimEffect, localStorage);
+                localStorage.putShop(new ShopKey(shop.getPartyId(), shop.getShopId()), shop);
             }
         }
+
+        return localStorage.getShops();
     }
 
-    private void handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage localStorage) {
+    private Shop handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage localStorage) {
         ShopEffectUnit shopEffect = effect.getShopEffect();
         int categoryId = shopEffect.getEffect().getCategoryChanged().getId();
         String shopId = shopEffect.getShopId();
@@ -51,7 +51,7 @@ public class ShopCategoryChangedHandler extends AbstractClaimChangeHandler {
         shop.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         shop.setCategoryId(categoryId);
 
-        localStorage.putShop(shopKey, shop);
+        return shop;
     }
 
 

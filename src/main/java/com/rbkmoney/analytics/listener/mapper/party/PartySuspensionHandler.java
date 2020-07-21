@@ -12,18 +12,17 @@ import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class PartySuspensionHandler implements ChangeHandler<PartyChange, MachineEvent> {
+public class PartySuspensionHandler implements ChangeHandler<PartyChange, MachineEvent, List<Party>> {
 
     private final PartyService partyService;
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void handleChange(PartyChange change, MachineEvent event, LocalStorage localStorage) {
+    public List<Party> handleChange(PartyChange change, MachineEvent event, LocalStorage localStorage) {
         Suspension partySuspension = change.getPartySuspension();
         String partyId = event.getSourceId();
 
@@ -37,7 +36,9 @@ public class PartySuspensionHandler implements ChangeHandler<PartyChange, Machin
             party.setSuspensionSuspendedSince(TypeUtil.stringToLocalDateTime(partySuspension.getSuspended().getSince()));
         }
 
-        localStorage.putParty(party.getPartyId(), party);
+        localStorage.putParty(partyId, party);
+
+        return List.of(party);
     }
 
     @Override

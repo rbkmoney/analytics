@@ -117,18 +117,18 @@ public class PartyListenerTest extends KafkaAbstractTest {
         Assert.assertEquals(PartyFlowGenerator.PARTY_EMAIL, party.getEmail());
         Assert.assertEquals(Contractor.legal_entity, party.getContractorType());
         Assert.assertEquals(LegalEntity.russian_legal_entity, party.getLegalEntityType());
-        Assert.assertFalse(party.getRussianLegalEntityActualAddress().isEmpty());
-        Assert.assertFalse(party.getRussianLegalEntityBankAccount().isEmpty());
-        Assert.assertFalse(party.getRussianLegalEntityBankBik().isEmpty());
-        Assert.assertFalse(party.getRussianLegalEntityBankName().isEmpty());
-        Assert.assertFalse(party.getRussianLegalEntityBankPostAccount().isEmpty());
-        Assert.assertFalse(party.getRussianLegalEntityInn().isEmpty());
-        Assert.assertFalse(party.getRussianLegalEntityName().isEmpty());
-        Assert.assertFalse(party.getRussianLegalEntityPostAddress().isEmpty());
-        Assert.assertFalse(party.getRussianLegalEntityRegisteredNumber().isEmpty());
-        Assert.assertFalse(party.getRussianLegalEntityRepresentativeDocument().isEmpty());
-        Assert.assertFalse(party.getRussianLegalEntityRepresentativeFullName().isEmpty());
-        Assert.assertFalse(party.getRussianLegalEntityRepresentativePosition().isEmpty());
+        Assert.assertNotNull(party.getRussianLegalEntityActualAddress());
+        Assert.assertNotNull(party.getRussianLegalEntityBankAccount());
+        Assert.assertNotNull(party.getRussianLegalEntityBankBik());
+        Assert.assertNotNull(party.getRussianLegalEntityBankName());
+        Assert.assertNotNull(party.getRussianLegalEntityBankPostAccount());
+        Assert.assertNotNull(party.getRussianLegalEntityInn());
+        Assert.assertNotNull(party.getRussianLegalEntityName());
+        Assert.assertNotNull(party.getRussianLegalEntityPostAddress());
+        Assert.assertNotNull(party.getRussianLegalEntityRegisteredNumber());
+        Assert.assertNotNull(party.getRussianLegalEntityRepresentativeDocument());
+        Assert.assertNotNull(party.getRussianLegalEntityRepresentativeFullName());
+        Assert.assertNotNull(party.getRussianLegalEntityRepresentativePosition());
     }
 
     @Test
