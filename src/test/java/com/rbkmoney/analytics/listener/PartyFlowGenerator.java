@@ -16,15 +16,11 @@ import lombok.NoArgsConstructor;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PartyFlowGenerator {
 
-    public static final String SOURCE_ID = "testPartyId";
-    public static final String PARTY_ID = "testPartyId";
     public static final String SHOP_ID = "testShopId";
     public static final String PARTY_EMAIL = "testPartyEmail";
     public static final String SOURCE_NS = "source_ns";
@@ -46,101 +42,101 @@ public class PartyFlowGenerator {
     public static final Long SETTLEMENT_ID = 245234L;
     public static final String CONTRACTOR_ID = "563462";
 
-    public static List<SinkEvent> generatePartyFlow() throws IOException {
+    public static List<SinkEvent> generatePartyFlow(String partyId) throws IOException {
         List<SinkEvent> sinkEvents = new ArrayList<>();
         Long sequenceId = 0L;
-        sinkEvents.add(buildSinkEvent(buildMessagePartyCreated(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildMessagePartyBlocking(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildMessagePartySuspension(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildMessagePartyRevisionChanged(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildContractorCreatedMapper(sequenceId++, buildPartyContractor())));
-        sinkEvents.add(buildSinkEvent(buildContractorIdentificationLevelChanged(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildMessageShopCreated(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildMessageShopBlocking(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildMessageShopSuspension(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildMessageShopCategoryChanged(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildMessageShopContractChanged(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildMessageShopDetailsChanged(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildMessageShopPayoutScheduleChanged(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildMessageShopPayoutToolChanged(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildMessageShopAccountCreated(sequenceId++)));
+        sinkEvents.add(buildSinkEvent(buildMessagePartyCreated(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessagePartyBlocking(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessagePartySuspension(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessagePartyRevisionChanged(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildContractorCreatedMapper(sequenceId++, buildPartyContractor(partyId), partyId)));
+        sinkEvents.add(buildSinkEvent(buildContractorIdentificationLevelChanged(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessageShopCreated(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessageShopBlocking(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessageShopSuspension(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessageShopCategoryChanged(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessageShopContractChanged(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessageShopDetailsChanged(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessageShopPayoutScheduleChanged(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessageShopPayoutToolChanged(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessageShopAccountCreated(sequenceId++, partyId)));
 
         return sinkEvents;
     }
 
-    public static List<SinkEvent> generatePartyContractorFlow() throws IOException {
+    public static List<SinkEvent> generatePartyContractorFlow(String partyId) throws IOException {
         List<SinkEvent> sinkEvents = new ArrayList<>();
         Long sequenceId = 0L;
-        sinkEvents.add(buildSinkEvent(buildMessagePartyCreated(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildMessagePartyBlocking(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildMessagePartySuspension(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildMessagePartyRevisionChanged(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildContractorCreatedMapper(sequenceId++, buildLegalPartyContractor())));
-        sinkEvents.add(buildSinkEvent(buildContractorIdentificationLevelChanged(sequenceId++)));
+        sinkEvents.add(buildSinkEvent(buildMessagePartyCreated(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessagePartyBlocking(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessagePartySuspension(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessagePartyRevisionChanged(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildContractorCreatedMapper(sequenceId++, buildLegalPartyContractor(partyId), partyId)));
+        sinkEvents.add(buildSinkEvent(buildContractorIdentificationLevelChanged(sequenceId++, partyId)));
 
         return sinkEvents;
     }
 
-    public static List<SinkEvent> generateShopFlow() throws IOException {
+    public static List<SinkEvent> generateShopFlow(String partyId) throws IOException {
         List<SinkEvent> sinkEvents = new ArrayList<>();
         Long sequenceId = 0L;
-        sinkEvents.add(buildSinkEvent(buildMessagePartyCreated(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildMessageShopCreated(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildMessageShopBlocking(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildMessageShopSuspension(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildMessageShopCategoryChanged(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildMessageShopContractChanged(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildMessageShopDetailsChanged(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildMessageShopPayoutScheduleChanged(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildMessageShopPayoutToolChanged(sequenceId++)));
-        sinkEvents.add(buildSinkEvent(buildMessageShopAccountCreated(sequenceId++)));
+        sinkEvents.add(buildSinkEvent(buildMessagePartyCreated(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessageShopCreated(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessageShopBlocking(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessageShopSuspension(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessageShopCategoryChanged(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessageShopContractChanged(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessageShopDetailsChanged(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessageShopPayoutScheduleChanged(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessageShopPayoutToolChanged(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessageShopAccountCreated(sequenceId++, partyId)));
 
         return sinkEvents;
     }
 
-    private static MachineEvent buildMessagePartyCreated(Long sequenceId) {
-        PartyCreated partyCreated = buildPartyCreated();
+    private static MachineEvent buildMessagePartyCreated(Long sequenceId, String partyId) {
+        PartyCreated partyCreated = buildPartyCreated(partyId);
         PartyChange partyChange = new PartyChange();
         partyChange.setPartyCreated(partyCreated);
-        return buildMachineEvent(partyChange, SOURCE_ID, sequenceId);
+        return buildMachineEvent(partyChange, partyId, sequenceId);
     }
 
-    private static MachineEvent buildMessagePartyBlocking(Long sequenceId) {
+    private static MachineEvent buildMessagePartyBlocking(Long sequenceId, String partyId) {
         Blocking blocking = buildPartyBlocking();
         PartyChange partyChange = new PartyChange();
         partyChange.setPartyBlocking(blocking);
-        return buildMachineEvent(partyChange, SOURCE_ID, sequenceId);
+        return buildMachineEvent(partyChange, partyId, sequenceId);
     }
 
-    private static MachineEvent buildMessagePartySuspension(Long sequenceId) {
+    private static MachineEvent buildMessagePartySuspension(Long sequenceId, String partyId) {
         Suspension suspension = buildPartySuspension();
         PartyChange partyChange = new PartyChange();
         partyChange.setPartySuspension(suspension);
-        return buildMachineEvent(partyChange, SOURCE_ID, sequenceId);
+        return buildMachineEvent(partyChange, partyId, sequenceId);
     }
 
-    private static MachineEvent buildMessagePartyRevisionChanged(Long sequenceId) {
+    private static MachineEvent buildMessagePartyRevisionChanged(Long sequenceId, String partyId) {
         PartyRevisionChanged partyRevisionChanged = buildPartyRevisionChanged();
         PartyChange partyChange = new PartyChange();
         partyChange.setRevisionChanged(partyRevisionChanged);
-        return buildMachineEvent(partyChange, SOURCE_ID, sequenceId);
+        return buildMachineEvent(partyChange, partyId, sequenceId);
     }
 
-    private static MachineEvent buildMessageShopBlocking(Long sequenceId) {
+    private static MachineEvent buildMessageShopBlocking(Long sequenceId, String partyId) {
         ShopBlocking shopBlocking = buildShopBlocking();
         PartyChange partyChange = new PartyChange();
         partyChange.setShopBlocking(shopBlocking);
-        return buildMachineEvent(partyChange, SOURCE_ID, sequenceId);
+        return buildMachineEvent(partyChange, partyId, sequenceId);
     }
 
-    private static MachineEvent buildMessageShopSuspension(Long sequenceId) {
+    private static MachineEvent buildMessageShopSuspension(Long sequenceId, String partyId) {
         ShopSuspension shopSuspension = buildShopSuspension();
         PartyChange partyChange = new PartyChange();
         partyChange.setShopSuspension(shopSuspension);
-        return buildMachineEvent(partyChange, SOURCE_ID, sequenceId);
+        return buildMachineEvent(partyChange, partyId, sequenceId);
     }
 
-    private static MachineEvent buildMessageShopCreated(Long sequenceId) throws IOException {
+    private static MachineEvent buildMessageShopCreated(Long sequenceId, String partyId) throws IOException {
         Shop shop = buildShopCreated();
         ShopEffectUnit shopEffectUnit = new ShopEffectUnit();
         shopEffectUnit.setShopId(SHOP_ID);
@@ -152,10 +148,10 @@ public class PartyFlowGenerator {
         Claim claim = buildClaimCreated(claimEffect);
         PartyChange partyChange = new PartyChange();
         partyChange.setClaimCreated(claim);
-        return buildMachineEvent(partyChange, SOURCE_ID, sequenceId);
+        return buildMachineEvent(partyChange, partyId, sequenceId);
     }
 
-    private static MachineEvent buildMessageShopCategoryChanged(Long sequenceId) {
+    private static MachineEvent buildMessageShopCategoryChanged(Long sequenceId, String partyId) {
         ShopEffectUnit shopEffectUnit = new ShopEffectUnit();
         shopEffectUnit.setShopId(SHOP_ID);
         ShopEffect shopEffect = new ShopEffect();
@@ -168,10 +164,10 @@ public class PartyFlowGenerator {
         Claim claim = buildClaimCreated(claimEffect);
         PartyChange partyChange = new PartyChange();
         partyChange.setClaimCreated(claim);
-        return buildMachineEvent(partyChange, SOURCE_ID, sequenceId);
+        return buildMachineEvent(partyChange, partyId, sequenceId);
     }
 
-    private static MachineEvent buildMessageShopContractChanged(Long sequenceId) {
+    private static MachineEvent buildMessageShopContractChanged(Long sequenceId, String partyId) {
         ShopEffectUnit shopEffectUnit = new ShopEffectUnit();
         shopEffectUnit.setShopId(SHOP_ID);
         ShopContractChanged shopContractChanged = new ShopContractChanged();
@@ -185,10 +181,10 @@ public class PartyFlowGenerator {
         Claim claim = buildClaimCreated(claimEffect);
         PartyChange partyChange = new PartyChange();
         partyChange.setClaimCreated(claim);
-        return buildMachineEvent(partyChange, SOURCE_ID, sequenceId);
+        return buildMachineEvent(partyChange, partyId, sequenceId);
     }
 
-    private static MachineEvent buildMessageShopDetailsChanged(Long sequenceId) {
+    private static MachineEvent buildMessageShopDetailsChanged(Long sequenceId, String partyId) {
         ShopEffectUnit shopEffectUnit = new ShopEffectUnit();
         shopEffectUnit.setShopId(SHOP_ID);
         ShopDetails shopDetails = new ShopDetails();
@@ -202,10 +198,10 @@ public class PartyFlowGenerator {
         Claim claim = buildClaimCreated(claimEffect);
         PartyChange partyChange = new PartyChange();
         partyChange.setClaimCreated(claim);
-        return buildMachineEvent(partyChange, SOURCE_ID, sequenceId);
+        return buildMachineEvent(partyChange, partyId, sequenceId);
     }
 
-    private static MachineEvent buildMessageShopPayoutScheduleChanged(Long sequenceId) {
+    private static MachineEvent buildMessageShopPayoutScheduleChanged(Long sequenceId, String partyId) {
         ShopEffectUnit shopEffectUnit = new ShopEffectUnit();
         shopEffectUnit.setShopId(SHOP_ID);
         ScheduleChanged scheduleChanged = new ScheduleChanged();
@@ -218,10 +214,10 @@ public class PartyFlowGenerator {
         Claim claim = buildClaimCreated(claimEffect);
         PartyChange partyChange = new PartyChange();
         partyChange.setClaimCreated(claim);
-        return buildMachineEvent(partyChange, SOURCE_ID, sequenceId);
+        return buildMachineEvent(partyChange, partyId, sequenceId);
     }
 
-    private static MachineEvent buildMessageShopPayoutToolChanged(Long sequenceId) {
+    private static MachineEvent buildMessageShopPayoutToolChanged(Long sequenceId, String partyId) {
         ShopEffectUnit shopEffectUnit = new ShopEffectUnit();
         shopEffectUnit.setShopId(SHOP_ID);
         ShopEffect shopEffect = new ShopEffect();
@@ -232,10 +228,10 @@ public class PartyFlowGenerator {
         Claim claim = buildClaimCreated(claimEffect);
         PartyChange partyChange = new PartyChange();
         partyChange.setClaimCreated(claim);
-        return buildMachineEvent(partyChange, SOURCE_ID, sequenceId);
+        return buildMachineEvent(partyChange, partyId, sequenceId);
     }
 
-    private static MachineEvent buildMessageShopAccountCreated(Long sequenceId) {
+    private static MachineEvent buildMessageShopAccountCreated(Long sequenceId, String partyId) {
         ShopEffectUnit shopEffectUnit = new ShopEffectUnit();
         shopEffectUnit.setShopId(SHOP_ID);
         ShopAccount shopAccount = new ShopAccount();
@@ -250,10 +246,10 @@ public class PartyFlowGenerator {
         Claim claim = buildClaimCreated(claimEffect);
         PartyChange partyChange = new PartyChange();
         partyChange.setClaimCreated(claim);
-        return buildMachineEvent(partyChange, SOURCE_ID, sequenceId);
+        return buildMachineEvent(partyChange, partyId, sequenceId);
     }
 
-    private static MachineEvent buildContractorCreatedMapper(Long sequenceId, PartyContractor partyContractor) throws IOException {
+    private static MachineEvent buildContractorCreatedMapper(Long sequenceId, PartyContractor partyContractor, String partyId) throws IOException {
         ContractorEffectUnit contractorEffectUnit = new ContractorEffectUnit();
         contractorEffectUnit.setId(CONTRACTOR_ID);
         ContractorEffect contractorEffect = new ContractorEffect();
@@ -264,10 +260,10 @@ public class PartyFlowGenerator {
         Claim claim = buildClaimCreated(claimEffect);
         PartyChange partyChange = new PartyChange();
         partyChange.setClaimCreated(claim);
-        return buildMachineEvent(partyChange, SOURCE_ID, sequenceId);
+        return buildMachineEvent(partyChange, partyId, sequenceId);
     }
 
-    private static MachineEvent buildContractorIdentificationLevelChanged(Long sequenceId) {
+    private static MachineEvent buildContractorIdentificationLevelChanged(Long sequenceId, String partyId) {
         ContractorEffectUnit contractorEffectUnit = new ContractorEffectUnit();
         contractorEffectUnit.setId(CONTRACTOR_ID);
         ContractorEffect contractorEffect = new ContractorEffect();
@@ -278,12 +274,12 @@ public class PartyFlowGenerator {
         Claim claim = buildClaimCreated(claimEffect);
         PartyChange partyChange = new PartyChange();
         partyChange.setClaimCreated(claim);
-        return buildMachineEvent(partyChange, SOURCE_ID, sequenceId);
+        return buildMachineEvent(partyChange, partyId, sequenceId);
     }
 
-    private static PartyContractor buildPartyContractor() throws IOException {
+    private static PartyContractor buildPartyContractor(String partyId) throws IOException {
         PartyContractor partyContractor = new PartyContractor();
-        partyContractor.setId(PARTY_ID);
+        partyContractor.setId(partyId);
         partyContractor.setStatus(ContractorIdentificationLevel.full);
         Contractor contractor = new Contractor();
         contractor = new MockTBaseProcessor(MockMode.ALL).process(contractor, new TBaseHandler<>(Contractor.class));
@@ -292,9 +288,9 @@ public class PartyFlowGenerator {
         return partyContractor;
     }
 
-    private static PartyContractor buildLegalPartyContractor() throws IOException {
+    private static PartyContractor buildLegalPartyContractor(String partyId) throws IOException {
         PartyContractor partyContractor = new PartyContractor();
-        partyContractor.setId(PARTY_ID);
+        partyContractor.setId(partyId);
         partyContractor.setStatus(ContractorIdentificationLevel.none);
         Contractor contractor = new Contractor();
         LegalEntity legalEntity = new LegalEntity();
@@ -341,8 +337,8 @@ public class PartyFlowGenerator {
         return new PartyRevisionChanged(TypeUtil.temporalToString(LocalDateTime.now()), PARTY_REVISION_ID);
     }
 
-    private static PartyCreated buildPartyCreated() {
-        return new PartyCreated(PARTY_ID, new PartyContactInfo(PARTY_EMAIL), TypeUtil.temporalToString(LocalDateTime.now()));
+    private static PartyCreated buildPartyCreated(String partyId) {
+        return new PartyCreated(partyId, new PartyContactInfo(PARTY_EMAIL), TypeUtil.temporalToString(LocalDateTime.now()));
     }
 
     private static Suspension buildPartySuspension() {

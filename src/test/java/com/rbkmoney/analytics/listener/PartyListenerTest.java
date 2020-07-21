@@ -26,6 +26,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
+import java.util.UUID;
 
 import static com.rbkmoney.analytics.listener.PartyFlowGenerator.SETTLEMENT_ID;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -66,7 +67,8 @@ public class PartyListenerTest extends KafkaAbstractTest {
 
     @Test
     public void testPartyEventSink() throws IOException {
-        List<SinkEvent> sinkEvents = PartyFlowGenerator.generatePartyFlow();
+        String partyId = UUID.randomUUID().toString();
+        List<SinkEvent> sinkEvents = PartyFlowGenerator.generatePartyFlow(partyId);
 
         sinkEvents.forEach(this::produceMessageToParty);
 
@@ -87,12 +89,13 @@ public class PartyListenerTest extends KafkaAbstractTest {
 
     @Test
     public void testPartyFlowSave() throws IOException {
-        List<SinkEvent> sinkEvents = PartyFlowGenerator.generatePartyContractorFlow();
+        String partyId = UUID.randomUUID().toString();
+        List<SinkEvent> sinkEvents = PartyFlowGenerator.generatePartyContractorFlow(partyId);
 
         sinkEvents.forEach(this::produceMessageToParty);
 
         await().atMost(60, SECONDS).until(() -> {
-            Party party = postgresPartyDao.getPartyForUpdate(PartyFlowGenerator.PARTY_ID);
+            Party party = postgresPartyDao.getPartyForUpdate(partyId);
             if (party == null) {
                 Thread.sleep(1000);
                 return false;
@@ -100,12 +103,12 @@ public class PartyListenerTest extends KafkaAbstractTest {
             return party.getContractorIdentificationLevel() == ContractorIdentificationLvl.partial;
         });
 
-        Party party = postgresPartyDao.getPartyForUpdate(PartyFlowGenerator.PARTY_ID);
+        Party party = postgresPartyDao.getPartyForUpdate(partyId);
         Assert.assertFalse(party.getPartyId().isEmpty());
         Assert.assertEquals(PartyFlowGenerator.PARTY_BLOCK_REASON, party.getBlockedReason());
         Assert.assertNotNull(party.getBlockedSince());
         Assert.assertEquals("active", party.getSuspension().name());
-        Assert.assertEquals(String.valueOf(PartyFlowGenerator.PARTY_REVISION_ID), party.getRevisionId());
+        Assert.assertEquals(PartyFlowGenerator.PARTY_REVISION_ID.toString(), party.getRevisionId());
         Assert.assertEquals(PartyFlowGenerator.PARTY_EMAIL, party.getEmail());
         Assert.assertEquals(Contractor.legal_entity, party.getContractorType());
         Assert.assertEquals(LegalEntity.russian_legal_entity, party.getLegalEntityType());
@@ -125,18 +128,19 @@ public class PartyListenerTest extends KafkaAbstractTest {
 
     @Test
     public void testShopFlowSave() throws IOException {
-        List<SinkEvent> sinkEvents = PartyFlowGenerator.generateShopFlow();
+        String partyId = UUID.randomUUID().toString();
+        List<SinkEvent> sinkEvents = PartyFlowGenerator.generateShopFlow(partyId);
         sinkEvents.forEach(this::produceMessageToParty);
         await().atMost(60, SECONDS).until(() -> {
-            Shop shop = postgresPartyDao.getShopForUpdate(PartyFlowGenerator.PARTY_ID, PartyFlowGenerator.SHOP_ID);
+            Shop shop = postgresPartyDao.getShopForUpdate(partyId, PartyFlowGenerator.SHOP_ID);
             if (shop == null) {
                 Thread.sleep(1000);
                 return false;
             }
             return shop.getAccountCurrencyCode().equals(PartyFlowGenerator.CURRENCY_SYMBOL);
         });
-        Shop shop = postgresPartyDao.getShopForUpdate(PartyFlowGenerator.PARTY_ID, PartyFlowGenerator.SHOP_ID);
-        Assert.assertEquals(PartyFlowGenerator.PARTY_ID, shop.getPartyId());
+        Shop shop = postgresPartyDao.getShopForUpdate(partyId, PartyFlowGenerator.SHOP_ID);
+        Assert.assertEquals(partyId, shop.getPartyId());
         Assert.assertEquals(PartyFlowGenerator.SHOP_ID, shop.getShopId());
         Assert.assertEquals(PartyFlowGenerator.CURRENCY_SYMBOL, shop.getAccountCurrencyCode());
         Assert.assertFalse(shop.getAccountGuarantee().isEmpty());
