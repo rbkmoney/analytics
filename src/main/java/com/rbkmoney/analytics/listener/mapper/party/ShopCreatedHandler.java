@@ -3,7 +3,9 @@ package com.rbkmoney.analytics.listener.mapper.party;
 import com.rbkmoney.analytics.domain.db.enums.Blocking;
 import com.rbkmoney.analytics.domain.db.enums.Suspension;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
+import com.rbkmoney.analytics.listener.handler.party.LocalStorage;
 import com.rbkmoney.analytics.service.PartyService;
+import com.rbkmoney.analytics.service.model.ShopKey;
 import com.rbkmoney.damsel.payment_processing.ClaimEffect;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
 import com.rbkmoney.damsel.payment_processing.ShopEffectUnit;
@@ -19,7 +21,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class ShopCreatedHandler extends AbstractClaimChangeHandler<Shop> {
+public class ShopCreatedHandler extends AbstractClaimChangeHandler {
 
     private final PartyService partyService;
 
@@ -31,16 +33,16 @@ public class ShopCreatedHandler extends AbstractClaimChangeHandler<Shop> {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void handleChange(PartyChange change, MachineEvent event) {
+    public void handleChange(PartyChange change, MachineEvent event, LocalStorage localStorage) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
         for (ClaimEffect claimEffect : claimEffects) {
             if (claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetCreated()) {
-                handleEvent(event, claimEffect);
+                handleEvent(event, claimEffect, localStorage);
             }
         }
     }
 
-    private void handleEvent(MachineEvent event, ClaimEffect effect) {
+    private void handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage localStorage) {
         ShopEffectUnit shopEffect = effect.getShopEffect();
         com.rbkmoney.damsel.domain.Shop shopCreated = shopEffect.getEffect().getCreated();
         String shopId = shopEffect.getShopId();
@@ -84,7 +86,8 @@ public class ShopCreatedHandler extends AbstractClaimChangeHandler<Shop> {
            shop.setPayoutScheduleId(shopCreated.getPayoutSchedule().getId());
        }
 
-        partyService.saveShop(shop);
+        ShopKey shopKey = new ShopKey(partyId, shopId);
+        localStorage.putShop(shopKey, shop);
     }
 
 

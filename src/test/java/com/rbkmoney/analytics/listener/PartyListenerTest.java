@@ -2,10 +2,16 @@ package com.rbkmoney.analytics.listener;
 
 import com.rbkmoney.analytics.AnalyticsApplication;
 import com.rbkmoney.analytics.dao.repository.postgres.PostgresPartyDao;
+import com.rbkmoney.analytics.domain.db.enums.Contractor;
+import com.rbkmoney.analytics.domain.db.enums.ContractorIdentificationLvl;
+import com.rbkmoney.analytics.domain.db.enums.LegalEntity;
+import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
+import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
 import com.rbkmoney.analytics.utils.FileUtil;
 import com.rbkmoney.machinegun.eventsink.SinkEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -85,6 +91,72 @@ public class PartyListenerTest extends KafkaAbstractTest {
             Thread.sleep(1000);
             return false;
         });
+    }
+
+    @Test
+    public void testPartyFlowSave() throws IOException {
+        List<SinkEvent> sinkEvents = PartyFlowGenerator.generatePartyContractorFlow();
+
+        sinkEvents.forEach(this::produceMessageToParty);
+
+        await().atMost(60, SECONDS).until(() -> {
+            Party party = postgresPartyDao.getParty(PartyFlowGenerator.PARTY_ID);
+            if (party == null) {
+                Thread.sleep(1000);
+                return false;
+            }
+            return party.getContractorIdentificationLevel() == ContractorIdentificationLvl.partial;
+        });
+
+        Party party = postgresPartyDao.getParty(PartyFlowGenerator.PARTY_ID);
+        Assert.assertFalse(party.getPartyId().isEmpty());
+        Assert.assertEquals(PartyFlowGenerator.PARTY_BLOCK_REASON, party.getBlockedReason());
+        Assert.assertNotNull(party.getBlockedSince());
+        Assert.assertEquals("active", party.getSuspension().name());
+        Assert.assertEquals(String.valueOf(PartyFlowGenerator.PARTY_REVISION_ID), party.getRevisionId());
+        Assert.assertEquals(PartyFlowGenerator.PARTY_EMAIL, party.getEmail());
+        Assert.assertEquals(Contractor.legal_entity, party.getContractorType());
+        Assert.assertEquals(LegalEntity.russian_legal_entity, party.getLegalEntityType());
+        Assert.assertFalse(party.getRussianLegalEntityActualAddress().isEmpty());
+        Assert.assertFalse(party.getRussianLegalEntityBankAccount().isEmpty());
+        Assert.assertFalse(party.getRussianLegalEntityBankBik().isEmpty());
+        Assert.assertFalse(party.getRussianLegalEntityBankName().isEmpty());
+        Assert.assertFalse(party.getRussianLegalEntityBankPostAccount().isEmpty());
+        Assert.assertFalse(party.getRussianLegalEntityInn().isEmpty());
+        Assert.assertFalse(party.getRussianLegalEntityName().isEmpty());
+        Assert.assertFalse(party.getRussianLegalEntityPostAddress().isEmpty());
+        Assert.assertFalse(party.getRussianLegalEntityRegisteredNumber().isEmpty());
+        Assert.assertFalse(party.getRussianLegalEntityRepresentativeDocument().isEmpty());
+        Assert.assertFalse(party.getRussianLegalEntityRepresentativeFullName().isEmpty());
+        Assert.assertFalse(party.getRussianLegalEntityRepresentativePosition().isEmpty());
+    }
+
+    @Test
+    public void testShopFlowSave() throws IOException {
+        List<SinkEvent> sinkEvents = PartyFlowGenerator.generateShopFlow();
+        sinkEvents.forEach(this::produceMessageToParty);
+        await().atMost(60, SECONDS).until(() -> {
+            Shop shop = postgresPartyDao.getShop(PartyFlowGenerator.PARTY_ID, PartyFlowGenerator.SHOP_ID);
+            if (shop == null) {
+                Thread.sleep(1000);
+                return false;
+            }
+            return shop.getAccountCurrencyCode().equals(PartyFlowGenerator.CURRENCY_SYMBOL);
+        });
+        Shop shop = postgresPartyDao.getShop(PartyFlowGenerator.PARTY_ID, PartyFlowGenerator.SHOP_ID);
+        Assert.assertEquals(PartyFlowGenerator.PARTY_ID, shop.getPartyId());
+        Assert.assertEquals(PartyFlowGenerator.SHOP_ID, shop.getShopId());
+        Assert.assertEquals(PartyFlowGenerator.CURRENCY_SYMBOL, shop.getAccountCurrencyCode());
+        Assert.assertFalse(shop.getAccountGuarantee().isEmpty());
+        Assert.assertEquals(PartyFlowGenerator.SHOP_UNBLOCK_REASON, shop.getUnblockedReason());
+        Assert.assertNotNull(shop.getUnblockedSince());
+        Assert.assertEquals("active", shop.getSuspension().name());
+        Assert.assertEquals(PartyFlowGenerator.CATEGORY_ID, shop.getCategoryId());
+        Assert.assertEquals(PartyFlowGenerator.DETAILS_NAME, shop.getDetailsName());
+        Assert.assertEquals(PartyFlowGenerator.DETAILS_DESCRIPTION, shop.getDetailsDescription());
+        Assert.assertEquals(PartyFlowGenerator.SCHEDULE_ID, shop.getPayoutScheduleId());
+        Assert.assertEquals(PartyFlowGenerator.PAYOUT_TOOL_ID, shop.getPayoutToolId());
+        Assert.assertEquals(String.valueOf(SETTLEMENT_ID), shop.getAccountSettlement());
     }
 
 }

@@ -2,6 +2,7 @@ package com.rbkmoney.analytics.listener.mapper.party;
 
 import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
+import com.rbkmoney.analytics.listener.handler.party.LocalStorage;
 import com.rbkmoney.analytics.listener.mapper.ChangeHandler;
 import com.rbkmoney.analytics.service.PartyService;
 import com.rbkmoney.damsel.domain.Suspension;
@@ -16,17 +17,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-public class PartySuspensionHandler implements ChangeHandler<PartyChange, MachineEvent, Party> {
+public class PartySuspensionHandler implements ChangeHandler<PartyChange, MachineEvent> {
 
     private final PartyService partyService;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void handleChange(PartyChange change, MachineEvent event) {
+    public void handleChange(PartyChange change, MachineEvent event, LocalStorage localStorage) {
         Suspension partySuspension = change.getPartySuspension();
         String partyId = event.getSourceId();
 
-        Party party = partyService.getParty(partyId);
+        Party party = partyService.getParty(partyId, localStorage);
         party.setEventId(event.getEventId());
         party.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         party.setSuspension(TBaseUtil.unionFieldToEnum(partySuspension, com.rbkmoney.analytics.domain.db.enums.Suspension.class));
@@ -36,7 +37,7 @@ public class PartySuspensionHandler implements ChangeHandler<PartyChange, Machin
             party.setSuspensionSuspendedSince(TypeUtil.stringToLocalDateTime(partySuspension.getSuspended().getSince()));
         }
 
-        partyService.saveParty(party);
+        localStorage.putParty(party.getPartyId(), party);
     }
 
     @Override

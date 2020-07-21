@@ -4,8 +4,6 @@ import com.rbkmoney.analytics.constant.*;
 import com.rbkmoney.analytics.dao.model.*;
 import com.rbkmoney.analytics.dao.repository.clickhouse.*;
 import com.rbkmoney.analytics.dao.repository.postgres.PostgresBalanceChangesRepository;
-import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
-import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
 import com.rbkmoney.analytics.service.PartyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

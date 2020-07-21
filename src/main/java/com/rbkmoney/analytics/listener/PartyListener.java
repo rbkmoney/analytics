@@ -1,6 +1,6 @@
 package com.rbkmoney.analytics.listener;
 
-import com.rbkmoney.analytics.service.PartyMachineEventHandler;
+import com.rbkmoney.analytics.listener.handler.party.PartyMachineEventHandler;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,12 +9,8 @@ import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -33,6 +29,7 @@ public class PartyListener {
         log.info("PartyListener listen offsets: {} partition: {} batch.size: {}", offsets, partition, batch.size());
         partyMachineEventHandler.handleMessages(batch);
         ack.acknowledge();
+        log.info("PartyListener batch has been commited, batch.size={}", batch.size());
     }
 
 }

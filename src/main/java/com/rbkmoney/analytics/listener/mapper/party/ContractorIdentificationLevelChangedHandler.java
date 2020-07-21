@@ -2,6 +2,7 @@ package com.rbkmoney.analytics.listener.mapper.party;
 
 import com.rbkmoney.analytics.domain.db.enums.ContractorIdentificationLvl;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
+import com.rbkmoney.analytics.listener.handler.party.LocalStorage;
 import com.rbkmoney.analytics.service.PartyService;
 import com.rbkmoney.damsel.domain.ContractorIdentificationLevel;
 import com.rbkmoney.damsel.payment_processing.ClaimEffect;
@@ -20,7 +21,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ContractorIdentificationLevelChangedHandler extends AbstractClaimChangeHandler<Party> {
+public class ContractorIdentificationLevelChangedHandler extends AbstractClaimChangeHandler {
 
     private final PartyService partyService;
 
@@ -32,28 +33,28 @@ public class ContractorIdentificationLevelChangedHandler extends AbstractClaimCh
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void handleChange(PartyChange change, MachineEvent event) {
+    public void handleChange(PartyChange change, MachineEvent event, LocalStorage localStorage) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
         for (ClaimEffect claimEffect : claimEffects) {
             if (claimEffect.isSetContractorEffect() && claimEffect.getContractorEffect().getEffect().isSetIdentificationLevelChanged()) {
-                handleEvent(event, claimEffect);
+                handleEvent(event, claimEffect, localStorage);
             }
         }
     }
 
-    private void handleEvent(MachineEvent event, ClaimEffect effect) {
+    private void handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage localStorage) {
         ContractorEffectUnit contractorEffect = effect.getContractorEffect();
         ContractorIdentificationLevel identificationLevelChanged = contractorEffect.getEffect().getIdentificationLevelChanged();
         String contractorId = contractorEffect.getId();
         String partyId = event.getSourceId();
 
-        Party party = partyService.getParty(partyId);
+        Party party = partyService.getParty(partyId, localStorage);
         party.setEventId(event.getEventId());
         party.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         party.setContractorId(contractorId);
         party.setContractorIdentificationLevel(ContractorIdentificationLvl.valueOf(identificationLevelChanged.name()));
 
-        partyService.saveParty(party);
+        localStorage.putParty(partyId, party);
     }
 
 }

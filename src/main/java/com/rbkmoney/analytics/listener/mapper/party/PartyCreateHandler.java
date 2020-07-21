@@ -4,6 +4,7 @@ import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.domain.db.enums.Blocking;
 import com.rbkmoney.analytics.domain.db.enums.Suspension;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
+import com.rbkmoney.analytics.listener.handler.party.LocalStorage;
 import com.rbkmoney.analytics.listener.mapper.ChangeHandler;
 import com.rbkmoney.analytics.service.PartyService;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
@@ -21,13 +22,13 @@ import java.time.LocalDateTime;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class PartyCreateHandler implements ChangeHandler<PartyChange, MachineEvent, Party> {
+public class PartyCreateHandler implements ChangeHandler<PartyChange, MachineEvent> {
 
     private final PartyService partyService;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void handleChange(PartyChange change, MachineEvent event) {
+    public void handleChange(PartyChange change, MachineEvent event, LocalStorage localStorage) {
         PartyCreated partyCreated = change.getPartyCreated();
         LocalDateTime partyCreatedAt = TypeUtil.stringToLocalDateTime(partyCreated.getCreatedAt());
         Party party = new Party();
@@ -44,7 +45,7 @@ public class PartyCreateHandler implements ChangeHandler<PartyChange, MachineEve
         party.setRevisionId("0");
         party.setRevisionChangedAt(partyCreatedAt);
 
-        partyService.saveParty(party);
+        localStorage.putParty(partyCreated.getId(), party);
     }
 
     @Override
