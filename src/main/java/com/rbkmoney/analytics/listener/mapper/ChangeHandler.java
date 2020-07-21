@@ -1,7 +1,6 @@
 package com.rbkmoney.analytics.listener.mapper;
 
 import com.rbkmoney.analytics.constant.EventType;
-import com.rbkmoney.analytics.listener.handler.party.LocalStorage;
 
 public interface ChangeHandler<C, P, T>  {
 
@@ -9,7 +8,7 @@ public interface ChangeHandler<C, P, T>  {
         return getChangeType().getFilter().match(change);
     }
 
-    T handleChange(C change, P parent, LocalStorage localStorage);
+    T handleChange(C change, P parent);
 
     EventType getChangeType();
 

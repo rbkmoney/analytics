@@ -27,8 +27,7 @@ public class PartyListener {
                        @Header(KafkaHeaders.OFFSET) int offsets,
                        Acknowledgment ack) throws InterruptedException {
         log.info("PartyListener listen offsets: {} partition: {} batch.size: {}", offsets, partition, batch.size());
-        partyMachineEventHandler.handleMessages(batch);
-        ack.acknowledge();
+        partyMachineEventHandler.handleMessages(batch, ack);
         log.info("PartyListener batch has been commited, batch.size={}", batch.size());
     }
 

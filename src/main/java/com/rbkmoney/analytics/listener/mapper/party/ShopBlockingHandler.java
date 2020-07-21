@@ -2,10 +2,8 @@ package com.rbkmoney.analytics.listener.mapper.party;
 
 import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
-import com.rbkmoney.analytics.listener.handler.party.LocalStorage;
 import com.rbkmoney.analytics.listener.mapper.ChangeHandler;
 import com.rbkmoney.analytics.service.PartyService;
-import com.rbkmoney.analytics.service.model.ShopKey;
 import com.rbkmoney.damsel.domain.Blocking;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
 import com.rbkmoney.geck.common.util.TBaseUtil;
@@ -20,16 +18,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ShopBlockingHandler implements ChangeHandler<PartyChange, MachineEvent, List<Shop>> {
 
-    private final PartyService partyService;
-
     @Override
-    public List<Shop> handleChange(PartyChange change, MachineEvent event, LocalStorage localStorage) {
+    public List<Shop> handleChange(PartyChange change, MachineEvent event) {
         Blocking blocking = change.getShopBlocking().getBlocking();
         String shopId = change.getShopBlocking().getShopId();
         String partyId = event.getSourceId();
 
-        ShopKey shopKey = new ShopKey(partyId, shopId);
-        Shop shop = partyService.getShop(shopKey, localStorage);
+        Shop shop = new Shop();
+        shop.setPartyId(partyId);
+        shop.setShopId(shopId);
         shop.setEventId(event.getEventId());
         shop.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         shop.setBlocking(TBaseUtil.unionFieldToEnum(change.getShopBlocking().getBlocking(), com.rbkmoney.analytics.domain.db.enums.Blocking.class));
@@ -40,8 +37,6 @@ public class ShopBlockingHandler implements ChangeHandler<PartyChange, MachineEv
             shop.setBlockedReason(blocking.getBlocked().getReason());
             shop.setBlockedSince(TypeUtil.stringToLocalDateTime(blocking.getBlocked().getSince()));
         }
-
-        localStorage.putShop(new ShopKey(shop.getPartyId(), shop.getShopId()), shop);
 
         return List.of(shop);
     }

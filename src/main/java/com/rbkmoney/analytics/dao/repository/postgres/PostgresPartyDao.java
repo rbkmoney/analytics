@@ -57,7 +57,7 @@ public class PostgresPartyDao extends AbstractGenericDao {
         batchExecute(queries);
     }
 
-    public Party getParty(String partyId) {
+    public Party getPartyForUpdate(String partyId) {
         Query query = getDslContext().selectFrom(PARTY)
                 .where(PARTY.PARTY_ID.eq(partyId))
                 .forUpdate();
@@ -88,7 +88,7 @@ public class PostgresPartyDao extends AbstractGenericDao {
         batchExecute(queries);
     }
 
-    public Shop getShop(String partyId, String shopId) {
+    public Shop getShopForUpdate(String partyId, String shopId) {
         Query query = getDslContext().selectFrom(SHOP)
                 .where(SHOP.PARTY_ID.eq(partyId).and(SHOP.SHOP_ID.eq(shopId)))
                 .forUpdate();

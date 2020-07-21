@@ -7,12 +7,9 @@ import com.rbkmoney.analytics.domain.db.enums.ContractorIdentificationLvl;
 import com.rbkmoney.analytics.domain.db.enums.LegalEntity;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
-import com.rbkmoney.analytics.utils.FileUtil;
 import com.rbkmoney.machinegun.eventsink.SinkEvent;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.thrift.TException;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,14 +21,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.testcontainers.containers.ClickHouseContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
-import ru.yandex.clickhouse.ClickHouseDataSource;
-import ru.yandex.clickhouse.settings.ClickHouseProperties;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.time.Duration;
 import java.util.List;
 
@@ -100,7 +92,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
         sinkEvents.forEach(this::produceMessageToParty);
 
         await().atMost(60, SECONDS).until(() -> {
-            Party party = postgresPartyDao.getParty(PartyFlowGenerator.PARTY_ID);
+            Party party = postgresPartyDao.getPartyForUpdate(PartyFlowGenerator.PARTY_ID);
             if (party == null) {
                 Thread.sleep(1000);
                 return false;
@@ -108,7 +100,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
             return party.getContractorIdentificationLevel() == ContractorIdentificationLvl.partial;
         });
 
-        Party party = postgresPartyDao.getParty(PartyFlowGenerator.PARTY_ID);
+        Party party = postgresPartyDao.getPartyForUpdate(PartyFlowGenerator.PARTY_ID);
         Assert.assertFalse(party.getPartyId().isEmpty());
         Assert.assertEquals(PartyFlowGenerator.PARTY_BLOCK_REASON, party.getBlockedReason());
         Assert.assertNotNull(party.getBlockedSince());
@@ -136,14 +128,14 @@ public class PartyListenerTest extends KafkaAbstractTest {
         List<SinkEvent> sinkEvents = PartyFlowGenerator.generateShopFlow();
         sinkEvents.forEach(this::produceMessageToParty);
         await().atMost(60, SECONDS).until(() -> {
-            Shop shop = postgresPartyDao.getShop(PartyFlowGenerator.PARTY_ID, PartyFlowGenerator.SHOP_ID);
+            Shop shop = postgresPartyDao.getShopForUpdate(PartyFlowGenerator.PARTY_ID, PartyFlowGenerator.SHOP_ID);
             if (shop == null) {
                 Thread.sleep(1000);
                 return false;
             }
             return shop.getAccountCurrencyCode().equals(PartyFlowGenerator.CURRENCY_SYMBOL);
         });
-        Shop shop = postgresPartyDao.getShop(PartyFlowGenerator.PARTY_ID, PartyFlowGenerator.SHOP_ID);
+        Shop shop = postgresPartyDao.getShopForUpdate(PartyFlowGenerator.PARTY_ID, PartyFlowGenerator.SHOP_ID);
         Assert.assertEquals(PartyFlowGenerator.PARTY_ID, shop.getPartyId());
         Assert.assertEquals(PartyFlowGenerator.SHOP_ID, shop.getShopId());
         Assert.assertEquals(PartyFlowGenerator.CURRENCY_SYMBOL, shop.getAccountCurrencyCode());

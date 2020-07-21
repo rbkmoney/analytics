@@ -1,9 +1,7 @@
 package com.rbkmoney.analytics.listener.mapper.party;
 
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
-import com.rbkmoney.analytics.listener.handler.party.LocalStorage;
 import com.rbkmoney.analytics.service.PartyService;
-import com.rbkmoney.analytics.service.model.ShopKey;
 import com.rbkmoney.damsel.payment_processing.ClaimEffect;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
 import com.rbkmoney.damsel.payment_processing.ShopEffectUnit;
@@ -12,13 +10,12 @@ import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 public class ShopCategoryChangedHandler extends AbstractClaimChangeHandler<List<Shop>> {
-
-    private final PartyService partyService;
 
     @Override
     public boolean accept(PartyChange change) {
@@ -27,26 +24,27 @@ public class ShopCategoryChangedHandler extends AbstractClaimChangeHandler<List<
     }
 
     @Override
-    public List<Shop> handleChange(PartyChange change, MachineEvent event, LocalStorage localStorage) {
+    public List<Shop> handleChange(PartyChange change, MachineEvent event) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
+        List<Shop> shopList = new ArrayList<>();
         for (ClaimEffect claimEffect : claimEffects) {
             if (claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetCategoryChanged()) {
-                Shop shop = handleEvent(event, claimEffect, localStorage);
-                localStorage.putShop(new ShopKey(shop.getPartyId(), shop.getShopId()), shop);
+               shopList.add(handleEvent(event, claimEffect));
             }
         }
 
-        return localStorage.getShops();
+        return shopList;
     }
 
-    private Shop handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage localStorage) {
+    private Shop handleEvent(MachineEvent event, ClaimEffect effect) {
         ShopEffectUnit shopEffect = effect.getShopEffect();
         int categoryId = shopEffect.getEffect().getCategoryChanged().getId();
         String shopId = shopEffect.getShopId();
         String partyId = event.getSourceId();
 
-        ShopKey shopKey = new ShopKey(partyId, shopId);
-        Shop shop = partyService.getShop(shopKey, localStorage);
+        Shop shop = new Shop();
+        shop.setPartyId(partyId);
+        shop.setShopId(shopId);
         shop.setEventId(event.getEventId());
         shop.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         shop.setCategoryId(categoryId);

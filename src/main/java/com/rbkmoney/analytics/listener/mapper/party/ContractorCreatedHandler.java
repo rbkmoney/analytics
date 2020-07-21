@@ -2,7 +2,6 @@ package com.rbkmoney.analytics.listener.mapper.party;
 
 import com.rbkmoney.analytics.domain.db.enums.ContractorIdentificationLvl;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
-import com.rbkmoney.analytics.listener.handler.party.LocalStorage;
 import com.rbkmoney.analytics.service.PartyService;
 import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.payment_processing.ClaimEffect;
@@ -17,14 +16,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class ContractorCreatedHandler extends AbstractClaimChangeHandler<List<Party>> {
-
-    private final PartyService partyService;
 
     @Override
     public boolean accept(PartyChange change) {
@@ -34,18 +32,18 @@ public class ContractorCreatedHandler extends AbstractClaimChangeHandler<List<Pa
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public List<Party> handleChange(PartyChange change, MachineEvent event, LocalStorage localStorage) {
+    public List<Party> handleChange(PartyChange change, MachineEvent event) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
+        List<Party> partyList = new ArrayList<>();
         for (ClaimEffect claimEffect : claimEffects) {
             if (claimEffect.isSetContractorEffect() && claimEffect.getContractorEffect().getEffect().isSetCreated()) {
-                Party party = handleEvent(event, claimEffect, localStorage);
-                localStorage.putParty(party.getPartyId(), party);
+                partyList.add(handleEvent(event, claimEffect));
             }
         }
-        return localStorage.getParties();
+        return partyList;
     }
 
-    private Party handleEvent(MachineEvent event, ClaimEffect effect, LocalStorage localStorage) {
+    private Party handleEvent(MachineEvent event, ClaimEffect effect) {
         ContractorEffectUnit contractorEffect = effect.getContractorEffect();
         PartyContractor partyContractor = contractorEffect.getEffect().getCreated();
         Contractor contractor = partyContractor.getContractor();
@@ -53,7 +51,8 @@ public class ContractorCreatedHandler extends AbstractClaimChangeHandler<List<Pa
         String contractorId = contractorEffect.getId();
         String partyId = event.getSourceId();
 
-        Party party = partyService.getParty(partyId, localStorage);
+        Party party = new Party();
+        party.setPartyId(partyId);
         party.setEventId(event.getEventId());
         party.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         party.setContractorId(contractorId);

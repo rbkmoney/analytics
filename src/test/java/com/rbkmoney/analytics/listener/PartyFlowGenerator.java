@@ -40,7 +40,7 @@ public class PartyFlowGenerator {
     public static final String DETAILS_NAME = "testDetailsName";
     public static final String DETAILS_DESCRIPTION = "testDescription";
     public static final Integer SCHEDULE_ID = 15643653;
-    public static final String PAYOUT_TOOL_ID = "65373462";
+    public static final String PAYOUT_TOOL_ID = "654635";
     public static final String CURRENCY_SYMBOL = "RUB";
     public static final Long PAYOUT_ID_LONG = 654635L;
     public static final Long SETTLEMENT_ID = 245234L;
