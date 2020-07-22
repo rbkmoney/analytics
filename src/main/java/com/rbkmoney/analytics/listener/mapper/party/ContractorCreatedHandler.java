@@ -12,8 +12,6 @@ import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +28,6 @@ public class ContractorCreatedHandler extends AbstractClaimChangeHandler<List<Pa
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
     public List<Party> handleChange(PartyChange change, MachineEvent event) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
         List<Party> partyList = new ArrayList<>();
@@ -46,6 +43,8 @@ public class ContractorCreatedHandler extends AbstractClaimChangeHandler<List<Pa
         ContractorEffectUnit contractorEffect = effect.getContractorEffect();
         PartyContractor partyContractor = contractorEffect.getEffect().getCreated();
         Contractor contractor = partyContractor.getContractor();
+
+        log.debug("ContractorCreatedHandler contractor: {}", contractor);
 
         String contractorId = contractorEffect.getId();
         String partyId = event.getSourceId();
@@ -96,6 +95,8 @@ public class ContractorCreatedHandler extends AbstractClaimChangeHandler<List<Pa
             }
         }
         party.setContractorIdentificationLevel(ContractorIdentificationLvl.valueOf(partyContractor.getStatus().name()));
+
+        log.debug("ContractorCreatedHandler result party: {}", party);
 
         return party;
     }

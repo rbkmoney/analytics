@@ -45,9 +45,11 @@ public class PartyMachineEventHandler {
             if (CollectionUtils.isEmpty(batch)) return;
 
             for (MachineEvent machineEvent : batch) {
+                log.debug("Party Machine event: {}", machineEvent);
                 PartyEventData eventData = eventParser.parse(machineEvent);
                 if (eventData.isSetChanges()) {
                     for (PartyChange change : eventData.getChanges()) {
+                        log.debug("Party change: {}", change);
                         List<Party> changedParties = partyHandlers.stream()
                                 .filter(changeHandler -> changeHandler.accept(change))
                                 .flatMap(changeHandler -> changeHandler.handleChange(change, machineEvent).stream())

@@ -20,7 +20,7 @@ public class PartyService {
 
     public Party getParty(String partyId) {
         Party party = postgresPartyDao.getPartyForUpdate(partyId);
-        log.debug("Get party from DB: {}", party);
+        log.debug("Get party from DB by partyId={}. Result={}", partyId, party);
 
         return party;
     }
@@ -37,7 +37,7 @@ public class PartyService {
 
     public Shop getShop(ShopKey shopKey) {
         Shop shop = postgresPartyDao.getShopForUpdate(shopKey.getPartyId(), shopKey.getShopId());
-        log.debug("Get shop from DB: {}", shop);
+        log.debug("Get shop from DB by partyId={}, shopId={}: {}", shopKey.getPartyId(), shopKey.getShopId(), shop);
 
         return shop;
     }
