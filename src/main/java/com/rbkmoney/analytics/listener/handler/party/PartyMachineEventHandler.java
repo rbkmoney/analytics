@@ -49,7 +49,7 @@ public class PartyMachineEventHandler {
                 PartyEventData eventData = eventParser.parse(machineEvent);
                 if (eventData.isSetChanges()) {
                     if (log.isDebugEnabled()) {
-                        log.debug("Party changes size: {}", eventData.getChanges());
+                        log.debug("Party changes size: {}", eventData.getChanges().size());
                     }
                     for (PartyChange change : eventData.getChanges()) {
                         log.debug("Party change: {}", change);
