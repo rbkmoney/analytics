@@ -28,7 +28,7 @@ public class ShopPayoutToolChangedHandler extends AbstractClaimChangeHandler<Lis
         List<Shop> shopList = new ArrayList<>();
         for (ClaimEffect claimEffect : claimEffects) {
             if (claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetPayoutToolChanged()) {
-                Shop shop = handleEvent(event, claimEffect);
+                shopList.add(handleEvent(event, claimEffect));
             }
         }
 

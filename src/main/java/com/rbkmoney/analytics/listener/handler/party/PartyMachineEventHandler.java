@@ -48,6 +48,9 @@ public class PartyMachineEventHandler {
                 log.debug("Party Machine event: {}", machineEvent);
                 PartyEventData eventData = eventParser.parse(machineEvent);
                 if (eventData.isSetChanges()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Party changes size: {}", eventData.getChanges());
+                    }
                     for (PartyChange change : eventData.getChanges()) {
                         log.debug("Party change: {}", change);
                         List<Party> changedParties = partyHandlers.stream()

@@ -78,7 +78,7 @@ public class ContractorCreatedHandler extends AbstractClaimChangeHandler<List<Pa
                 party.setInternationalLegalEntityName(internationalLegalEntity.getLegalName());
                 party.setInternationalLegalEntityTradingName(internationalLegalEntity.getTradingName());
                 party.setInternationalLegalEntityRegisteredAddress(internationalLegalEntity.getRegisteredAddress());
-                party.setRussianLegalEntityActualAddress(internationalLegalEntity.getActualAddress());
+                party.setInternationalActualAddress(internationalLegalEntity.getActualAddress());
                 party.setInternationalLegalEntityRegisteredNumber(internationalLegalEntity.getRegisteredNumber());
             }
         } else if (contractor.isSetPrivateEntity()) {

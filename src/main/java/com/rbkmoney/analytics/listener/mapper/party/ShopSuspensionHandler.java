@@ -27,8 +27,10 @@ public class ShopSuspensionHandler implements ChangeHandler<PartyChange, Machine
         shop.setEventId(event.getEventId());
         shop.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         if (suspension.isSetActive()) {
+            shop.setSuspension(com.rbkmoney.analytics.domain.db.enums.Suspension.active);
             shop.setSuspensionActiveSince(TypeUtil.stringToLocalDateTime(suspension.getActive().getSince()));
         } else if (suspension.isSetSuspended()) {
+            shop.setSuspension(com.rbkmoney.analytics.domain.db.enums.Suspension.suspended);
             shop.setSuspensionSuspendedSince(TypeUtil.stringToLocalDateTime(suspension.getSuspended().getSince()));
         }
 
