@@ -89,6 +89,7 @@ public class PartyFlowGenerator {
         sinkEvents.add(buildSinkEvent(buildMessageShopDetailsChanged(sequenceId++, partyId, shopId)));
         sinkEvents.add(buildSinkEvent(buildMessageShopPayoutScheduleChanged(sequenceId++, partyId, shopId)));
         sinkEvents.add(buildSinkEvent(buildMessageShopAccountCreated(sequenceId++, partyId, shopId)));
+
         sinkEvents.add(buildSinkEvent(buildMessageShopSuspension(
                 sequenceId++, partyId, buildSuspendedShopSuspension(TypeUtil.temporalToString(LocalDateTime.now()), shopId))));
 

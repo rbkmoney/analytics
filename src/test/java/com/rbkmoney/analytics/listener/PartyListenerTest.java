@@ -61,6 +61,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
                     "spring.flyway.password=" + postgres.getPassword(),
                     "spring.flyway.enabled=true")
                     .applyTo(configurableApplicationContext.getEnvironment());
+            postgres.start();
         }
     }
 
@@ -113,7 +114,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
         Assert.assertFalse(party.getPartyId().isEmpty());
         Assert.assertEquals(PartyFlowGenerator.PARTY_BLOCK_REASON, party.getBlockedReason());
         Assert.assertNotNull(party.getBlockedSince());
-        Assert.assertEquals("active", party.getSuspension().name());
+        Assert.assertEquals(Suspension.active, party.getSuspension());
         Assert.assertEquals(PartyFlowGenerator.PARTY_REVISION_ID.toString(), party.getRevisionId());
         Assert.assertEquals(PartyFlowGenerator.PARTY_EMAIL, party.getEmail());
         Assert.assertEquals(Contractor.legal_entity, party.getContractorType());
@@ -139,12 +140,13 @@ public class PartyListenerTest extends KafkaAbstractTest {
         List<SinkEvent> sinkEvents = PartyFlowGenerator.generateShopFlow(partyId, shopId);
         sinkEvents.forEach(this::produceMessageToParty);
         await().atMost(60, SECONDS).until(() -> {
-            Shop shop = postgresPartyDao.getShopForUpdate(partyId, shopId);
-            if (shop == null) {
+            Integer lastShopCount = postgresJdbcTemplate.queryForObject(String.format(
+                    "SELECT count(*) FROM analytics.shop WHERE party_id = '%s' AND shop_id = '%s' AND suspension = 'suspended'", partyId, shopId), Integer.class);
+            if (lastShopCount <= 0) {
                 Thread.sleep(1000);
                 return false;
             }
-            return shop.getAccountCurrencyCode().equals(PartyFlowGenerator.CURRENCY_SYMBOL);
+            return true;
         });
         Shop shop = postgresPartyDao.getShopForUpdate(partyId, shopId);
         Assert.assertEquals(partyId, shop.getPartyId());

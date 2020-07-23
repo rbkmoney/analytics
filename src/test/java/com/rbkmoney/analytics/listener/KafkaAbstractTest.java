@@ -71,6 +71,7 @@ public abstract class KafkaAbstractTest {
                     .applyTo(configurableApplicationContext.getEnvironment());
             initTopic(EVENT_SINK_TOPIC, MachineEventDeserializer.class);
             initTopic(PAYOUT_TOPIC, PayoutEventDeserializer.class);
+            kafka.start();
         }
 
         @NotNull
