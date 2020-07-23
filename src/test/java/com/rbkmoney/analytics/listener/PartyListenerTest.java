@@ -11,6 +11,9 @@ import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
 import com.rbkmoney.damsel.domain.PartyContractor;
 import com.rbkmoney.damsel.domain.RussianLegalEntity;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
+import com.rbkmoney.geck.serializer.kit.mock.MockMode;
+import com.rbkmoney.geck.serializer.kit.mock.MockTBaseProcessor;
+import com.rbkmoney.geck.serializer.kit.tbase.TBaseHandler;
 import com.rbkmoney.machinegun.eventsink.SinkEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
@@ -173,6 +176,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
         String lastPartyId = UUID.randomUUID().toString();
 
         PartyContractor partyContractor = PartyFlowGenerator.buildRussianLegalPartyContractor(lastPartyId);
+        RussianLegalEntity russianLegalEntity = partyContractor.getContractor().getLegalEntity().getRussianLegalEntity();
         List<SinkEvent> sinkEvents = PartyFlowGenerator.generatePartyFlowWithCount(count, lastPartyId, partyContractor);
         sinkEvents.forEach(this::produceMessageToParty);
         await().atMost(120, SECONDS).until(() -> {
@@ -182,7 +186,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
                 return false;
             }
             Integer lastPartyCount = postgresJdbcTemplate.queryForObject(String.format(
-                    "SELECT count(*) FROM analytics.party WHERE party_id = '%s' AND russian_legal_entity_inn IS NOT NULL", lastPartyId), Integer.class);
+                    "SELECT count(*) FROM analytics.party WHERE party_id = '%s' AND russian_legal_entity_inn = '%s'", lastPartyId, russianLegalEntity.getInn()), Integer.class);
             if (lastPartyCount <= 0) {
                 Thread.sleep(1000);
                 return false;
@@ -190,7 +194,6 @@ public class PartyListenerTest extends KafkaAbstractTest {
             return true;
         });
         Party party = postgresPartyDao.getPartyForUpdate(lastPartyId);
-        RussianLegalEntity russianLegalEntity = partyContractor.getContractor().getLegalEntity().getRussianLegalEntity();
         Assert.assertEquals(russianLegalEntity.getInn(), party.getRussianLegalEntityInn());
         Assert.assertEquals(russianLegalEntity.getActualAddress(), party.getRussianLegalEntityActualAddress());
         Assert.assertEquals(russianLegalEntity.getRussianBankAccount().getAccount(), party.getRussianLegalEntityBankAccount());
@@ -210,6 +213,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
         Integer count = 10;
         String partyId = UUID.randomUUID().toString();
         PartyContractor partyContractor = PartyFlowGenerator.buildRussianLegalPartyContractor(partyId);
+        RussianLegalEntity russianLegalEntity = partyContractor.getContractor().getLegalEntity().getRussianLegalEntity();
         List<SinkEvent> sinkEvents = PartyFlowGenerator.generatePartyFlowWithMultiplePartyChange(count, partyId, partyContractor);
         sinkEvents.forEach(this::produceMessageToParty);
         await().atMost(60, SECONDS).until(() -> {
@@ -219,7 +223,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
                 return false;
             }
             Integer lastPartyCount = postgresJdbcTemplate.queryForObject(String.format(
-                    "SELECT count(*) FROM analytics.party WHERE party_id = '%s' and russian_legal_entity_inn IS NOT NULL", partyId), Integer.class);
+                    "SELECT count(*) FROM analytics.party WHERE party_id = '%s' and russian_legal_entity_inn = '%s'", partyId, russianLegalEntity.getInn()), Integer.class);
             if (lastPartyCount <= 0) {
                 Thread.sleep(1000);
                 return false;
@@ -227,7 +231,6 @@ public class PartyListenerTest extends KafkaAbstractTest {
             return true;
         });
         Party party = postgresPartyDao.getPartyForUpdate(partyId);
-        RussianLegalEntity russianLegalEntity = partyContractor.getContractor().getLegalEntity().getRussianLegalEntity();
         Assert.assertEquals(russianLegalEntity.getInn(), party.getRussianLegalEntityInn());
         Assert.assertEquals(russianLegalEntity.getActualAddress(), party.getRussianLegalEntityActualAddress());
         Assert.assertEquals(russianLegalEntity.getRussianBankAccount().getAccount(), party.getRussianLegalEntityBankAccount());
@@ -258,7 +261,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
                 return false;
             }
             Integer lastShopCount = postgresJdbcTemplate.queryForObject(String.format(
-                    "SELECT count(*) FROM analytics.shop WHERE party_id = '%s' and shop_id = '%s' and payout_tool_id IS NOT NULL", partyId, shopId), Integer.class);
+                    "SELECT count(*) FROM analytics.shop WHERE party_id = '%s' and shop_id = '%s' and payout_tool_id = '%s'", partyId, shopId, payoutToolId), Integer.class);
             if (lastShopCount <= 0) {
                 Thread.sleep(1000);
                 return false;
