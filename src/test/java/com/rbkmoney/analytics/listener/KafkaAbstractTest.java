@@ -41,7 +41,9 @@ public abstract class KafkaAbstractTest {
     public static final String PAYOUT_TOPIC = "payout";
 
     @ClassRule
-    public static KafkaContainer kafka = new KafkaContainer(CONFLUENT_PLATFORM_VERSION).withEmbeddedZookeeper();
+    public static KafkaContainer kafka = new KafkaContainer(CONFLUENT_PLATFORM_VERSION)
+            .withEmbeddedZookeeper()
+            .withNetworkMode("bridge");
 
     @Value("${kafka.topic.event.sink.initial}")
     public String eventSinkTopic;

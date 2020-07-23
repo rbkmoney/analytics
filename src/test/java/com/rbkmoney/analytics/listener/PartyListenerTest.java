@@ -47,7 +47,8 @@ public class PartyListenerTest extends KafkaAbstractTest {
     @ClassRule
     @SuppressWarnings("rawtypes")
     public static PostgreSQLContainer postgres = (PostgreSQLContainer) new PostgreSQLContainer("postgres:9.6")
-            .withStartupTimeout(Duration.ofMinutes(5));
+            .withStartupTimeout(Duration.ofMinutes(5))
+            .withNetworkMode("bridge");
 
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         @Override
