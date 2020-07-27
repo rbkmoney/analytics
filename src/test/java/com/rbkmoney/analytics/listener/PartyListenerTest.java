@@ -329,5 +329,37 @@ public class PartyListenerTest extends KafkaAbstractTest {
         Assert.assertEquals(payoutToolId, shop.getPayoutToolId());
     }
 
+    @Test
+    public void testCotractWithContractorSave() throws IOException {
+        String partyId = UUID.randomUUID().toString();
+        com.rbkmoney.damsel.domain.LegalEntity legalEntity = new com.rbkmoney.damsel.domain.LegalEntity();
+        RussianLegalEntity russianLegalEntity = PartyFlowGenerator.buildRussianLegalEntity();
+        legalEntity.setRussianLegalEntity(russianLegalEntity);
+        List<SinkEvent> sinkEvents = generatePartyFlowWithContract(partyId, legalEntity);
+        sinkEvents.forEach(this::produceMessageToParty);
+        await().atMost(60, SECONDS).until(() -> {
+            Integer lastPartyCount = postgresJdbcTemplate.queryForObject(String.format(
+                    "SELECT count(*) FROM analytics.party WHERE party_id = '%s' and russian_legal_entity_inn = '%s'", partyId, russianLegalEntity.getInn()), Integer.class);
+            if (lastPartyCount <= 0) {
+                Thread.sleep(1000);
+                return false;
+            }
+            return true;
+        });
+        Party party = postgresPartyDao.getPartyForUpdate(partyId);
+        Assert.assertEquals(russianLegalEntity.getInn(), party.getRussianLegalEntityInn());
+        Assert.assertEquals(russianLegalEntity.getActualAddress(), party.getRussianLegalEntityActualAddress());
+        Assert.assertEquals(russianLegalEntity.getRussianBankAccount().getAccount(), party.getRussianLegalEntityBankAccount());
+        Assert.assertEquals(russianLegalEntity.getRussianBankAccount().getBankBik(), party.getRussianLegalEntityBankBik());
+        Assert.assertEquals(russianLegalEntity.getRussianBankAccount().getBankName(), party.getRussianLegalEntityBankName());
+        Assert.assertEquals(russianLegalEntity.getRussianBankAccount().getBankPostAccount(), party.getRussianLegalEntityBankPostAccount());
+        Assert.assertEquals(russianLegalEntity.getRegisteredName(), party.getRussianLegalEntityName());
+        Assert.assertEquals(russianLegalEntity.getPostAddress(), party.getRussianLegalEntityPostAddress());
+        Assert.assertEquals(russianLegalEntity.getRegisteredNumber(), party.getRussianLegalEntityRegisteredNumber());
+        Assert.assertEquals(russianLegalEntity.getRepresentativeDocument(), party.getRussianLegalEntityRepresentativeDocument());
+        Assert.assertEquals(russianLegalEntity.getRepresentativeFullName(), party.getRussianLegalEntityRepresentativeFullName());
+        Assert.assertEquals(russianLegalEntity.getRepresentativePosition(), party.getRussianLegalEntityRepresentativePosition());
+    }
+
 
 }

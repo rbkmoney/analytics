@@ -48,7 +48,7 @@ public class PartyFlowGenerator {
         sinkEvents.add(buildSinkEvent(buildMessagePartyBlocking(sequenceId++, partyId)));
         sinkEvents.add(buildSinkEvent(buildMessagePartySuspension(sequenceId++, partyId)));
         sinkEvents.add(buildSinkEvent(buildMessagePartyRevisionChanged(sequenceId++, partyId)));
-        sinkEvents.add(buildSinkEvent(buildContractorCreatedMapper(sequenceId++, buildPartyContractor(partyId), partyId)));
+        sinkEvents.add(buildSinkEvent(buildContractorCreated(sequenceId++, buildPartyContractor(partyId), partyId)));
         sinkEvents.add(buildSinkEvent(buildContractorIdentificationLevelChanged(sequenceId++, partyId)));
         sinkEvents.add(buildSinkEvent(buildMessageShopCreated(sequenceId++, partyId, shopId)));
         sinkEvents.add(buildSinkEvent(buildMessageShopBlocking(sequenceId++, partyId, shopId)));
@@ -70,7 +70,7 @@ public class PartyFlowGenerator {
         sinkEvents.add(buildSinkEvent(buildMessagePartyBlocking(sequenceId++, partyId)));
         sinkEvents.add(buildSinkEvent(buildMessagePartySuspension(sequenceId++, partyId)));
         sinkEvents.add(buildSinkEvent(buildMessagePartyRevisionChanged(sequenceId++, partyId)));
-        sinkEvents.add(buildSinkEvent(buildContractorCreatedMapper(sequenceId++, buildRussianLegalPartyContractor(partyId), partyId)));
+        sinkEvents.add(buildSinkEvent(buildContractorCreated(sequenceId++, buildRussianLegalPartyContractor(partyId), partyId)));
         sinkEvents.add(buildSinkEvent(buildContractorIdentificationLevelChanged(sequenceId++, partyId)));
 
         return sinkEvents;
@@ -103,12 +103,12 @@ public class PartyFlowGenerator {
             if (i == count - 1) {
                 sinkEvents.add(buildSinkEvent(buildMessagePartyCreated(sequenceId++, lastPartyId)));
                 sinkEvents.add(buildSinkEvent(buildMessagePartyBlocking(sequenceId++, lastPartyId)));
-                sinkEvents.add(buildSinkEvent(buildContractorCreatedMapper(sequenceId++, contractor, lastPartyId)));
+                sinkEvents.add(buildSinkEvent(buildContractorCreated(sequenceId++, contractor, lastPartyId)));
                 sinkEvents.add(buildSinkEvent(buildContractorIdentificationLevelChanged(sequenceId++, lastPartyId)));
             } else {
                 String partyId = UUID.randomUUID().toString();
                 sinkEvents.add(buildSinkEvent(buildMessagePartyCreated(sequenceId++, partyId)));
-                sinkEvents.add(buildSinkEvent(buildContractorCreatedMapper(sequenceId++, buildRussianLegalPartyContractor(partyId), partyId)));
+                sinkEvents.add(buildSinkEvent(buildContractorCreated(sequenceId++, buildRussianLegalPartyContractor(partyId), partyId)));
                 sinkEvents.add(buildSinkEvent(buildContractorIdentificationLevelChanged(sequenceId++, partyId)));
                 sinkEvents.add(buildSinkEvent(buildMessagePartyBlocking(sequenceId++, partyId)));
                 sinkEvents.add(buildSinkEvent(buildMessagePartySuspension(sequenceId++, partyId)));
@@ -164,6 +164,53 @@ public class PartyFlowGenerator {
         sinkEvents.add(buildSinkEvent(buildMultiShopChangeDifferentShopId(sequenceId, lastPartyId, lastShopId, customPartyChange)));
 
         return sinkEvents;
+    }
+
+    public static List<SinkEvent> generatePartyFlowWithContract(String partyId, LegalEntity legalEntity) throws IOException {
+        List<SinkEvent> sinkEvents = new ArrayList<>();
+        Long sequenceId = 0L;
+        sinkEvents.add(buildSinkEvent(buildMessagePartyCreated(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessagePartyBlocking(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessagePartySuspension(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildMessagePartyRevisionChanged(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildContractorCreated(sequenceId++, buildRussianLegalPartyContractor(partyId), partyId)));
+        sinkEvents.add(buildSinkEvent(buildContractorIdentificationLevelChanged(sequenceId++, partyId)));
+        sinkEvents.add(buildSinkEvent(buildContractContractorCreated(sequenceId++, partyId, legalEntity)));
+
+        return sinkEvents;
+    }
+
+    public static MachineEvent buildContractContractorCreated(Long sequenceId, String partyId, LegalEntity legalEntity) {
+        ContractEffect contractEffect = new ContractEffect();
+        Contract contract = new Contract();
+        contract.setId("testContractId");
+        contract.setContractorId("testContractorId");
+        contract.setCreatedAt(TypeUtil.temporalToString(LocalDateTime.now()));
+        contract.setStatus(ContractStatus.active(new ContractActive()));
+        contract.setAdjustments(Collections.emptyList());
+        contract.setPayoutTools(Collections.emptyList());
+        TermSetHierarchyRef termSetHierarchyRef = new TermSetHierarchyRef();
+        termSetHierarchyRef.setId(12345);
+        contract.setTerms(termSetHierarchyRef);
+        Contractor contractor = new Contractor();
+        contractor.setLegalEntity(legalEntity);
+        contract.setContractor(contractor);
+        contractEffect.setCreated(contract);
+        ContractEffectUnit contractEffectUnit = new ContractEffectUnit();
+        contractEffectUnit.setContractId("testContractId");
+        contractEffectUnit.setEffect(contractEffect);
+        ClaimEffect claimEffect = new ClaimEffect();
+        claimEffect.setContractEffect(contractEffectUnit);
+        Claim claim = buildClaimCreated(claimEffect);
+        PartyChange partyChange = new PartyChange();
+        partyChange.setClaimCreated(claim);
+        return buildMachineEvent(partyId, sequenceId, partyChange);
+    }
+
+    public static RussianLegalEntity buildRussianLegalEntity() throws IOException {
+        RussianLegalEntity russianLegalEntity = new RussianLegalEntity();
+        russianLegalEntity = new MockTBaseProcessor(MockMode.ALL).process(russianLegalEntity, new TBaseHandler<>(RussianLegalEntity.class));
+        return russianLegalEntity;
     }
 
     public static MachineEvent buildMessagePartyCreated(Long sequenceId, String partyId) {
@@ -393,7 +440,7 @@ public class PartyFlowGenerator {
         return partyChange;
     }
 
-    public static MachineEvent buildContractorCreatedMapper(Long sequenceId, PartyContractor partyContractor, String partyId) throws IOException {
+    public static MachineEvent buildContractorCreated(Long sequenceId, PartyContractor partyContractor, String partyId) throws IOException {
         PartyChange partyChange = buildContractorCreatedPartyChange(partyContractor);
         return buildMachineEvent(partyId, sequenceId, partyChange);
     }
