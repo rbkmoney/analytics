@@ -1,4 +1,4 @@
-package com.rbkmoney.analytics.listener.mapper.party.helper;
+package com.rbkmoney.analytics.converter;
 
 import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
 import com.rbkmoney.damsel.domain.Contractor;
@@ -6,13 +6,14 @@ import com.rbkmoney.damsel.domain.InternationalLegalEntity;
 import com.rbkmoney.damsel.domain.RussianLegalEntity;
 import com.rbkmoney.damsel.domain.RussianPrivateEntity;
 import com.rbkmoney.geck.common.util.TBaseUtil;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.stereotype.Component;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class PartyHelper {
+@Component
+public class ContractorToPartyConverter implements Converter<Contractor, Party> {
 
-    public static Party contractorToParty(Contractor contractor) {
+    @Override
+    public Party convert(Contractor contractor) {
         Party party = new Party();
         party.setContractorType(TBaseUtil.unionFieldToEnum(contractor, com.rbkmoney.analytics.domain.db.enums.Contractor.class));
         if (contractor.isSetRegisteredUser()) {
