@@ -36,7 +36,7 @@ public class ContractCreatedHandler extends AbstractClaimChangeHandler<List<Part
         for (ClaimEffect claimEffect : claimEffects) {
             if (claimEffect.isSetContractEffect()
                     && claimEffect.getContractEffect().getEffect().isSetCreated()
-                    && claimEffect.getContractorEffect().getEffect().getCreated().isSetContractor()) {
+                    && claimEffect.getContractEffect().getEffect().getCreated().isSetContractor()) {
                 partyList.add(handleEvent(event, claimEffect));
             }
         }
