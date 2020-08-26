@@ -200,35 +200,53 @@ public class ClickHousePaymentRepository {
 
     public List<NumberModel> getCurrentBalances(String partyId, List<String> shopIds) {
         String selectSql = "SELECT " +
-                "    currency," +
-                "    sm_all - sm_ref as num  " +
-                "FROM " +
-                "( " +
+                "    currency, " +
+                "    num_payment - sm_payout as num " +
+                " FROM " +
+                "(" +
                 "    SELECT " +
                 "        currency, " +
-                "        sum(amount - systemFee) as sm_all " +
-                "    FROM analytic.events_sink " +
-                "    WHERE " +
-                "        ? >= timestamp " +
-                "        and status = 'captured' " +
-                "        and partyId = ? " +
-                " %1$s " +
-                "    GROUP BY currency " +
+                "        sm_all - sm_ref as num_payment " +
+                "    FROM " +
+                "(" +
+                "        SELECT " +
+                "            currency, " +
+                "            sum(amount - systemFee) as sm_all " +
+                "        FROM analytic.events_sink " +
+                "        WHERE " +
+                "            ? >= timestamp " +
+                "            and status = 'captured' " +
+                "            and partyId = ? " +
+                "            %1$s " +
+                "        GROUP BY currency " +
+                ")    " +
+                " ANY LEFT JOIN " +
+                "(" +
+                "        SELECT " +
+                "            currency, " +
+                "            sum(amount + systemFee) as sm_ref " +
+                "        FROM analytic.events_sink_refund " +
+                "        WHERE " +
+                "            ? >= timestamp " +
+                "            and status = 'succeeded' " +
+                "            and partyId = ? " +
+                "            %1$s " +
+                "        GROUP BY currency " +
+                ") USING  currency " +
                 ")" +
                 "ANY LEFT JOIN " +
-                "( " +
+                "(" +
                 "    SELECT " +
                 "        currency, " +
-                "        sum(amount + systemFee) as sm_ref " +
-                "    FROM analytic.events_sink_refund " +
+                "        sum(amount + fee) as sm_payout " +
+                "    FROM analytic.events_sink_payout " +
                 "    WHERE " +
                 "        ? >= timestamp " +
-                "        and status = 'succeeded' " +
+                "        and status = 'paid' " +
                 "        and partyId = ? " +
-                " %1$s " +
+                "        %1$s " +
                 "    GROUP BY currency " +
-                ") " +
-                " USING currency";
+                ") USING  currency ";
 
         String sql;
         LocalDate to = LocalDate.now();
@@ -242,7 +260,9 @@ public class ClickHousePaymentRepository {
         } else {
             sql = String.format(selectSql, " ");
         }
-        params.addAll(List.copyOf(params));
+        List<Object> collection = List.copyOf(params);
+        params.addAll(collection);
+        params.addAll(collection);
         log.info("ClickHouseRefundRepository getCurrentBalances sql: {} params: {}", sql, params);
         List<Map<String, Object>> rows = clickHouseJdbcTemplate.queryForList(sql, params.toArray());
         return costCommonRowsMapper.map(rows);
