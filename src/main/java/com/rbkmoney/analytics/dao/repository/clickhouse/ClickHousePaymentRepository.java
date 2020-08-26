@@ -201,17 +201,19 @@ public class ClickHousePaymentRepository {
     public List<NumberModel> getCurrentBalances(String partyId, List<String> shopIds) {
         String selectSql = "SELECT " +
                 "    currency, " +
-                "    num_payment - sm_payout as num " +
+                "    diff_sum_of_payment_amount_without_system_fee_and_sum_of_refund_amount_with_system_fee - sum_of_payout_amount_with_fee" +
+                " as num " +
                 " FROM " +
                 "(" +
                 "    SELECT " +
                 "        currency, " +
-                "        sm_all - sm_ref as num_payment " +
+                "        sum_of_payment_amount_without_system_fee - sum_of_refund_amount_with_system_fee " +
+                " as diff_sum_of_payment_amount_without_system_fee_and_sum_of_refund_amount_with_system_fee " +
                 "    FROM " +
                 "(" +
                 "        SELECT " +
                 "            currency, " +
-                "            sum(amount - systemFee) as sm_all " +
+                "            sum(amount - systemFee) as sum_of_payment_amount_without_system_fee " +
                 "        FROM analytic.events_sink " +
                 "        WHERE " +
                 "            ? >= timestamp " +
@@ -224,7 +226,7 @@ public class ClickHousePaymentRepository {
                 "(" +
                 "        SELECT " +
                 "            currency, " +
-                "            sum(amount + systemFee) as sm_ref " +
+                "            sum(amount + systemFee) as sum_of_refund_amount_with_system_fee " +
                 "        FROM analytic.events_sink_refund " +
                 "        WHERE " +
                 "            ? >= timestamp " +
@@ -238,7 +240,7 @@ public class ClickHousePaymentRepository {
                 "(" +
                 "    SELECT " +
                 "        currency, " +
-                "        sum(amount + fee) as sm_payout " +
+                "        sum(amount + fee) as sum_of_payout_amount_with_fee " +
                 "    FROM analytic.events_sink_payout " +
                 "    WHERE " +
                 "        ? >= timestamp " +
