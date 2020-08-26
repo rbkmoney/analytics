@@ -241,4 +241,22 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
 
         paymentsAmount.validate();
     }
+
+    @Test
+    public void getCurrentBalances() throws TException {
+        AmountResponse paymentsAmount = analyticsHandler.getCurrentBalances(new MerchantFilter()
+                .setPartyId("ca2e9162-eda2-4d17-bbfa-dc5e39b1772f")
+                .setShopIds(List.of("ad8b7bfd-0760-4781-a400-51903ee8e509"))
+        );
+        List<CurrencyGroupedAmount> groupsAmount = paymentsAmount.getGroupsAmount();
+
+        CurrencyGroupedAmount rub = groupsAmount.stream()
+                .filter(currencyGroupedAmount -> currencyGroupedAmount.getCurrency().equals(RUB))
+                .findFirst()
+                .get();
+
+        assertEquals(44900L, rub.amount);
+
+        paymentsAmount.validate();
+    }
 }
