@@ -207,7 +207,7 @@ public class ClickHousePaymentRepository {
                 "  ( " +
                 "    SELECT  " +
                 "      currency,  " +
-                "      sum_captured_payment - sum_succeded_refund as sum_payment_without_refund  " +
+                "      sum_captured_payment - sum_succeeded_refund as sum_payment_without_refund  " +
                 "    FROM  " +
                 "      ( " +
                 "        SELECT  " +
@@ -226,7 +226,7 @@ public class ClickHousePaymentRepository {
                 "      LEFT JOIN ( " +
                 "        SELECT  " +
                 "          currency,  " +
-                "          sum(amount + systemFee) as sum_succeded_refund " +
+                "          sum(amount + systemFee) as sum_succeeded_refund " +
                 "        FROM  " +
                 "          analytic.events_sink_refund  " +
                 "        WHERE  " +
@@ -241,7 +241,7 @@ public class ClickHousePaymentRepository {
                 "  LEFT JOIN ( " +
                 "    SELECT  " +
                 "      currency,  " +
-                "      sum_paid_payout - sum_calncelled_after_paid_payout as sum_payout_without_cancelled  " +
+                "      sum_paid_payout - sum_cancelled_after_paid_payout as sum_payout_without_cancelled  " +
                 "    FROM  " +
                 "      ( " +
                 "        SELECT  " +
@@ -260,7 +260,7 @@ public class ClickHousePaymentRepository {
                 "      LEFT JOIN ( " +
                 "        SELECT  " +
                 "          currency,  " +
-                "          sum(amount + fee) as sum_calncelled_after_paid_payout " +
+                "          sum(amount + fee) as sum_cancelled_after_paid_payout " +
                 "        FROM  " +
                 "          analytic.events_sink_payout  " +
                 "        WHERE  " +
