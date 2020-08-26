@@ -19,9 +19,10 @@ import ru.yandex.clickhouse.except.ClickHouseException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Service
@@ -199,56 +200,79 @@ public class ClickHousePaymentRepository {
     }
 
     public List<NumberModel> getCurrentBalances(String partyId, List<String> shopIds) {
-        String selectSql = "SELECT " +
-                "    currency, " +
-                "    diff_sum_of_payment_amount_without_system_fee_and_sum_of_refund_amount_with_system_fee - sum_of_payout_amount_with_fee" +
-                " as num " +
-                " FROM " +
-                "(" +
-                "    SELECT " +
-                "        currency, " +
-                "        sum_of_payment_amount_without_system_fee - sum_of_refund_amount_with_system_fee " +
-                " as diff_sum_of_payment_amount_without_system_fee_and_sum_of_refund_amount_with_system_fee " +
-                "    FROM " +
-                "(" +
-                "        SELECT " +
-                "            currency, " +
-                "            sum(amount - systemFee) as sum_of_payment_amount_without_system_fee " +
-                "        FROM analytic.events_sink " +
-                "        WHERE " +
-                "            ? >= timestamp " +
-                "            and status = 'captured' " +
-                "            and partyId = ? " +
-                "            %1$s " +
-                "        GROUP BY currency " +
-                ")    " +
-                " ANY LEFT JOIN " +
-                "(" +
-                "        SELECT " +
-                "            currency, " +
-                "            sum(amount + systemFee) as sum_of_refund_amount_with_system_fee " +
-                "        FROM analytic.events_sink_refund " +
-                "        WHERE " +
-                "            ? >= timestamp " +
-                "            and status = 'succeeded' " +
-                "            and partyId = ? " +
-                "            %1$s " +
-                "        GROUP BY currency " +
-                ") USING  currency " +
-                ")" +
-                "ANY LEFT JOIN " +
-                "(" +
-                "    SELECT " +
-                "        currency, " +
-                "        sum(amount + fee) as sum_of_payout_amount_with_fee " +
-                "    FROM analytic.events_sink_payout " +
-                "    WHERE " +
-                "        ? >= timestamp " +
-                "        and status = 'paid' " +
-                "        and partyId = ? " +
-                "        %1$s " +
-                "    GROUP BY currency " +
-                ") USING  currency ";
+        String selectSql = "SELECT  " +
+                "  currency,  " +
+                "  sum_payment_without_refund - sum_payout_without_cancelled as num  " +
+                "FROM  " +
+                "  ( " +
+                "    SELECT  " +
+                "      currency,  " +
+                "      sum_captured_payment - sum_succeded_refund as sum_payment_without_refund  " +
+                "    FROM  " +
+                "      ( " +
+                "        SELECT  " +
+                "          currency,  " +
+                "          sum(amount - systemFee) as sum_captured_payment  " +
+                "        FROM  " +
+                "          analytic.events_sink  " +
+                "        WHERE  " +
+                "          ? >= timestamp  " +
+                "          and status = 'captured'  " +
+                "          and partyId = ? " +
+                "          %1$s " +
+                "        GROUP BY  " +
+                "          currency " +
+                "      ) ANY  " +
+                "      LEFT JOIN ( " +
+                "        SELECT  " +
+                "          currency,  " +
+                "          sum(amount + systemFee) as sum_succeded_refund " +
+                "        FROM  " +
+                "          analytic.events_sink_refund  " +
+                "        WHERE  " +
+                "          ? >= timestamp  " +
+                "          and status = 'succeeded'  " +
+                "          and partyId = ? " +
+                "          %1$s " +
+                "        GROUP BY  " +
+                "          currency " +
+                "      ) USING currency " +
+                "  ) ANY  " +
+                "  LEFT JOIN ( " +
+                "    SELECT  " +
+                "      currency,  " +
+                "      sum_paid_payout - sum_calncelled_after_paid_payout as sum_payout_without_cancelled  " +
+                "    FROM  " +
+                "      ( " +
+                "        SELECT  " +
+                "          currency,  " +
+                "          sum(amount + fee) as sum_paid_payout  " +
+                "        FROM  " +
+                "          analytic.events_sink_payout  " +
+                "        WHERE  " +
+                "          ? >= timestamp  " +
+                "          and status = 'paid'  " +
+                "          and partyId = ? " +
+                "          %1$s " +
+                "        GROUP BY  " +
+                "          currency " +
+                "      ) ANY  " +
+                "      LEFT JOIN ( " +
+                "        SELECT  " +
+                "          currency,  " +
+                "          sum(amount + fee) as sum_calncelled_after_paid_payout " +
+                "        FROM  " +
+                "          analytic.events_sink_payout  " +
+                "        WHERE  " +
+                "          ? >= timestamp  " +
+                "          and status = 'cancelled'  " +
+                "          and isCancelledAfterBeingPaid = 1  " +
+                "          and partyId = ? " +
+                "          %1$s " +
+                "        GROUP BY  " +
+                "          currency " +
+                "      ) USING currency " +
+                "  ) USING currency ";
 
         String sql;
         LocalDate to = LocalDate.now();
@@ -262,9 +286,9 @@ public class ClickHousePaymentRepository {
         } else {
             sql = String.format(selectSql, " ");
         }
-        List<Object> collection = List.copyOf(params);
-        params.addAll(collection);
-        params.addAll(collection);
+        params = Collections.nCopies(4, params).stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
         log.info("ClickHouseRefundRepository getCurrentBalances sql: {} params: {}", sql, params);
         List<Map<String, Object>> rows = clickHouseJdbcTemplate.queryForList(sql, params.toArray());
         return costCommonRowsMapper.map(rows);
