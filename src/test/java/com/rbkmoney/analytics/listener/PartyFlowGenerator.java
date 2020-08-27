@@ -40,6 +40,7 @@ public class PartyFlowGenerator {
     public static final Long SETTLEMENT_ID = 245234L;
     public static final String CONTRACTOR_ID = "563462";
     public static final Long SHOP_ACCOUNT_PAYOUT = 5425234L;
+    public static final String INN = "213123123123";
 
     public static List<SinkEvent> generatePartyFlow(String partyId, String shopId) throws IOException {
         List<SinkEvent> sinkEvents = new ArrayList<>();
@@ -562,6 +563,7 @@ public class PartyFlowGenerator {
         LegalEntity legalEntity = new LegalEntity();
         RussianLegalEntity russianLegalEntity = new RussianLegalEntity();
         russianLegalEntity = new MockTBaseProcessor(MockMode.ALL).process(russianLegalEntity, new TBaseHandler<>(RussianLegalEntity.class));
+        russianLegalEntity.setInn(INN);
         legalEntity.setRussianLegalEntity(russianLegalEntity);
         contractor.setLegalEntity(legalEntity);
         partyContractor.setContractor(contractor);
