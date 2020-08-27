@@ -6,6 +6,7 @@ import com.rbkmoney.analytics.dao.mapper.SplitStatusRowsMapper;
 import com.rbkmoney.analytics.dao.model.*;
 import com.rbkmoney.analytics.dao.utils.QueryUtils;
 import com.rbkmoney.analytics.dao.utils.SplitUtils;
+import com.rbkmoney.analytics.utils.FileUtil;
 import com.rbkmoney.analytics.utils.TimeParamUtils;
 import com.rbkmoney.damsel.analytics.SplitUnit;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +23,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -35,6 +34,9 @@ public class ClickHousePaymentRepository {
     public static final String ERROR_REASON = "errorReason";
     public static final String ERROR_CODE = "errorCode";
     public static final String WHERE_TIME_PARAMS = "where timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ?";
+    public static final String SELECT_BALANCES_SQL = FileUtil.getFile("scripts/select_current_balance.sql");
+    public static final String SELECT_ERROR_DESCRIPTION = FileUtil.getFile("scripts/select_error_description.sql");
+    public static final String SELECT_PAYMENT_TOOL_DESCRIPTION = FileUtil.getFile("scripts/select_payment_tool_description.sql");
 
     private final JdbcTemplate clickHouseJdbcTemplate;
 
@@ -137,13 +139,7 @@ public class ClickHousePaymentRepository {
     public List<NamingDistribution> getPaymentsToolDistribution(String partyId, List<String> shopIds,
                                                                 LocalDateTime from,
                                                                 LocalDateTime to) {
-        String sql = "SELECT %3$s as naming_result," +
-                "(SELECT count() from analytic.events_sink " +
-                "where timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ? AND %1$s %2$s) as total_count, count() * 100 / total_count as percent " +
-                "from analytic.events_sink " +
-                "where timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ? AND %1$s %2$s " +
-                "group by %3$s";
-        return queryNamingDistributions(sql, partyId, shopIds, from, to, PAYMENT_TOOL);
+        return queryNamingDistributions(SELECT_PAYMENT_TOOL_DESCRIPTION, partyId, shopIds, from, to, PAYMENT_TOOL);
     }
 
     public List<NamingDistribution> getPaymentsErrorReasonDistribution(String partyId, List<String> shopIds,
@@ -159,13 +155,7 @@ public class ClickHousePaymentRepository {
     }
 
     private List<NamingDistribution> errorDistributionQuery(String partyId, List<String> shopIds, LocalDateTime from, LocalDateTime to, String groupField) {
-        String sql = "SELECT %3$s as naming_result," +
-                "(SELECT count() from analytic.events_sink " +
-                "where status='failed' and timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ? AND %1$s %2$s) as total_count, count() * 100 / total_count as percent " +
-                "from analytic.events_sink " +
-                "where status='failed' and timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ? AND %1$s %2$s " +
-                "group by %3$s ";
-        return queryNamingDistributions(sql, partyId, shopIds, from, to, groupField);
+        return queryNamingDistributions(SELECT_ERROR_DESCRIPTION, partyId, shopIds, from, to, groupField);
     }
 
     private List<NamingDistribution> queryNamingDistributions(String sql, String partyId, List<String> shopIds,
@@ -200,91 +190,17 @@ public class ClickHousePaymentRepository {
     }
 
     public List<NumberModel> getCurrentBalances(String partyId, List<String> shopIds) {
-        String selectSql = "SELECT  " +
-                "  currency,  " +
-                "  sum_payment_without_refund - sum_payout_without_cancelled as num  " +
-                "FROM  " +
-                "  ( " +
-                "    SELECT  " +
-                "      currency,  " +
-                "      sum_captured_payment - sum_succeeded_refund as sum_payment_without_refund  " +
-                "    FROM  " +
-                "      ( " +
-                "        SELECT  " +
-                "          currency,  " +
-                "          sum(amount - systemFee) as sum_captured_payment  " +
-                "        FROM  " +
-                "          analytic.events_sink  " +
-                "        WHERE  " +
-                "          ? >= timestamp  " +
-                "          and status = 'captured'  " +
-                "          and partyId = ? " +
-                "          %1$s " +
-                "        GROUP BY  " +
-                "          currency " +
-                "      ) ANY  " +
-                "      LEFT JOIN ( " +
-                "        SELECT  " +
-                "          currency,  " +
-                "          sum(amount + systemFee) as sum_succeeded_refund " +
-                "        FROM  " +
-                "          analytic.events_sink_refund  " +
-                "        WHERE  " +
-                "          ? >= timestamp  " +
-                "          and status = 'succeeded'  " +
-                "          and partyId = ? " +
-                "          %1$s " +
-                "        GROUP BY  " +
-                "          currency " +
-                "      ) USING currency " +
-                "  ) ANY  " +
-                "  LEFT JOIN ( " +
-                "    SELECT  " +
-                "      currency,  " +
-                "      sum_paid_payout - sum_cancelled_after_paid_payout as sum_payout_without_cancelled  " +
-                "    FROM  " +
-                "      ( " +
-                "        SELECT  " +
-                "          currency,  " +
-                "          sum(amount + fee) as sum_paid_payout  " +
-                "        FROM  " +
-                "          analytic.events_sink_payout  " +
-                "        WHERE  " +
-                "          ? >= timestamp  " +
-                "          and status = 'paid'  " +
-                "          and partyId = ? " +
-                "          %1$s " +
-                "        GROUP BY  " +
-                "          currency " +
-                "      ) ANY  " +
-                "      LEFT JOIN ( " +
-                "        SELECT  " +
-                "          currency,  " +
-                "          sum(amount + fee) as sum_cancelled_after_paid_payout " +
-                "        FROM  " +
-                "          analytic.events_sink_payout  " +
-                "        WHERE  " +
-                "          ? >= timestamp  " +
-                "          and status = 'cancelled'  " +
-                "          and isCancelledAfterBeingPaid = 1  " +
-                "          and partyId = ? " +
-                "          %1$s " +
-                "        GROUP BY  " +
-                "          currency " +
-                "      ) USING currency " +
-                "  ) USING currency ";
-
-        String sql;
         LocalDate to = LocalDate.now();
         List<Object> params = new ArrayList<>();
         params.add(to);
         params.add(partyId);
+        String sql;
         if (!CollectionUtils.isEmpty(shopIds)) {
             StringBuilder stringBuilder = QueryUtils.generateInList(shopIds);
-            sql = String.format(selectSql, " and shopId " + stringBuilder.toString());
+            sql = String.format(SELECT_BALANCES_SQL, " and shopId " + stringBuilder.toString());
             params.addAll(shopIds);
         } else {
-            sql = String.format(selectSql, " ");
+            sql = String.format(SELECT_BALANCES_SQL, " ");
         }
         params = Collections.nCopies(4, params).stream()
                 .flatMap(Collection::stream)
