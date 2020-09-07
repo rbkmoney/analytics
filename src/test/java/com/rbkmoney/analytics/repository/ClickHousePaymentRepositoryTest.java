@@ -158,7 +158,7 @@ public class ClickHousePaymentRepositoryTest extends ClickHouseAbstractTest {
         List<NumberModel> numberModels = clickHousePaymentRepository.getAveragePayment("ca2e9162-eda2-4d17-bbfa-dc5e39b1772a", null,
                 Instant.ofEpochMilli(1575554400000L).atZone(ZoneOffset.UTC).toLocalDateTime(), Instant.ofEpochMilli(1575556887697L).atZone(ZoneOffset.UTC).toLocalDateTime());
         NumberModel numberModel = findCost(numberModels, RUB);
-        assertEquals(2333L, numberModel.getNumber().longValue());
+        assertEquals(3000L, numberModel.getNumber().longValue());
 
         numberModels = clickHousePaymentRepository.getAveragePayment("ca2e9162-eda2-4d17-bbfa-dc5e39b1772a", List.of("ad8b7bfd-0760-4781-a400-51903ee8e502"),
                 Instant.ofEpochMilli(1575554400000L).atZone(ZoneOffset.UTC).toLocalDateTime(), Instant.ofEpochMilli(1575556887697L).atZone(ZoneOffset.UTC).toLocalDateTime());
@@ -175,7 +175,7 @@ public class ClickHousePaymentRepositoryTest extends ClickHouseAbstractTest {
         List<NumberModel> countModels = clickHousePaymentRepository.getPaymentsCount("ca2e9162-eda2-4d17-bbfa-dc5e39b1772a", null,
                 Instant.ofEpochMilli(1575554400000L).atZone(ZoneOffset.UTC).toLocalDateTime(), Instant.ofEpochMilli(1579666000697L).atZone(ZoneOffset.UTC).toLocalDateTime());
         NumberModel countModel = findCountModel(countModels, RUB);
-        assertEquals(3, countModel.getNumber().longValue());
+        assertEquals(2, countModel.getNumber().longValue());
 
         countModels = clickHousePaymentRepository.getPaymentsCount("ca2e9162-eda2-4d17-bbfa-dc5e39b1772a", List.of("ad8b7bfd-0760-4781-a400-51903ee8e502"),
                 Instant.ofEpochMilli(1575554400000L).atZone(ZoneOffset.UTC).toLocalDateTime(), Instant.ofEpochMilli(1579666000697L).atZone(ZoneOffset.UTC).toLocalDateTime());

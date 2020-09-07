@@ -132,7 +132,7 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
                 .findFirst()
                 .get();
 
-        assertEquals(3L, rub.count);
+        assertEquals(2L, rub.count);
 
         paymentsCount.validate();
     }

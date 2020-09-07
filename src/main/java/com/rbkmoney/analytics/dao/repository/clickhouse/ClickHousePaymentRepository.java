@@ -37,6 +37,7 @@ public class ClickHousePaymentRepository {
     public static final String SELECT_BALANCES_SQL = FileUtil.getFile("scripts/select_current_balance.sql");
     public static final String SELECT_ERROR_DESCRIPTION = FileUtil.getFile("scripts/select_error_description.sql");
     public static final String SELECT_PAYMENT_TOOL_DESCRIPTION = FileUtil.getFile("scripts/select_payment_tool_description.sql");
+    public static final String AND_STATUS_CAPTURED = " and status='captured'";
 
     private final JdbcTemplate clickHouseJdbcTemplate;
 
@@ -65,7 +66,7 @@ public class ClickHousePaymentRepository {
         String selectSql = "SELECT currency, avg(amount) as num from analytic.events_sink ";
         String groupedSql = " group by partyId, currency having partyId = ? ";
 
-        List<Map<String, Object>> rows = splitQuery(partyId, shopIds, from, to, WHERE_TIME_PARAMS, groupedSql, selectSql);
+        List<Map<String, Object>> rows = splitQuery(partyId, shopIds, from, to, WHERE_TIME_PARAMS + AND_STATUS_CAPTURED, groupedSql, selectSql);
         return costCommonRowsMapper.map(rows);
     }
 
@@ -74,10 +75,9 @@ public class ClickHousePaymentRepository {
                                                LocalDateTime from,
                                                LocalDateTime to) {
         String selectSql = "SELECT currency, sum(amount) as num from analytic.events_sink ";
-        String whereSql = "where timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ? and status='captured'";
         String groupedSql = " group by partyId, currency having partyId = ? ";
 
-        List<Map<String, Object>> rows = splitQuery(partyId, shopIds, from, to, whereSql, groupedSql, selectSql);
+        List<Map<String, Object>> rows = splitQuery(partyId, shopIds, from, to, WHERE_TIME_PARAMS + AND_STATUS_CAPTURED, groupedSql, selectSql);
         return costCommonRowsMapper.map(rows);
     }
 
@@ -88,7 +88,7 @@ public class ClickHousePaymentRepository {
         String selectSql = "SELECT currency, count() as num from analytic.events_sink ";
         String groupedSql = " group by partyId, currency having partyId = ? ";
 
-        List<Map<String, Object>> rows = splitQuery(partyId, shopIds, from, to, WHERE_TIME_PARAMS, groupedSql, selectSql);
+        List<Map<String, Object>> rows = splitQuery(partyId, shopIds, from, to, WHERE_TIME_PARAMS + AND_STATUS_CAPTURED, groupedSql, selectSql);
         return countModelCommonRowsMapper.map(rows);
     }
 
@@ -102,7 +102,7 @@ public class ClickHousePaymentRepository {
         String selectSql = "SELECT " + groupBy + " , currency, sum(amount) as num from analytic.events_sink ";
         String groupedSql = " group by partyId, currency, " + groupBy + " having partyId = ? ";
 
-        List<Map<String, Object>> rows = splitQuery(partyId, shopIds, from, to, WHERE_TIME_PARAMS, groupedSql, selectSql);
+        List<Map<String, Object>> rows = splitQuery(partyId, shopIds, from, to, WHERE_TIME_PARAMS + AND_STATUS_CAPTURED, groupedSql, selectSql);
         return splitCostCommonRowsMapper.map(rows, splitUnit);
     }
 
