@@ -52,7 +52,7 @@ public class AdjustmentRowFactory extends InvoiceBaseRowFactory<AdjustmentRow> {
         List<FinalCashFlowPosting> cashFlow = adjustment.getNewCashFlow();
         row.setCashFlowResult(cashFlowComputer.compute(cashFlow));
 
-        List<FinalCashFlowPosting> oldCashFlow = adjustment.getNewCashFlow();
+        List<FinalCashFlowPosting> oldCashFlow = adjustment.getOldCashFlowInverse();
         row.setOldCashFlowResult(reversedCashFlowComputer.compute(oldCashFlow));
     }
 

@@ -10,7 +10,7 @@
                       (
                         SELECT
                           currency,
-                          sum(amount - systemFee) as sum_captured_payment
+                          sum(amount - systemFee - guaranteeDeposit) as sum_captured_payment
                         FROM
                           analytic.events_sink
                         WHERE

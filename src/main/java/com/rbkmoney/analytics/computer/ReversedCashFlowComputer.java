@@ -30,10 +30,6 @@ public class ReversedCashFlowComputer {
                 amount += posting.getVolume().getAmount();
             }
 
-            if (isReversedRefund(posting)) {
-                amount += posting.getVolume().getAmount();
-            }
-
             if (isReversedSystemFee(posting)) {
                 systemFee += posting.getVolume().getAmount();
             }
