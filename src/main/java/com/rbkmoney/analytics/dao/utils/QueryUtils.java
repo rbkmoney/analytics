@@ -19,12 +19,12 @@ public class QueryUtils {
         return generate(shopIds, NOT + IN + " ( ?");
     }
 
-    private static StringBuilder generate(List<String> shopIds, String s) {
+    private static StringBuilder generate(List<String> shopIds, String inFunction) {
         StringBuilder inList = null;
         for (String shopId : shopIds) {
             if (inList == null) {
                 inList = new StringBuilder();
-                inList.append(s);
+                inList.append(inFunction);
             } else {
                 inList.append(",?");
             }
@@ -35,10 +35,10 @@ public class QueryUtils {
         return inList;
     }
 
-    public static String generateIdsSql(List<String> shopIds, List<Object> params, Function<List<String>, StringBuilder> func) {
+    public static String generateIdsSql(List<String> shopIds, List<Object> params, Function<List<String>, StringBuilder> generateListFunction) {
         String excludeShopIdsList;
         if (!CollectionUtils.isEmpty(shopIds)) {
-            excludeShopIdsList = " and shopId " + func.apply(shopIds).toString();
+            excludeShopIdsList = " and shopId " + generateListFunction.apply(shopIds).toString();
             params.addAll(shopIds);
         } else {
             excludeShopIdsList = EMPTY_STRING;
