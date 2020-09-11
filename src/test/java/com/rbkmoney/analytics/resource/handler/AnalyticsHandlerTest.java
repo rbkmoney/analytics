@@ -4,7 +4,7 @@ import com.rbkmoney.analytics.config.RawMapperConfig;
 import com.rbkmoney.analytics.converter.*;
 import com.rbkmoney.analytics.dao.mapper.SplitRowsMapper;
 import com.rbkmoney.analytics.dao.mapper.SplitStatusRowsMapper;
-import com.rbkmoney.analytics.dao.repository.clickhouse.ClickHousePaymentRepository;
+import com.rbkmoney.analytics.dao.repository.clickhouse.ClickHousePaymentRepositoryImpl;
 import com.rbkmoney.analytics.dao.repository.clickhouse.ClickHouseRefundRepository;
 import com.rbkmoney.analytics.repository.ClickHouseAbstractTest;
 import com.rbkmoney.analytics.repository.ClickHousePayoutRepositoryTest;
@@ -12,6 +12,7 @@ import com.rbkmoney.damsel.analytics.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
 import org.jetbrains.annotations.NotNull;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ import static org.junit.Assert.assertEquals;
 @ContextConfiguration(initializers = ClickHousePayoutRepositoryTest.Initializer.class,
         classes = {RawToNumModelConverter.class, RawToSplitNumberConverter.class, RawToSplitStatusConverter.class,
                 SplitRowsMapper.class, SplitStatusRowsMapper.class, RawToNamingDistributionConverter.class,
-                RawMapperConfig.class, ClickHousePaymentRepository.class, ClickHouseRefundRepository.class, AnalyticsHandler.class,
+                RawMapperConfig.class, ClickHousePaymentRepositoryImpl.class, ClickHouseRefundRepository.class, AnalyticsHandler.class,
                 DaoErrorReasonDistributionsToResponseConverter.class, DaoErrorCodeDistributionsToResponseConverter.class,
                 DaoNamingDistributionsToResponseConverter.class,
                 CostToAmountResponseConverter.class, CountModelCountResponseConverter.class,
@@ -72,10 +73,9 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
     @NotNull
     private NamingDistribution findByNameNamingDistribution(PaymentToolDistributionResponse paymentsToolDistribution, String bankCard) {
         return paymentsToolDistribution.getPaymentToolsDistributions().stream()
-                .filter(namingDistribution -> {
-                    return bankCard.equals(namingDistribution.getName());
-                })
-                .findFirst().get();
+                .filter(namingDistribution -> bankCard.equals(namingDistribution.getName()))
+                .findFirst()
+                .get();
     }
 
     @Test
@@ -240,6 +240,19 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
         assertEquals(5000L, rub.amount);
 
         paymentsAmount.validate();
+    }
+
+    @Test
+    public void getRefundsAmountWithExclude() throws TException {
+        AmountResponse paymentsAmount = analyticsHandler.getRefundsAmount(new FilterRequest()
+                .setMerchantFilter(new MerchantFilter()
+                        .setPartyId("ca2e9162-eda2-4d17-bbfa-dc5e39b1772f")
+                        .setExcludeShopIds(List.of("ad8b7bfd-0760-4781-a400-51903ee8e509"))
+                )
+                .setTimeFilter(timeFilterDefault));
+        List<CurrencyGroupedAmount> groupsAmount = paymentsAmount.getGroupsAmount();
+
+        Assert.assertTrue(groupsAmount.isEmpty());
     }
 
     @Test

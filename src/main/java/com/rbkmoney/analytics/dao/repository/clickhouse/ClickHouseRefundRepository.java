@@ -1,9 +1,10 @@
 package com.rbkmoney.analytics.dao.repository.clickhouse;
 
 import com.rbkmoney.analytics.dao.mapper.CommonRowsMapper;
-import com.rbkmoney.analytics.dao.model.RefundRow;
 import com.rbkmoney.analytics.dao.model.NumberModel;
+import com.rbkmoney.analytics.dao.model.RefundRow;
 import com.rbkmoney.analytics.dao.utils.QueryUtils;
+import com.rbkmoney.analytics.utils.FileUtil;
 import com.rbkmoney.analytics.utils.TimeParamUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +12,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import ru.yandex.clickhouse.except.ClickHouseException;
 
 import java.time.LocalDateTime;
@@ -26,6 +26,8 @@ public class ClickHouseRefundRepository {
     private final JdbcTemplate clickHouseJdbcTemplate;
     private final CommonRowsMapper<NumberModel> costCommonRowsMapper;
 
+    public static final String SELECT_REFUND_PAYMENT_AMOUNT = FileUtil.getFile("scripts/select_refund_payment_amount.sql");
+
     @Retryable(value = ClickHouseException.class, backoff = @Backoff(delay = 5000))
     public void insertBatch(List<RefundRow> refundRows) {
         if (refundRows != null && !refundRows.isEmpty()) {
@@ -37,27 +39,13 @@ public class ClickHouseRefundRepository {
 
     public List<NumberModel> getPaymentsAmount(String partyId,
                                                List<String> shopIds,
+                                               List<String> excludeShopIds,
                                                LocalDateTime from,
                                                LocalDateTime to) {
-
-        String selectSql = "SELECT currency, sum(amount) as num " +
-                "from analytic.events_sink_refund ";
-        String whereSql = "where timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ? and status='succeeded'";
-        String groupedSql = " group by partyId, currency " +
-                " having partyId = ?";
-
-        String sql = selectSql;
-
         List<Object> params = TimeParamUtils.generateTimeParams(from, to);
-        if (!CollectionUtils.isEmpty(shopIds)) {
-            StringBuilder inList = QueryUtils.generateInList(shopIds);
-            sql = sql + whereSql + " AND shopId " + inList + groupedSql;
-            params.addAll(shopIds);
-            params.add(partyId);
-        } else {
-            sql = sql + whereSql + groupedSql;
-            params.add(partyId);
-        }
+        String sql = String.format(SELECT_REFUND_PAYMENT_AMOUNT, QueryUtils.generateIdsSql(shopIds, params, QueryUtils::generateInList),
+                QueryUtils.generateIdsSql(excludeShopIds, params, QueryUtils::generateNotInList));
+        params.add(partyId);
 
         log.info("ClickHouseRefundRepository getPaymentsAmount sql: {} params: {}", sql, params);
         List<Map<String, Object>> rows = clickHouseJdbcTemplate.queryForList(sql, params.toArray());

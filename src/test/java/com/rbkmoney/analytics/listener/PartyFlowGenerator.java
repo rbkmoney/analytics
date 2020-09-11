@@ -211,6 +211,7 @@ public class PartyFlowGenerator {
     public static RussianLegalEntity buildRussianLegalEntity() throws IOException {
         RussianLegalEntity russianLegalEntity = new RussianLegalEntity();
         russianLegalEntity = new MockTBaseProcessor(MockMode.ALL).process(russianLegalEntity, new TBaseHandler<>(RussianLegalEntity.class));
+        russianLegalEntity.setInn(INN);
         return russianLegalEntity;
     }
 

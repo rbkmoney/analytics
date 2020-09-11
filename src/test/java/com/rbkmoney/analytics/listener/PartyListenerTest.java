@@ -11,9 +11,6 @@ import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
 import com.rbkmoney.damsel.domain.PartyContractor;
 import com.rbkmoney.damsel.domain.RussianLegalEntity;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
-import com.rbkmoney.geck.serializer.kit.mock.MockMode;
-import com.rbkmoney.geck.serializer.kit.mock.MockTBaseProcessor;
-import com.rbkmoney.geck.serializer.kit.tbase.TBaseHandler;
 import com.rbkmoney.machinegun.eventsink.SinkEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
@@ -28,7 +25,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.StringUtils;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.io.IOException;

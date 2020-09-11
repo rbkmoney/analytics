@@ -18,6 +18,7 @@
                           and status = 'captured'
                           and partyId = ?
                           %1$s
+                          %2$s
                         GROUP BY
                           currency
                       ) ANY
@@ -32,6 +33,7 @@
                           and status = 'succeeded'
                           and partyId = ?
                           %1$s
+                          %2$s
                         GROUP BY
                           currency
                       ) USING currency
@@ -52,6 +54,7 @@
                           and status = 'paid'
                           and partyId = ?
                           %1$s
+                          %2$s
                         GROUP BY
                           currency
                       ) ANY
@@ -67,6 +70,7 @@
                           and isCancelledAfterBeingPaid = 1
                           and partyId = ?
                           %1$s
+                          %2$s
                         GROUP BY
                           currency
                       ) USING currency

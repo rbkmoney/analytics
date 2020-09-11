@@ -21,7 +21,7 @@ public class RepositoryFacade {
     private final PostgresBalanceChangesRepository postgresBalanceChangesRepository;
     private final PartyService partyService;
 
-    private final ClickHousePaymentRepository clickHousePaymentRepository;
+    private final ClickHousePaymentRepositoryImpl clickHousePaymentRepository;
     private final ClickHouseRefundRepository clickHouseRefundRepository;
     private final ClickHouseAdjustmentRepository clickHouseAdjustmentRepository;
     private final ClickHouseChargebackRepository clickHouseChargebackRepository;

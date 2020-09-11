@@ -4,6 +4,7 @@ import com.rbkmoney.analytics.dao.mapper.CommonRowsMapper;
 import com.rbkmoney.analytics.dao.mapper.SplitRowsMapper;
 import com.rbkmoney.analytics.dao.mapper.SplitStatusRowsMapper;
 import com.rbkmoney.analytics.dao.model.*;
+import com.rbkmoney.analytics.dao.repository.clickhouse.iface.ClickHousePaymentRepository;
 import com.rbkmoney.analytics.dao.utils.QueryUtils;
 import com.rbkmoney.analytics.dao.utils.SplitUtils;
 import com.rbkmoney.analytics.utils.FileUtil;
@@ -15,7 +16,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import ru.yandex.clickhouse.except.ClickHouseException;
 
 import java.time.LocalDate;
@@ -26,18 +26,18 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ClickHousePaymentRepository {
+public class ClickHousePaymentRepositoryImpl implements ClickHousePaymentRepository {
 
-    public static final String SHOP_ID = "shopId";
-    public static final String PARTY_ID = "partyId";
     public static final String PAYMENT_TOOL = "paymentTool";
     public static final String ERROR_REASON = "errorReason";
     public static final String ERROR_CODE = "errorCode";
     public static final String WHERE_TIME_PARAMS = "where timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ?";
+    public static final String AND_STATUS_CAPTURED = " and status='captured'";
+    public static final String ADDITIONAL_PARAMETERS = " %1s %2s";
+
     public static final String SELECT_BALANCES_SQL = FileUtil.getFile("scripts/select_current_balance.sql");
     public static final String SELECT_ERROR_DESCRIPTION = FileUtil.getFile("scripts/select_error_description.sql");
     public static final String SELECT_PAYMENT_TOOL_DESCRIPTION = FileUtil.getFile("scripts/select_payment_tool_description.sql");
-    public static final String AND_STATUS_CAPTURED = " and status='captured'";
 
     private final JdbcTemplate clickHouseJdbcTemplate;
 
@@ -47,6 +47,7 @@ public class ClickHousePaymentRepository {
     private final SplitRowsMapper splitCostCommonRowsMapper;
     private final SplitStatusRowsMapper splitStatusRowsMapper;
 
+    @Override
     @Retryable(value = ClickHouseException.class, backoff = @Backoff(delay = 5000))
     public void insertBatch(List<PaymentRow> paymentRows) {
         if (paymentRows != null && !paymentRows.isEmpty()) {
@@ -59,41 +60,52 @@ public class ClickHousePaymentRepository {
         }
     }
 
+    @Override
     public List<NumberModel> getAveragePayment(String partyId,
                                                List<String> shopIds,
+                                               List<String> excludeShopIds,
                                                LocalDateTime from,
                                                LocalDateTime to) {
         String selectSql = "SELECT currency, avg(amount) as num from analytic.events_sink ";
         String groupedSql = " group by partyId, currency having partyId = ? ";
 
-        List<Map<String, Object>> rows = splitQuery(partyId, shopIds, from, to, WHERE_TIME_PARAMS + AND_STATUS_CAPTURED, groupedSql, selectSql);
+        List<Map<String, Object>> rows = splitQuery(partyId, shopIds, excludeShopIds, from, to,
+                WHERE_TIME_PARAMS + AND_STATUS_CAPTURED + ADDITIONAL_PARAMETERS, groupedSql, selectSql);
         return costCommonRowsMapper.map(rows);
     }
 
+    @Override
     public List<NumberModel> getPaymentsAmount(String partyId,
                                                List<String> shopIds,
+                                               List<String> excludeShopIds,
                                                LocalDateTime from,
                                                LocalDateTime to) {
         String selectSql = "SELECT currency, sum(amount) as num from analytic.events_sink ";
         String groupedSql = " group by partyId, currency having partyId = ? ";
 
-        List<Map<String, Object>> rows = splitQuery(partyId, shopIds, from, to, WHERE_TIME_PARAMS + AND_STATUS_CAPTURED, groupedSql, selectSql);
+        List<Map<String, Object>> rows = splitQuery(partyId, shopIds, excludeShopIds, from, to,
+                WHERE_TIME_PARAMS + AND_STATUS_CAPTURED + ADDITIONAL_PARAMETERS, groupedSql, selectSql);
         return costCommonRowsMapper.map(rows);
     }
 
+    @Override
     public List<NumberModel> getPaymentsCount(String partyId,
                                               List<String> shopIds,
+                                              List<String> excludeShopIds,
                                               LocalDateTime from,
                                               LocalDateTime to) {
         String selectSql = "SELECT currency, count() as num from analytic.events_sink ";
         String groupedSql = " group by partyId, currency having partyId = ? ";
 
-        List<Map<String, Object>> rows = splitQuery(partyId, shopIds, from, to, WHERE_TIME_PARAMS + AND_STATUS_CAPTURED, groupedSql, selectSql);
+        List<Map<String, Object>> rows = splitQuery(partyId, shopIds, excludeShopIds, from, to,
+                WHERE_TIME_PARAMS + AND_STATUS_CAPTURED + ADDITIONAL_PARAMETERS, groupedSql, selectSql);
         return countModelCommonRowsMapper.map(rows);
     }
 
+    @Override
     public List<SplitNumberModel> getPaymentsSplitAmount(String partyId,
                                                          List<String> shopIds,
+                                                         List<String> excludeShopIds,
                                                          LocalDateTime from,
                                                          LocalDateTime to,
                                                          SplitUnit splitUnit) {
@@ -102,28 +114,33 @@ public class ClickHousePaymentRepository {
         String selectSql = "SELECT " + groupBy + " , currency, sum(amount) as num from analytic.events_sink ";
         String groupedSql = " group by partyId, currency, " + groupBy + " having partyId = ? ";
 
-        List<Map<String, Object>> rows = splitQuery(partyId, shopIds, from, to, WHERE_TIME_PARAMS + AND_STATUS_CAPTURED, groupedSql, selectSql);
+        List<Map<String, Object>> rows = splitQuery(partyId, shopIds, excludeShopIds, from, to,
+                WHERE_TIME_PARAMS + AND_STATUS_CAPTURED + ADDITIONAL_PARAMETERS, groupedSql, selectSql);
         return splitCostCommonRowsMapper.map(rows, splitUnit);
     }
 
-    private List<Map<String, Object>> splitQuery(String partyId, List<String> shopIds, LocalDateTime from, LocalDateTime to, String whereSql, String groupedSql, String sql) {
+    private List<Map<String, Object>> splitQuery(String partyId,
+                                                 List<String> shopIds,
+                                                 List<String> excludeShopIds,
+                                                 LocalDateTime from,
+                                                 LocalDateTime to,
+                                                 String whereSql,
+                                                 String groupedSql,
+                                                 String sql) {
         List<Object> params = TimeParamUtils.generateTimeParams(from, to);
-        if (!CollectionUtils.isEmpty(shopIds)) {
-            StringBuilder inList = QueryUtils.generateInList(shopIds);
-            sql = sql + whereSql + " AND shopId " + inList + groupedSql;
-            params.addAll(shopIds);
-            params.add(partyId);
-        } else {
-            sql = sql + whereSql + groupedSql;
-            params.add(partyId);
-        }
 
-        log.info("ClickHousePaymentRepository splitQuery sql: {} params: {}", sql, params);
+        sql = String.format(sql + whereSql, QueryUtils.generateIdsSql(shopIds, params, QueryUtils::generateInList),
+                QueryUtils.generateIdsSql(excludeShopIds, params, QueryUtils::generateNotInList)) + groupedSql;
+        params.add(partyId);
+
+        log.info("splitQuery sql: {} params: {}", sql, params);
         return clickHouseJdbcTemplate.queryForList(sql, params.toArray());
     }
 
+    @Override
     public List<SplitStatusNumberModel> getPaymentsSplitCount(String partyId,
                                                               List<String> shopIds,
+                                                              List<String> excludeShopIds,
                                                               LocalDateTime from,
                                                               LocalDateTime to,
                                                               SplitUnit splitUnit) {
@@ -132,52 +149,60 @@ public class ClickHousePaymentRepository {
         String selectSql = "SELECT " + groupBy + " , status, currency, count(concat(invoiceId, paymentId)) as num from analytic.events_sink ";
         String groupedSql = " group by partyId, currency, status, " + groupBy + " having partyId = ? ";
 
-        List<Map<String, Object>> rows = splitQuery(partyId, shopIds, from, to, WHERE_TIME_PARAMS, groupedSql, selectSql);
+        List<Map<String, Object>> rows = splitQuery(partyId, shopIds, excludeShopIds, from, to, WHERE_TIME_PARAMS, groupedSql, selectSql);
         return splitStatusRowsMapper.map(rows, splitUnit);
     }
 
-    public List<NamingDistribution> getPaymentsToolDistribution(String partyId, List<String> shopIds,
+    @Override
+    public List<NamingDistribution> getPaymentsToolDistribution(String partyId,
+                                                                List<String> shopIds,
+                                                                List<String> excludeShopIds,
                                                                 LocalDateTime from,
                                                                 LocalDateTime to) {
-        return queryNamingDistributions(SELECT_PAYMENT_TOOL_DESCRIPTION, partyId, shopIds, from, to, PAYMENT_TOOL);
+        return queryNamingDistributions(SELECT_PAYMENT_TOOL_DESCRIPTION, partyId, shopIds, excludeShopIds, from, to, PAYMENT_TOOL);
     }
 
-    public List<NamingDistribution> getPaymentsErrorReasonDistribution(String partyId, List<String> shopIds,
+    @Override
+    public List<NamingDistribution> getPaymentsErrorReasonDistribution(String partyId,
+                                                                       List<String> shopIds,
+                                                                       List<String> excludeShopIds,
                                                                        LocalDateTime from,
                                                                        LocalDateTime to) {
-        return errorDistributionQuery(partyId, shopIds, from, to, ERROR_REASON);
+        return errorDistributionQuery(partyId, shopIds, excludeShopIds, from, to, ERROR_REASON);
     }
 
-    public List<NamingDistribution> getPaymentsErrorCodeDistribution(String partyId, List<String> shopIds,
+    @Override
+    public List<NamingDistribution> getPaymentsErrorCodeDistribution(String partyId,
+                                                                     List<String> shopIds,
+                                                                     List<String> excludeShopIds,
                                                                      LocalDateTime from,
                                                                      LocalDateTime to) {
-        return errorDistributionQuery(partyId, shopIds, from, to, ERROR_CODE);
+        return errorDistributionQuery(partyId, shopIds, excludeShopIds, from, to, ERROR_CODE);
     }
 
-    private List<NamingDistribution> errorDistributionQuery(String partyId, List<String> shopIds, LocalDateTime from, LocalDateTime to, String groupField) {
-        return queryNamingDistributions(SELECT_ERROR_DESCRIPTION, partyId, shopIds, from, to, groupField);
+    private List<NamingDistribution> errorDistributionQuery(String partyId,
+                                                            List<String> shopIds,
+                                                            List<String> excludeShopIds,
+                                                            LocalDateTime from,
+                                                            LocalDateTime to,
+                                                            String groupField) {
+        return queryNamingDistributions(SELECT_ERROR_DESCRIPTION, partyId, shopIds, excludeShopIds, from, to, groupField);
     }
 
-    private List<NamingDistribution> queryNamingDistributions(String sql, String partyId, List<String> shopIds,
+    private List<NamingDistribution> queryNamingDistributions(String sql,
+                                                              String partyId,
+                                                              List<String> shopIds,
+                                                              List<String> excludeShopIds,
                                                               LocalDateTime from,
                                                               LocalDateTime to,
                                                               String name) {
-        Object[] params = null;
-
         List<Object> timeParams = TimeParamUtils.generateTimeParams(from, to);
+        timeParams.add(partyId);
+        sql = String.format(sql, QueryUtils.generateIdsSql(shopIds, timeParams, QueryUtils::generateInList),
+                QueryUtils.generateIdsSql(excludeShopIds, timeParams, QueryUtils::generateNotInList), name);
+        Object[] params = doubleList(timeParams).toArray();
 
-        if (!CollectionUtils.isEmpty(shopIds)) {
-            StringBuilder inList = QueryUtils.generateInList(shopIds);
-            sql = String.format(sql, SHOP_ID, inList.toString(), name);
-            timeParams.addAll(shopIds);
-            params = doubleList(timeParams).toArray();
-        } else {
-            sql = String.format(sql, PARTY_ID, " = ? ", name);
-            timeParams.add(partyId);
-            params = doubleList(timeParams).toArray();
-        }
-
-        log.info("ClickHousePaymentRepository queryNamingDistributions sql: {} params: {}", sql, params);
+        log.info("queryNamingDistributions sql: {} params: {}", sql, params);
         List<Map<String, Object>> rows = clickHouseJdbcTemplate.queryForList(sql, params);
         return namingDistributionCommonRowsMapper.map(rows);
     }
@@ -189,23 +214,18 @@ public class ClickHousePaymentRepository {
         return resultList;
     }
 
-    public List<NumberModel> getCurrentBalances(String partyId, List<String> shopIds) {
+    @Override
+    public List<NumberModel> getCurrentBalances(String partyId, List<String> shopIds, List<String> excludeShopIds) {
         LocalDate to = LocalDate.now();
         List<Object> params = new ArrayList<>();
         params.add(to);
         params.add(partyId);
-        String sql;
-        if (!CollectionUtils.isEmpty(shopIds)) {
-            StringBuilder stringBuilder = QueryUtils.generateInList(shopIds);
-            sql = String.format(SELECT_BALANCES_SQL, " and shopId " + stringBuilder.toString());
-            params.addAll(shopIds);
-        } else {
-            sql = String.format(SELECT_BALANCES_SQL, " ");
-        }
+        String sql = String.format(SELECT_BALANCES_SQL, QueryUtils.generateIdsSql(shopIds, params, QueryUtils::generateInList),
+                QueryUtils.generateIdsSql(excludeShopIds, params, QueryUtils::generateNotInList));
         params = Collections.nCopies(4, params).stream()
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
-        log.info("ClickHouseRefundRepository getCurrentBalances sql: {} params: {}", sql, params);
+        log.info("getCurrentBalances sql: {} params: {}", sql, params);
         List<Map<String, Object>> rows = clickHouseJdbcTemplate.queryForList(sql, params.toArray());
         return costCommonRowsMapper.map(rows);
     }

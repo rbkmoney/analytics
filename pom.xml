@@ -32,7 +32,7 @@
         <machinegun-proto.version>1.12-ebae56f</machinegun-proto.version>
         <geck.version>0.6.7</geck.version>
         <woody.thrift.version>1.1.15</woody.thrift.version>
-        <analytics-proto.version>1.22-692755b</analytics-proto.version>
+        <analytics-proto.version>1.24-7148f40</analytics-proto.version>
         <mg-event-sink-listener-spring-boot-starter.version>0.0.5-SNAPSHOT</mg-event-sink-listener-spring-boot-starter.version>
         <db-common-lib.version>0.0.3</db-common-lib.version>
         <sink-common-lib.version>0.0.4</sink-common-lib.version>
