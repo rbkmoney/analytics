@@ -3,6 +3,7 @@ package com.rbkmoney.analytics.dao.repository;
 import com.rbkmoney.analytics.constant.*;
 import com.rbkmoney.analytics.dao.model.*;
 import com.rbkmoney.analytics.dao.repository.clickhouse.*;
+import com.rbkmoney.analytics.dao.repository.clickhouse.iface.ClickHousePaymentRepository;
 import com.rbkmoney.analytics.dao.repository.postgres.PostgresBalanceChangesRepository;
 import com.rbkmoney.analytics.service.PartyService;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +20,8 @@ import static java.util.stream.Collectors.toList;
 public class RepositoryFacade {
 
     private final PostgresBalanceChangesRepository postgresBalanceChangesRepository;
-    private final PartyService partyService;
 
-    private final ClickHousePaymentRepositoryImpl clickHousePaymentRepository;
+    private final ClickHousePaymentRepository clickHousePaymentRepository;
     private final ClickHouseRefundRepository clickHouseRefundRepository;
     private final ClickHouseAdjustmentRepository clickHouseAdjustmentRepository;
     private final ClickHouseChargebackRepository clickHouseChargebackRepository;
