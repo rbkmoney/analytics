@@ -149,7 +149,7 @@ public class ClickHousePaymentRepositoryImpl implements ClickHousePaymentReposit
         String selectSql = "SELECT " + groupBy + " , status, currency, count(concat(invoiceId, paymentId)) as num from analytic.events_sink ";
         String groupedSql = " group by partyId, currency, status, " + groupBy + " having partyId = ? ";
 
-        List<Map<String, Object>> rows = splitQuery(partyId, shopIds, excludeShopIds, from, to, WHERE_TIME_PARAMS, groupedSql, selectSql);
+        List<Map<String, Object>> rows = splitQuery(partyId, shopIds, excludeShopIds, from, to, WHERE_TIME_PARAMS + ADDITIONAL_PARAMETERS, groupedSql, selectSql);
         return splitStatusRowsMapper.map(rows, splitUnit);
     }
 

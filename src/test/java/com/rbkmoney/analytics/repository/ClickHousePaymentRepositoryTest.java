@@ -15,6 +15,7 @@ import com.rbkmoney.analytics.dao.repository.clickhouse.ClickHousePaymentReposit
 import com.rbkmoney.damsel.analytics.SplitUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -157,6 +158,13 @@ public class ClickHousePaymentRepositoryTest extends ClickHouseAbstractTest {
                 SplitUnit.YEAR);
         numberModel = findCost(costs, RUB);
         assertEquals(3, numberModel.getNumber().longValue());
+
+        costs = clickHousePaymentRepository.getPaymentsSplitCount("ca2e9162-eda2-4d17-bbfa-dc5e39b1772d",
+                null, List.of("ad8b7bfd-0760-4781-a400-51903ee8e509"),
+                Instant.ofEpochMilli(1575554400000L).atZone(ZoneOffset.UTC).toLocalDateTime(), Instant.ofEpochMilli(1579666000698L).atZone(ZoneOffset.UTC).toLocalDateTime(),
+                SplitUnit.YEAR);
+
+        Assert.assertTrue(costs.isEmpty());
     }
 
     @NotNull
@@ -247,6 +255,13 @@ public class ClickHousePaymentRepositoryTest extends ClickHouseAbstractTest {
         toolDistribution.forEach(paymentToolDistribution ->
                 assertEquals(100, paymentToolDistribution.getPercent().intValue())
         );
+
+        toolDistribution = clickHousePaymentRepository.getPaymentsToolDistribution(
+                "ca2e9162-eda2-4d17-bbfa-dc5e39b1772a",
+                null, List.of("ad8b7bfd-0760-4781-a400-51903ee8e503", "ad8b7bfd-0760-4781-a400-51903ee8e502"),
+                Instant.ofEpochMilli(1575554400000L).atZone(ZoneOffset.UTC).toLocalDateTime(), Instant.ofEpochMilli(1575556887697L).atZone(ZoneOffset.UTC).toLocalDateTime());
+
+        Assert.assertTrue(toolDistribution.isEmpty());
     }
 
     @Test
