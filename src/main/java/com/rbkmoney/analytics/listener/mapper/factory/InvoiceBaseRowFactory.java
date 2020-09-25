@@ -5,13 +5,13 @@ import com.rbkmoney.analytics.constant.PaymentToolType;
 import com.rbkmoney.analytics.dao.model.InvoiceBaseRow;
 import com.rbkmoney.analytics.service.GeoProvider;
 import com.rbkmoney.damsel.domain.*;
-import com.rbkmoney.damsel.domain.Invoice;
 import com.rbkmoney.damsel.payment_processing.InvoicePayment;
 import com.rbkmoney.geck.common.util.TBaseUtil;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -77,6 +77,7 @@ public abstract class InvoiceBaseRowFactory<T extends InvoiceBaseRow> implements
             row.setBankCountry(bankCard.isSetIssuerCountry() ? bankCard.getIssuerCountry().name() : ClickHouseUtilsValue.UNKNOWN);
             row.setProvider(bankCard.getBankName());
             row.setCardToken(bankCard.getToken());
+            row.setCardHolderName(StringUtils.isEmpty(bankCard.getCardholderName()) ? ClickHouseUtilsValue.UNKNOWN : bankCard.getCardholderName());
             row.setBin(bankCard.getBin());
             row.setMaskedPan(bankCard.getLastDigits());
             row.setPaymentSystem(bankCard.getPaymentSystem().name());

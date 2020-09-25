@@ -18,6 +18,7 @@ public class InvoiceBaseRow {
     private String email;
     private String fingerprint;
     private String cardToken;
+    private String cardHolderName;
     private String paymentSystem;
     private String digitalWalletProvider;
     private String digitalWalletToken;
