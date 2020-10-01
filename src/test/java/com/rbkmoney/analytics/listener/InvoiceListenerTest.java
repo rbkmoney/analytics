@@ -5,7 +5,7 @@ import com.rbkmoney.analytics.dao.repository.postgres.PostgresBalanceChangesRepo
 import com.rbkmoney.analytics.service.HgClientService;
 import com.rbkmoney.analytics.utils.BuildUtils;
 import com.rbkmoney.analytics.utils.EventRangeFactory;
-import com.rbkmoney.analytics.utils.FileUtil;
+import com.rbkmoney.clickhouse.initializer.ChInitializer;
 import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.geo_ip.GeoIpServiceSrv;
 import com.rbkmoney.damsel.payment_processing.InvoicingSrv;
@@ -87,13 +87,8 @@ public class InvoiceListenerTest extends KafkaAbstractTest {
 
     @Before
     public void init() throws SQLException {
-        try (Connection connection = getSystemConn()) {
-            String sql = FileUtil.getFile("sql/V1__db_init.sql");
-            String[] split = sql.split(";");
-            for (String exec : split) {
-                connection.createStatement().execute(exec);
-            }
-        }
+        ChInitializer.initAllScripts(clickHouseContainer, List.of("sql/V1__db_init.sql",
+                "sql/V2__add_fields.sql"));
     }
 
     private Connection getSystemConn() throws SQLException {
