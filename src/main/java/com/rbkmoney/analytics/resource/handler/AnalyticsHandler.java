@@ -12,6 +12,7 @@ import com.rbkmoney.geck.common.util.TypeUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -224,6 +225,7 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
     }
 
     @Override
+    @Cacheable(value = "getCurrentBalances")
     public AmountResponse getCurrentBalances(MerchantFilter merchantFilter) throws TException {
         log.info("-> getCurrentBalances filterRequest: {}", merchantFilter);
         List<NumberModel> paymentsToolDistribution = clickHousePaymentRepository.getCurrentBalances(
