@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class CacheConfig {
 
-    @Value("${cofeine.cache-expiration-seconds:60}")
+    @Value("${caffeine.cache-expiration-seconds:60}")
     public int cacheExpirationSeconds;
 
     @Bean
