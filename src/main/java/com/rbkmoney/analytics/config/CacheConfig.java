@@ -1,7 +1,6 @@
 package com.rbkmoney.analytics.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -16,11 +15,11 @@ import java.util.concurrent.TimeUnit;
 public class CacheConfig {
 
     @Value("${cofeine.expired-cache-after-seconds:60}")
-    public int expiredCacheAfter;
+    public int cacheExpirationSeconds;
 
     @Bean
     public Caffeine caffeineConfig() {
-        return Caffeine.newBuilder().expireAfterWrite(expiredCacheAfter, TimeUnit.SECONDS);
+        return Caffeine.newBuilder().expireAfterWrite(cacheExpirationSeconds, TimeUnit.SECONDS);
     }
 
     @Bean
