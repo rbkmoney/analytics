@@ -84,4 +84,4 @@ cache:
   shop:
     size: 10000
 
-cofeine.cache-expiration-seconds: 60
+caffeine.cache-expiration-seconds: 60
