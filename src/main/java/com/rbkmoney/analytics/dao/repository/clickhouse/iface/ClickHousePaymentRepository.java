@@ -28,4 +28,6 @@ public interface ClickHousePaymentRepository {
 
     List<NumberModel> getCurrentBalances(String partyId, List<String> shopIds, List<String> excludeShopIds);
 
+    List<ShopAmountModel> getShopBalances(String partyId, List<String> shopdIds, List<String> excludeShopIds);
+
 }

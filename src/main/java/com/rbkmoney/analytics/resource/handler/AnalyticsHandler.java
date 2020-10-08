@@ -1,10 +1,8 @@
 package com.rbkmoney.analytics.resource.handler;
 
 import com.rbkmoney.analytics.converter.*;
+import com.rbkmoney.analytics.dao.model.*;
 import com.rbkmoney.analytics.dao.model.NamingDistribution;
-import com.rbkmoney.analytics.dao.model.NumberModel;
-import com.rbkmoney.analytics.dao.model.SplitNumberModel;
-import com.rbkmoney.analytics.dao.model.SplitStatusNumberModel;
 import com.rbkmoney.analytics.dao.repository.clickhouse.ClickHouseRefundRepository;
 import com.rbkmoney.analytics.dao.repository.clickhouse.iface.ClickHousePaymentRepository;
 import com.rbkmoney.damsel.analytics.*;
@@ -67,7 +65,7 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
                 TypeUtil.stringToLocalDateTime(timeFilter.getToTime())
         );
 
-        AmountResponse amountResponse = costToAmountResponseConverter.convert(paymentsToolDistribution);
+        AmountResponse amountResponse = costToAmountResponseConverter.convertCurrency(paymentsToolDistribution);
         log.info("<- getPaymentsAmount amountResponse: {}", amountResponse);
         return amountResponse;
     }
@@ -87,7 +85,7 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
                 TypeUtil.stringToLocalDateTime(timeFilter.getToTime())
         );
 
-        AmountResponse amountResponse = costToAmountResponseConverter.convert(paymentsToolDistribution);
+        AmountResponse amountResponse = costToAmountResponseConverter.convertCurrency(paymentsToolDistribution);
         log.info("<- getAveragePayment amountResponse: {}", amountResponse);
         return amountResponse;
     }
@@ -218,7 +216,7 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
                 TypeUtil.stringToLocalDateTime(timeFilter.getToTime())
         );
 
-        AmountResponse amountResponse = costToAmountResponseConverter.convert(paymentsToolDistribution);
+        AmountResponse amountResponse = costToAmountResponseConverter.convertCurrency(paymentsToolDistribution);
 
         log.info("<- getRefundsAmount amountResponse: {}", amountResponse);
         return amountResponse;
@@ -234,9 +232,24 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
                 merchantFilter.getExcludeShopIds()
         );
 
-        AmountResponse amountResponse = costToAmountResponseConverter.convert(paymentsToolDistribution);
+        AmountResponse amountResponse = costToAmountResponseConverter.convertCurrency(paymentsToolDistribution);
 
         log.info("<- getCurrentBalances amountResponse: {}", amountResponse);
+        return amountResponse;
+    }
+
+    @Override
+    @Cacheable(value = "getCurrentShopBalances")
+    public ShopAmountResponse getCurrentShopBalances(MerchantFilter merchantFilter) throws TException {
+        log.info("-> getCurrentShopBalances filterRequest: {}", merchantFilter);
+        List<ShopAmountModel> paymentsToolDistribution = clickHousePaymentRepository.getShopBalances(
+                merchantFilter.getPartyId(),
+                merchantFilter.getShopIds(),
+                merchantFilter.getExcludeShopIds()
+        );
+        ShopAmountResponse amountResponse = costToAmountResponseConverter.convertShop(paymentsToolDistribution);
+        log.info("<- getCurrentShopBalances amountResponse: {}", amountResponse);
+
         return amountResponse;
     }
 }

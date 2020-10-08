@@ -36,11 +36,13 @@ public class ClickHousePaymentRepositoryImpl implements ClickHousePaymentReposit
     public static final String ADDITIONAL_PARAMETERS = " %1s %2s";
 
     public static final String SELECT_BALANCES_SQL = FileUtil.getFile("scripts/select_current_balance.sql");
+    public static final String SELECT_SHOP_BANALCES_SQL = FileUtil.getFile("scripts/select_current_shop_balance.sql");
     public static final String SELECT_ERROR_DESCRIPTION = FileUtil.getFile("scripts/select_error_description.sql");
     public static final String SELECT_PAYMENT_TOOL_DESCRIPTION = FileUtil.getFile("scripts/select_payment_tool_description.sql");
 
     private final JdbcTemplate clickHouseJdbcTemplate;
 
+    private final CommonRowsMapper<ShopAmountModel> shopAmountModelCommonRowsMapper;
     private final CommonRowsMapper<NumberModel> costCommonRowsMapper;
     private final CommonRowsMapper<NumberModel> countModelCommonRowsMapper;
     private final CommonRowsMapper<NamingDistribution> namingDistributionCommonRowsMapper;
@@ -228,6 +230,23 @@ public class ClickHousePaymentRepositoryImpl implements ClickHousePaymentReposit
         log.info("getCurrentBalances sql: {} params: {}", sql, params);
         List<Map<String, Object>> rows = clickHouseJdbcTemplate.queryForList(sql, params.toArray());
         return costCommonRowsMapper.map(rows);
+    }
+
+    @Override
+    public List<ShopAmountModel> getShopBalances(String partyId, List<String> shopIds, List<String> excludeShopIds) {
+        List<Object> params = new ArrayList<>();
+        params.add(LocalDate.now());
+        params.add(partyId);
+        String sql = String.format(SELECT_SHOP_BANALCES_SQL,
+                QueryUtils.generateIdsSql(shopIds, params, QueryUtils::generateInList),
+                QueryUtils.generateIdsSql(excludeShopIds, params, QueryUtils::generateNotInList));
+        params = Collections.nCopies(4, params).stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+        log.info("getShopBalances sql: {} params: {}", sql, params);
+        List<Map<String, Object>> rows = clickHouseJdbcTemplate.queryForList(sql, params.toArray());
+
+        return shopAmountModelCommonRowsMapper.map(rows);
     }
 
 }

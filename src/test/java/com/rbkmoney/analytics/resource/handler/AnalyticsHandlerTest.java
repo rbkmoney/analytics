@@ -28,7 +28,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(SpringRunner.class)
 @ContextConfiguration(initializers = ClickHousePayoutRepositoryTest.Initializer.class,
         classes = {RawToNumModelConverter.class, RawToSplitNumberConverter.class, RawToSplitStatusConverter.class,
-                SplitRowsMapper.class, SplitStatusRowsMapper.class, RawToNamingDistributionConverter.class,
+                SplitRowsMapper.class, SplitStatusRowsMapper.class, RawToNamingDistributionConverter.class, RawToShopAmountModelConverter.class,
                 RawMapperConfig.class, ClickHousePaymentRepositoryImpl.class, ClickHouseRefundRepository.class, AnalyticsHandler.class,
                 DaoErrorReasonDistributionsToResponseConverter.class, DaoErrorCodeDistributionsToResponseConverter.class,
                 DaoNamingDistributionsToResponseConverter.class,
@@ -272,4 +272,25 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
 
         paymentsAmount.validate();
     }
+
+    @Test
+    public void getShopBalances() throws TException {
+        ShopAmountResponse paymentsAmount = analyticsHandler.getCurrentShopBalances(new MerchantFilter()
+                .setPartyId("ca2e9162-eda2-4d17-bbfa-dc5e39b1772f")
+                .setShopIds(List.of("ad8b7bfd-0760-4781-a400-51903ee8e509"))
+        );
+        List<ShopGroupedAmount> groupsAmount = paymentsAmount.getGroupsAmount();
+
+        ShopGroupedAmount shopGroupedAmount = groupsAmount.stream()
+                .filter(currencyGroupedAmount -> currencyGroupedAmount.getShopId().equals("ad8b7bfd-0760-4781-a400-51903ee8e509"))
+                .findFirst()
+                .get();
+
+        assertEquals(44900L, shopGroupedAmount.amount);
+        assertEquals("ad8b7bfd-0760-4781-a400-51903ee8e509", shopGroupedAmount.shop_id);
+        assertEquals(RUB, shopGroupedAmount.currency);
+
+        paymentsAmount.validate();
+    }
+
 }

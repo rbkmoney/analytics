@@ -1,10 +1,7 @@
 package com.rbkmoney.analytics.repository;
 
 import com.rbkmoney.analytics.config.RawMapperConfig;
-import com.rbkmoney.analytics.converter.RawToNamingDistributionConverter;
-import com.rbkmoney.analytics.converter.RawToNumModelConverter;
-import com.rbkmoney.analytics.converter.RawToSplitNumberConverter;
-import com.rbkmoney.analytics.converter.RawToSplitStatusConverter;
+import com.rbkmoney.analytics.converter.*;
 import com.rbkmoney.analytics.dao.mapper.SplitRowsMapper;
 import com.rbkmoney.analytics.dao.mapper.SplitStatusRowsMapper;
 import com.rbkmoney.analytics.dao.model.NamingDistribution;
@@ -33,7 +30,7 @@ import static org.junit.Assert.assertTrue;
 @Slf4j
 @RunWith(SpringRunner.class)
 @ContextConfiguration(initializers = ClickHousePayoutRepositoryTest.Initializer.class,
-        classes = {RawToNumModelConverter.class, RawToSplitNumberConverter.class, RawToSplitStatusConverter.class,
+        classes = {RawToNumModelConverter.class, RawToSplitNumberConverter.class, RawToSplitStatusConverter.class, RawToShopAmountModelConverter.class,
                 SplitRowsMapper.class, SplitStatusRowsMapper.class, RawToNamingDistributionConverter.class, RawMapperConfig.class, ClickHousePaymentRepositoryImpl.class})
 public class ClickHousePaymentRepositoryTest extends ClickHouseAbstractTest {
 
