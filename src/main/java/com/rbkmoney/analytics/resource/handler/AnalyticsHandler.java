@@ -30,6 +30,7 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
     private final CountModelCountResponseConverter countModelCountResponseConverter;
     private final GroupedCurAmountToResponseConverter groupedCurAmountToResponseConverter;
     private final GroupedCurCountToResponseConverter groupedCurCountToResponseConverter;
+    private final ShopAmountToResponseConverter shopAmountToResponseConverter;
 
     @Override
     public PaymentToolDistributionResponse getPaymentsToolDistribution(FilterRequest filterRequest) {
@@ -247,7 +248,7 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
                 merchantFilter.getShopIds(),
                 merchantFilter.getExcludeShopIds()
         );
-        ShopAmountResponse amountResponse = costToAmountResponseConverter.convertShop(paymentsToolDistribution);
+        ShopAmountResponse amountResponse = shopAmountToResponseConverter.convertShop(paymentsToolDistribution);
         log.info("<- getCurrentShopBalances amountResponse: {}", amountResponse);
 
         return amountResponse;

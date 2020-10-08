@@ -33,7 +33,7 @@ import static org.junit.Assert.assertEquals;
                 DaoErrorReasonDistributionsToResponseConverter.class, DaoErrorCodeDistributionsToResponseConverter.class,
                 DaoNamingDistributionsToResponseConverter.class,
                 CostToAmountResponseConverter.class, CountModelCountResponseConverter.class,
-                GroupedCurAmountToResponseConverter.class, GroupedCurCountToResponseConverter.class})
+                GroupedCurAmountToResponseConverter.class, GroupedCurCountToResponseConverter.class, ShopAmountToResponseConverter.class})
 public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
 
     public static final String RUB = "RUB";
