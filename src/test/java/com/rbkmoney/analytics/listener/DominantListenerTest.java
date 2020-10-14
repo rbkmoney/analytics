@@ -68,6 +68,7 @@ public class DominantListenerTest extends KafkaAbstractTest {
     @Before
     public void setUp() throws Exception {
         postgresJdbcTemplate.execute("TRUNCATE TABLE analytics.category");
+        postgresJdbcTemplate.execute("TRUNCATE TABLE analytics.dominant");
     }
 
     @Test
