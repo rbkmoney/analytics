@@ -74,6 +74,14 @@ service:
   payouter:
     url: http://changeit/
     networkTimeout: 5000
+  dominant:
+    url: http://dominant:8022/v1/domain/repository
+    networkTimeout: 5000
+    scheduler:
+      enabled: false
+      lockFor: 30m
+      pollingDelay: 3000
+      querySize: 10
 
 columbus.url: http://columbus:8022/repo
 repository.insert.enabled: true

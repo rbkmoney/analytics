@@ -36,6 +36,7 @@
         <mg-event-sink-listener-spring-boot-starter.version>0.0.5-SNAPSHOT</mg-event-sink-listener-spring-boot-starter.version>
         <db-common-lib.version>0.0.3</db-common-lib.version>
         <sink-common-lib.version>0.0.4</sink-common-lib.version>
+        <schedlock.version>4.14.0</schedlock.version>
         <db.port>5432</db.port>
         <db.user>postgres</db.user>
         <db.password>postgres</db.password>
@@ -191,6 +192,16 @@
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
             <version>2.8.5</version>
+        </dependency>
+        <dependency>
+            <groupId>net.javacrumbs.shedlock</groupId>
+            <artifactId>shedlock-spring</artifactId>
+            <version>${schedlock.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.javacrumbs.shedlock</groupId>
+            <artifactId>shedlock-provider-jdbc-template</artifactId>
+            <version>${schedlock.version}</version>
         </dependency>
 
         <!--test-->

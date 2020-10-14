@@ -6,16 +6,13 @@ import com.rbkmoney.analytics.domain.db.tables.records.PartyRecord;
 import com.rbkmoney.analytics.domain.db.tables.records.ShopRecord;
 import com.rbkmoney.dao.impl.AbstractGenericDao;
 import com.rbkmoney.mapper.RecordRowMapper;
-import org.jooq.InsertOnDuplicateSetMoreStep;
 import org.jooq.Query;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
-
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.rbkmoney.analytics.domain.db.Tables.PARTY;
 import static com.rbkmoney.analytics.domain.db.Tables.SHOP;
