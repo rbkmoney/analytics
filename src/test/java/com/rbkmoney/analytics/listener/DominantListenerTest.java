@@ -7,6 +7,7 @@ import com.rbkmoney.analytics.utils.TestData;
 import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.domain_config.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.thrift.TException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -14,6 +15,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -26,6 +28,10 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
 
 @Slf4j
 @RunWith(SpringRunner.class)
@@ -65,14 +71,16 @@ public class DominantListenerTest extends KafkaAbstractTest {
     @Autowired
     private JdbcTemplate postgresJdbcTemplate;
 
+    @MockBean
+    private RepositorySrv.Iface dominantClient;
+
     @Before
     public void setUp() throws Exception {
         postgresJdbcTemplate.execute("TRUNCATE TABLE analytics.category");
-        postgresJdbcTemplate.execute("TRUNCATE TABLE analytics.dominant");
     }
 
     @Test
-    public void testDominantProcessCommitsInsert() {
+    public void testDominantProcessCommitsInsert() throws TException {
         Integer categoryId = 64;
         String categoryName = "testName";
         String categoryDescription = "testDescription";
@@ -80,9 +88,10 @@ public class DominantListenerTest extends KafkaAbstractTest {
 
         Map<Long, Commit> commits = new HashMap<>();
         commits.put(1L, TestData.buildInsertCategoryCommit(categoryId, categoryName, categoryDescription, categoryType));
-        for (Map.Entry<Long, Commit> commitEntry : commits.entrySet()) {
-            dominantService.processCommits(commitEntry.getKey(), commitEntry);
-        }
+        when(dominantClient.pullRange(anyLong(),anyInt())).thenReturn(commits);
+
+        dominantService.pullDominantRange(10);
+
         com.rbkmoney.analytics.domain.db.tables.pojos.Category category = categoryDao.getCategory(64, 1L);
 
         Assert.assertEquals(categoryId, category.getCategoryId());
@@ -92,7 +101,7 @@ public class DominantListenerTest extends KafkaAbstractTest {
     }
 
     @Test
-    public void testDominantProcessCommitsUpdate() {
+    public void testDominantProcessCommitsUpdate() throws TException {
         Integer categoryId = 64;
         String categoryName = "testName";
         String categoryDescription = "testDescription";
@@ -106,10 +115,10 @@ public class DominantListenerTest extends KafkaAbstractTest {
         Commit secondCommit = TestData.buildUpdateCategoryCommit(categoryId, updatedCategoryName, updatedCategoryDescription, categoryType, oldObject);
         commits.put(1L, firstCommit);
         commits.put(2L, secondCommit);
+        when(dominantClient.pullRange(anyLong(),anyInt())).thenReturn(commits);
 
-        for (Map.Entry<Long, Commit> commitEntry : commits.entrySet()) {
-            dominantService.processCommits(commitEntry.getKey(), commitEntry);
-        }
+        dominantService.pullDominantRange(10);
+
         com.rbkmoney.analytics.domain.db.tables.pojos.Category category = categoryDao.getCategory(64, 2L);
 
         Assert.assertEquals(categoryId, category.getCategoryId());
@@ -118,7 +127,7 @@ public class DominantListenerTest extends KafkaAbstractTest {
     }
 
     @Test
-    public void testDominantProcessCommitsRemove() {
+    public void testDominantProcessCommitsRemove() throws TException {
         Integer categoryId = 64;
         String categoryName = "testName";
         String categoryDescription = "testDescription";
@@ -128,9 +137,11 @@ public class DominantListenerTest extends KafkaAbstractTest {
         Commit secondCommit = TestData.buildRemoveCategoryCommit(categoryId, categoryName, categoryDescription, categoryType);
         commits.put(1L, firstCommit);
         commits.put(2L, secondCommit);
-        for (Map.Entry<Long, Commit> commitEntry : commits.entrySet()) {
-            dominantService.processCommits(commitEntry.getKey(), commitEntry);
-        }
+
+        when(dominantClient.pullRange(anyLong(),anyInt())).thenReturn(commits);
+
+        dominantService.pullDominantRange(10);
+
         com.rbkmoney.analytics.domain.db.tables.pojos.Category category = categoryDao.getCategory(64, 2L);
 
         Assert.assertEquals(categoryId, category.getCategoryId());
