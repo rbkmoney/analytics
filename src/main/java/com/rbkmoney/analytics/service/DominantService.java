@@ -11,8 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
 @Service
@@ -27,12 +29,14 @@ public class DominantService {
 
     @Transactional
     public void pullDominantRange(int querySize) {
-        Long lastVersion = dominantDao.getLastVersion();
-        if (lastVersion == null) {
-            lastVersion = 0L;
-        }
+
         try {
-            Map<Long, Commit> commitMap = dominantClient.pullRange(lastVersion, querySize);
+            Long initialVersion = dominantDao.getLastVersion();
+            if (initialVersion == null) {
+                initialVersion = 0L;
+            }
+            AtomicLong lastVer = new AtomicLong(initialVersion);
+            Map<Long, Commit> commitMap = dominantClient.pullRange(lastVer.get(), querySize);
             commitMap.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(entry -> {
                 List<Operation> operations = entry.getValue().getOps();
                 operations.forEach(op -> dominantHandlers.forEach(handler -> {
@@ -41,6 +45,14 @@ public class DominantService {
                         handler.handle(op, entry.getKey());
                     }
                 }));
+                if (lastVer.get() == 0) {
+                    log.info("Save dominant version: {}", entry.getKey());
+                    dominantDao.saveVersion(entry.getKey());
+                } else {
+                    log.info("Update dominant version={} oldVersion={}", entry.getKey(), lastVer.get());
+                    dominantDao.updateVersion(entry.getKey(), lastVer.get());
+                }
+                lastVer.set(entry.getKey());
             });
         } catch (Exception e) {
             throw new IllegalStateException("Dominant pullRange failed", e);
