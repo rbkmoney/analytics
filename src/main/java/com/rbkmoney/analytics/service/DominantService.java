@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -29,7 +28,6 @@ public class DominantService {
 
     @Transactional
     public void pullDominantRange(int querySize) {
-
         try {
             Long initialVersion = dominantDao.getLastVersion();
             if (initialVersion == null) {
