@@ -31,7 +31,7 @@
         <damsel-utils.version>2.1.3</damsel-utils.version>
         <machinegun-proto.version>1.12-ebae56f</machinegun-proto.version>
         <geck.version>0.6.7</geck.version>
-        <woody.thrift.version>1.1.15</woody.thrift.version>
+        <woody.thrift.version>1.1.22</woody.thrift.version>
         <analytics-proto.version>1.25-2ec5116</analytics-proto.version>
         <mg-event-sink-listener-spring-boot-starter.version>0.0.5-SNAPSHOT</mg-event-sink-listener-spring-boot-starter.version>
         <db-common-lib.version>0.0.3</db-common-lib.version>
