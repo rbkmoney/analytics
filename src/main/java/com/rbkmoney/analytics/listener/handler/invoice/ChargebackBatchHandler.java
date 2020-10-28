@@ -40,12 +40,11 @@ public class ChargebackBatchHandler implements InvoiceBatchHandler {
 
     private ChargebackRow findAndMapChange(Map.Entry<MachineEvent, InvoiceChange> changeWithParent) {
         InvoiceChange change = changeWithParent.getValue();
-        for (ChargebackMapper invoiceMapper : getMappers()) {
-            if (invoiceMapper.accept(change)) {
-                return invoiceMapper.map(change, changeWithParent.getKey());
+        for (ChargebackMapper mapper : getMappers()) {
+            if (mapper.accept(change)) {
+                return mapper.map(change, changeWithParent.getKey());
             }
         }
-
         return null;
     }
 }
