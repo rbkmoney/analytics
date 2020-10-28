@@ -26,6 +26,14 @@ public class ChargebackMapper implements Mapper<InvoiceChange, MachineEvent, Cha
     private final RowFactory<ChargebackRow> chargebackRowRowFactory;
 
     @Override
+    public boolean accept(InvoiceChange change) {
+        return getChangeType().getFilter().match(change)
+                && (change.getInvoicePaymentChange().getPayload().getInvoicePaymentChargebackChange().getPayload().getInvoicePaymentChargebackStatusChanged().getStatus().isSetAccepted()
+                || change.getInvoicePaymentChange().getPayload().getInvoicePaymentChargebackChange().getPayload().getInvoicePaymentChargebackStatusChanged().getStatus().isSetCancelled()
+                || change.getInvoicePaymentChange().getPayload().getInvoicePaymentChargebackChange().getPayload().getInvoicePaymentChargebackStatusChanged().getStatus().isSetRejected());
+    }
+    
+    @Override
     public ChargebackRow map(InvoiceChange change, MachineEvent event) {
         InvoicePaymentChange invoicePaymentChange = change.getInvoicePaymentChange();
         String paymentId = invoicePaymentChange.getId();
