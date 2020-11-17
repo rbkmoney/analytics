@@ -14,7 +14,6 @@ import com.rbkmoney.damsel.payment_processing.InvoicePayment;
 import com.rbkmoney.damsel.payment_processing.InvoicingSrv;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import org.apache.thrift.TException;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -69,7 +68,6 @@ public class PaymentMapperTest {
                 .setPayments(payments);
     }
 
-    @NotNull
     private InvoicePayment createPaymentWrapper(String paymentId) {
         InvoicePaymentWrapper paymentWrapper = new InvoicePaymentWrapper();
         InvoicePayment invoicePayment = new InvoicePayment();

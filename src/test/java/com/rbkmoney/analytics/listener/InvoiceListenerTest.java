@@ -115,15 +115,20 @@ public class InvoiceListenerTest extends KafkaAbstractTest {
         sinkEvents.forEach(this::produceMessageToEventSink);
 
         AtomicLong count = new AtomicLong();
-        await().atMost(60, TimeUnit.SECONDS).untilAsserted(() -> {
+
+        //check sum for captured payment
+        await().atMost(60, TimeUnit.SECONDS).until(() -> {
             Thread.sleep(MESSAGE_TIMEOUT);
 
-            //check sum for captured payment
-            count.set(clickHouseJdbcTemplate.queryForObject(
-                    String.format(SELECT_SUM, "analytic.events_sink") + InvoiceFlowGenerator.SHOP_ID
-                            + "' and status = 'captured' and currency = 'RUB'", (resultSet, i) -> resultSet.getLong("sum")));
+            try {
+                count.set(clickHouseJdbcTemplate.queryForObject(
+                        String.format(SELECT_SUM, "analytic.events_sink") + InvoiceFlowGenerator.SHOP_ID
+                                + "' and status = 'captured' and currency = 'RUB'", (resultSet, i) -> resultSet.getLong("sum")));
+            } catch (Exception e) {
+                return false;
+            }
 
-            assertEquals(1000L, count.get());
+            return count.get() == 1000L;
         });
 
         //statistic for paymentTool
@@ -154,13 +159,17 @@ public class InvoiceListenerTest extends KafkaAbstractTest {
         sinkEvents.forEach(this::produceMessageToEventSink);
 
         //check sum for succeeded refund
-        await().atMost(60, TimeUnit.SECONDS).untilAsserted(() -> {
+        await().atMost(60, TimeUnit.SECONDS).until(() -> {
             Thread.sleep(MESSAGE_TIMEOUT);
-            count.set(clickHouseJdbcTemplate.queryForObject(
-                    String.format(SELECT_SUM, "analytic.events_sink_refund") + InvoiceFlowGenerator.SHOP_ID
-                            + "' and status = 'succeeded' and currency = 'RUB'", (resultSet, i) -> resultSet.getLong("sum")));
+            try {
+                count.set(clickHouseJdbcTemplate.queryForObject(
+                        String.format(SELECT_SUM, "analytic.events_sink_refund") + InvoiceFlowGenerator.SHOP_ID
+                                + "' and status = 'succeeded' and currency = 'RUB'", (resultSet, i) -> resultSet.getLong("sum")));
+            } catch (Exception e) {
+                return false;
+            }
 
-            assertEquals(246L, count.get());
+            return count.get() == 246L;
         });
 
         //check collapsing sum for pending refund
@@ -178,12 +187,17 @@ public class InvoiceListenerTest extends KafkaAbstractTest {
         sinkEvents.forEach(this::produceMessageToEventSink);
 
         //check sum for succeeded refund
-        await().atMost(60, TimeUnit.SECONDS).untilAsserted(() -> {
+        await().atMost(60, TimeUnit.SECONDS).until(() -> {
             Thread.sleep(MESSAGE_TIMEOUT);
-            count.set(clickHouseJdbcTemplate.queryForObject(
-                    String.format(SELECT_SUM, "analytic.events_sink_adjustment") + InvoiceFlowGenerator.SHOP_ID
-                            + "' and status = 'captured' and currency = 'RUB'", (resultSet, i) -> resultSet.getLong("sum")));
-            assertEquals(23L, count.get());
+            try {
+                count.set(clickHouseJdbcTemplate.queryForObject(
+                        String.format(SELECT_SUM, "analytic.events_sink_adjustment") + InvoiceFlowGenerator.SHOP_ID
+                                + "' and status = 'captured' and currency = 'RUB'", (resultSet, i) -> resultSet.getLong("sum")));
+            } catch (Exception e) {
+                return false;
+            }
+
+            return count.get() == 23L;
         });
 
         String sourceChargeback = "source_chargeback";
@@ -194,13 +208,17 @@ public class InvoiceListenerTest extends KafkaAbstractTest {
 
 
         //check sum for succeeded chargeback
-        await().atMost(60, TimeUnit.SECONDS).untilAsserted(() -> {
+        await().atMost(60, TimeUnit.SECONDS).until(() -> {
             Thread.sleep(20000L);
-            count.set(clickHouseJdbcTemplate.queryForObject(
-                    String.format(SELECT_SUM, "analytic.events_sink_chargeback") + InvoiceFlowGenerator.SHOP_ID
-                            + "' and status = 'accepted' and currency = 'RUB'", (resultSet, i) -> resultSet.getLong("sum")));
+            try {
+                count.set(clickHouseJdbcTemplate.queryForObject(
+                        String.format(SELECT_SUM, "analytic.events_sink_chargeback") + InvoiceFlowGenerator.SHOP_ID
+                                + "' and status = 'accepted' and currency = 'RUB'", (resultSet, i) -> resultSet.getLong("sum")));
+            } catch (Exception e) {
+                return false;
+            }
 
-            assertEquals(23L, count.get());
+            return count.get() == 23L;
         });
 
     }

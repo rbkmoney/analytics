@@ -21,7 +21,7 @@ public class ClickHousePaymentBatchPreparedStatementSetter implements BatchPrepa
             "status, errorCode, errorReason,  invoiceId, paymentId, sequenceId, ip, bin, maskedPan, paymentTool, " +
             "fingerprint,cardToken, paymentSystem, digitalWalletProvider, digitalWalletToken, cryptoCurrency, mobileOperator," +
             "paymentCountry, bankCountry, paymentTime, providerId, terminal, cardHolderName, bankCardTokenProvider)" +
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private final List<PaymentRow> batch;
 
