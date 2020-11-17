@@ -81,6 +81,9 @@ public abstract class InvoiceBaseRowFactory<T extends InvoiceBaseRow> implements
             row.setBin(bankCard.getBin());
             row.setMaskedPan(bankCard.getLastDigits());
             row.setPaymentSystem(bankCard.getPaymentSystem().name());
+            if (bankCard.getTokenProvider() != null) {
+                row.setBankCardTokenProvider(bankCard.getTokenProvider().name());
+            }
         } else if (paymentTool.isSetDigitalWallet()) {
             row.setDigitalWalletProvider(paymentTool.getDigitalWallet().getProvider().name());
             row.setDigitalWalletToken(paymentTool.getDigitalWallet().getToken());
