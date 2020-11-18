@@ -3,24 +3,24 @@ package com.rbkmoney.analytics.listener.mapper.invoice;
 import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.dao.model.PaymentRow;
 import com.rbkmoney.analytics.domain.InvoicePaymentWrapper;
-import com.rbkmoney.analytics.listener.mapper.Mapper;
+import com.rbkmoney.analytics.listener.mapper.AbstractMapper;
 import com.rbkmoney.analytics.listener.mapper.factory.RowFactory;
 import com.rbkmoney.analytics.service.HgClientService;
 import com.rbkmoney.damsel.domain.AdditionalTransactionInfo;
 import com.rbkmoney.damsel.domain.TransactionInfo;
-import com.rbkmoney.damsel.payment_processing.*;
+import com.rbkmoney.damsel.payment_processing.InvoiceChange;
+import com.rbkmoney.damsel.payment_processing.InvoicePaymentChange;
+import com.rbkmoney.damsel.payment_processing.InvoicePaymentSessionChange;
+import com.rbkmoney.damsel.payment_processing.SessionChangePayload;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-import java.util.function.BiFunction;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class PaymentSessionMapper implements Mapper<InvoiceChange, MachineEvent, PaymentRow> {
+public class PaymentSessionMapper extends AbstractMapper<InvoiceChange, MachineEvent, PaymentRow> {
 
     private final HgClientService hgClientService;
     private final RowFactory<PaymentRow> paymentSinkRowFactory;
@@ -32,12 +32,9 @@ public class PaymentSessionMapper implements Mapper<InvoiceChange, MachineEvent,
         InvoicePaymentSessionChange sessionChange = invoicePaymentChange.getPayload().getInvoicePaymentSessionChange();
         SessionChangePayload payload = sessionChange.getPayload();
 
-        BiFunction<String, Invoice, Optional<InvoicePayment>> findPaymentFunc = (id, invoiceInfo) -> invoiceInfo.getPayments().stream()
-                .filter(payment -> payment.isSetPayment() && payment.getPayment().getId().equals(id))
-                .findFirst();
         InvoicePaymentWrapper invoicePaymentWrapper = hgClientService.getInvoiceInfo(
                 event.getSourceId(),
-                findPaymentFunc,
+                findPayment(),
                 paymentId, event.getEventId());
         PaymentRow paymentRow = paymentSinkRowFactory.create(event, invoicePaymentWrapper, paymentId);
 

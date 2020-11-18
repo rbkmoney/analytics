@@ -5,12 +5,15 @@ import com.rbkmoney.analytics.constant.PaymentStatus;
 import com.rbkmoney.analytics.dao.model.PaymentRow;
 import com.rbkmoney.analytics.domain.CashFlowResult;
 import com.rbkmoney.analytics.domain.InvoicePaymentWrapper;
-import com.rbkmoney.analytics.listener.mapper.Mapper;
+import com.rbkmoney.analytics.listener.mapper.AbstractMapper;
 import com.rbkmoney.analytics.listener.mapper.factory.RowFactory;
 import com.rbkmoney.analytics.service.HgClientService;
 import com.rbkmoney.damsel.domain.Failure;
 import com.rbkmoney.damsel.domain.OperationFailure;
-import com.rbkmoney.damsel.payment_processing.*;
+import com.rbkmoney.damsel.payment_processing.InvoiceChange;
+import com.rbkmoney.damsel.payment_processing.InvoicePaymentChange;
+import com.rbkmoney.damsel.payment_processing.InvoicePaymentChangePayload;
+import com.rbkmoney.damsel.payment_processing.InvoicePaymentStatusChanged;
 import com.rbkmoney.geck.common.util.TBaseUtil;
 import com.rbkmoney.geck.serializer.kit.tbase.TErrorUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
@@ -18,13 +21,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-import java.util.function.BiFunction;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class PaymentMapper implements Mapper<InvoiceChange, MachineEvent, PaymentRow> {
+public class PaymentMapper extends AbstractMapper<InvoiceChange, MachineEvent, PaymentRow> {
 
     public static final String OPERATION_TIMEOUT = "operation_timeout";
 
@@ -70,12 +70,6 @@ public class PaymentMapper implements Mapper<InvoiceChange, MachineEvent, Paymen
 
         log.debug("PaymentMapper paymentRow: {}", paymentRow);
         return paymentRow;
-    }
-
-    private BiFunction<String, Invoice, Optional<InvoicePayment>> findPayment() {
-        return (id, invoiceInfo) -> invoiceInfo.getPayments().stream()
-                .filter(payment -> payment.isSetPayment() && payment.getPayment().getId().equals(id))
-                .findFirst();
     }
 
     @Override

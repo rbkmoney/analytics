@@ -3,6 +3,7 @@ package com.rbkmoney.analytics.listener.mapper.invoice;
 import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.dao.model.PaymentRow;
 import com.rbkmoney.analytics.domain.InvoicePaymentWrapper;
+import com.rbkmoney.analytics.listener.mapper.AbstractMapper;
 import com.rbkmoney.analytics.listener.mapper.Mapper;
 import com.rbkmoney.analytics.listener.mapper.factory.RowFactory;
 import com.rbkmoney.analytics.service.HgClientService;
@@ -20,7 +21,7 @@ import java.util.function.BiFunction;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class PaymentRiskScoreMapper implements Mapper<InvoiceChange, MachineEvent, PaymentRow> {
+public class PaymentRiskScoreMapper extends AbstractMapper<InvoiceChange, MachineEvent, PaymentRow> {
 
     private final HgClientService hgClientService;
     private final RowFactory<PaymentRow> paymentSinkRowFactory;
@@ -32,12 +33,9 @@ public class PaymentRiskScoreMapper implements Mapper<InvoiceChange, MachineEven
         InvoicePaymentRiskScoreChanged invoicePaymentRiskScoreChanged = invoicePaymentChange.getPayload().getInvoicePaymentRiskScoreChanged();
         RiskScore riskScore = invoicePaymentRiskScoreChanged.getRiskScore();
 
-        BiFunction<String, Invoice, Optional<InvoicePayment>> findPaymentFunc = (id, invoiceInfo) -> invoiceInfo.getPayments().stream()
-                .filter(payment -> payment.isSetPayment() && payment.getPayment().getId().equals(id))
-                .findFirst();
         InvoicePaymentWrapper invoicePaymentWrapper = hgClientService.getInvoiceInfo(
                 event.getSourceId(),
-                findPaymentFunc,
+                findPayment(),
                 paymentId, event.getEventId());
         PaymentRow paymentRow = paymentSinkRowFactory.create(event, invoicePaymentWrapper, paymentId);
 
