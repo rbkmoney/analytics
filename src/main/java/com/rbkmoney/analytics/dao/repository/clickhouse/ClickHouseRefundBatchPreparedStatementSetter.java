@@ -42,8 +42,8 @@ public class ClickHouseRefundBatchPreparedStatementSetter implements BatchPrepar
         ps.setLong(l++, cashFlowResult.getAmount());
         ps.setLong(l++, cashFlowResult.getGuaranteeDeposit());
         ps.setLong(l++, cashFlowResult.getSystemFee());
-        ps.setLong(l++, cashFlowResult.getExternalFee());
         ps.setLong(l++, cashFlowResult.getProviderFee());
+        ps.setLong(l++, cashFlowResult.getExternalFee());
 
         ps.setString(l++, row.getCurrency());
 
