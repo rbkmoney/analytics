@@ -20,8 +20,8 @@ public class ClickHousePaymentBatchPreparedStatementSetter implements BatchPrepa
             "amount, guaranteeDeposit, systemFee, providerFee, externalFee, currency, providerName, " +
             "status, errorCode, errorReason,  invoiceId, paymentId, sequenceId, ip, bin, maskedPan, paymentTool, " +
             "fingerprint,cardToken, paymentSystem, digitalWalletProvider, digitalWalletToken, cryptoCurrency, mobileOperator," +
-            "paymentCountry, bankCountry, paymentTime, providerId, terminal, cardHolderName, bankCardTokenProvider)" +
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "paymentCountry, bankCountry, paymentTime, providerId, terminal, cardHolderName, bankCardTokenProvider, riskScore, rrn, paymentTerminal)" +
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private final List<PaymentRow> batch;
 
@@ -78,7 +78,10 @@ public class ClickHousePaymentBatchPreparedStatementSetter implements BatchPrepa
         ps.setString(l++, row.getProviderId() != null ? row.getProviderId().toString() : ClickHouseUtilsValue.UNKNOWN);
         ps.setString(l++, row.getTerminal() != null ? row.getTerminal().toString() : ClickHouseUtilsValue.UNKNOWN);
         ps.setString(l++, row.getCardHolderName() != null ? row.getCardHolderName().toString() : ClickHouseUtilsValue.UNKNOWN);
-        ps.setString(l, row.getBankCardTokenProvider());
+        ps.setString(l++, row.getBankCardTokenProvider());
+        ps.setString(l++, row.getRiskScore());
+        ps.setString(l++, row.getRrn());
+        ps.setString(l, row.getPaymentTerminal());
     }
 
     @Override

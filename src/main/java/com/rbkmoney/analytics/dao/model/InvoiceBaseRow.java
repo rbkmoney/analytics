@@ -17,6 +17,7 @@ public class InvoiceBaseRow {
 
     private String ip;
     private String email;
+    private String phoneNumber;
     private String fingerprint;
     private String cardToken;
     private String cardHolderName;
@@ -49,6 +50,12 @@ public class InvoiceBaseRow {
     private String bin;
 
     private String maskedPan;
+
+    private String paymentTerminal;
+
+    private String rrn;
+
+    private String riskScore;
 
     private String errorCode;
     private String errorReason;
