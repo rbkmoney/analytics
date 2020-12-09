@@ -1,6 +1,5 @@
 package com.rbkmoney.analytics.dao.model;
 
-import com.rbkmoney.analytics.constant.BankCardTokenProvider;
 import com.rbkmoney.analytics.constant.PaymentToolType;
 import com.rbkmoney.analytics.domain.CashFlowResult;
 import lombok.Data;
