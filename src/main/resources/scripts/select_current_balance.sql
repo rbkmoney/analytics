@@ -51,7 +51,7 @@
                           analytic.events_sink_payout
                         WHERE
                           ? >= timestamp
-                          and status = 'paid'
+                          and status = 'confirmed'
                           and partyId = ?
                           %1$s
                           %2$s

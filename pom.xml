@@ -428,7 +428,7 @@
                         </database>
                         <target>
                             <packageName>com.rbkmoney.analytics.domain.db</packageName>
-                            <directory>src/main/java/</directory>
+                            <directory>target/generated-sources/jooq</directory>
                         </target>
                     </generator>
                 </configuration>
