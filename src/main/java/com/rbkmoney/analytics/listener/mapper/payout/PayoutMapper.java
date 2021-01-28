@@ -37,7 +37,6 @@ public class PayoutMapper implements Mapper<PayoutChange, Event, PayoutRow> {
                 .map(PayoutCreated::getPayout)
                 .findFirst()
                 .orElseThrow(() -> new PayoutInfoNotFoundException(payoutId));
-
         PayoutRow payoutRow = payoutRowFactory.create(
                 event,
                 payoutCreated,
