@@ -199,19 +199,9 @@ public class PartyListenerTest extends KafkaAbstractTest {
             }
             return true;
         });
-        Party party = postgresPartyDao.getPartyForUpdate(lastPartyId);
-//        Assert.assertEquals(russianLegalEntity.getInn(), party.getRussianLegalEntityInn());
-//        Assert.assertEquals(russianLegalEntity.getActualAddress(), party.getRussianLegalEntityActualAddress());
-//        Assert.assertEquals(russianLegalEntity.getRussianBankAccount().getAccount(), party.getRussianLegalEntityBankAccount());
-//        Assert.assertEquals(russianLegalEntity.getRussianBankAccount().getBankBik(), party.getRussianLegalEntityBankBik());
-//        Assert.assertEquals(russianLegalEntity.getRussianBankAccount().getBankName(), party.getRussianLegalEntityBankName());
-//        Assert.assertEquals(russianLegalEntity.getRussianBankAccount().getBankPostAccount(), party.getRussianLegalEntityBankPostAccount());
-//        Assert.assertEquals(russianLegalEntity.getRegisteredName(), party.getRussianLegalEntityName());
-//        Assert.assertEquals(russianLegalEntity.getPostAddress(), party.getRussianLegalEntityPostAddress());
-//        Assert.assertEquals(russianLegalEntity.getRegisteredNumber(), party.getRussianLegalEntityRegisteredNumber());
-//        Assert.assertEquals(russianLegalEntity.getRepresentativeDocument(), party.getRussianLegalEntityRepresentativeDocument());
-//        Assert.assertEquals(russianLegalEntity.getRepresentativeFullName(), party.getRussianLegalEntityRepresentativeFullName());
-//        Assert.assertEquals(russianLegalEntity.getRepresentativePosition(), party.getRussianLegalEntityRepresentativePosition());
+
+        checkContractorFields(russianLegalEntity);
+        checkShopFields(russianLegalEntity, lastPartyId, lastShopId);
     }
 
     @Test
@@ -352,6 +342,22 @@ public class PartyListenerTest extends KafkaAbstractTest {
 
     private void checkContractorFields(RussianLegalEntity russianLegalEntity) {
         CurrentContractor contractorForUpdate = postgresPartyDao.getContractorForUpdate(CONTRACTOR_ID);
+        Assert.assertEquals(russianLegalEntity.getInn(), contractorForUpdate.getRussianLegalEntityInn());
+        Assert.assertEquals(russianLegalEntity.getActualAddress(), contractorForUpdate.getRussianLegalEntityActualAddress());
+        Assert.assertEquals(russianLegalEntity.getRussianBankAccount().getAccount(), contractorForUpdate.getRussianLegalEntityBankAccount());
+        Assert.assertEquals(russianLegalEntity.getRussianBankAccount().getBankBik(), contractorForUpdate.getRussianLegalEntityBankBik());
+        Assert.assertEquals(russianLegalEntity.getRussianBankAccount().getBankName(), contractorForUpdate.getRussianLegalEntityBankName());
+        Assert.assertEquals(russianLegalEntity.getRussianBankAccount().getBankPostAccount(), contractorForUpdate.getRussianLegalEntityBankPostAccount());
+        Assert.assertEquals(russianLegalEntity.getRegisteredName(), contractorForUpdate.getRussianLegalEntityName());
+        Assert.assertEquals(russianLegalEntity.getPostAddress(), contractorForUpdate.getRussianLegalEntityPostAddress());
+        Assert.assertEquals(russianLegalEntity.getRegisteredNumber(), contractorForUpdate.getRussianLegalEntityRegisteredNumber());
+        Assert.assertEquals(russianLegalEntity.getRepresentativeDocument(), contractorForUpdate.getRussianLegalEntityRepresentativeDocument());
+        Assert.assertEquals(russianLegalEntity.getRepresentativeFullName(), contractorForUpdate.getRussianLegalEntityRepresentativeFullName());
+        Assert.assertEquals(russianLegalEntity.getRepresentativePosition(), contractorForUpdate.getRussianLegalEntityRepresentativePosition());
+    }
+
+    private void checkShopFields(RussianLegalEntity russianLegalEntity, String partyId, String shopId) {
+        Shop contractorForUpdate = postgresPartyDao.getShopForUpdate(partyId, shopId);
         Assert.assertEquals(russianLegalEntity.getInn(), contractorForUpdate.getRussianLegalEntityInn());
         Assert.assertEquals(russianLegalEntity.getActualAddress(), contractorForUpdate.getRussianLegalEntityActualAddress());
         Assert.assertEquals(russianLegalEntity.getRussianBankAccount().getAccount(), contractorForUpdate.getRussianLegalEntityBankAccount());
