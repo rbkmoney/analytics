@@ -1,13 +1,12 @@
 package com.rbkmoney.analytics.service.model;
 
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
 @Data
-public class ShopKey {
+public class GeneralKey {
 
     private final String partyId;
 
-    private final String shopId;
+    private final String refId;
 
 }

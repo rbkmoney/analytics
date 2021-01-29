@@ -1,5 +1,7 @@
 package com.rbkmoney.analytics.dao.repository.postgres;
 
+import com.rbkmoney.analytics.domain.db.tables.pojos.ContractRef;
+import com.rbkmoney.analytics.domain.db.tables.pojos.CurrentContractor;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
 import com.rbkmoney.analytics.domain.db.tables.records.PartyRecord;
@@ -14,8 +16,7 @@ import javax.sql.DataSource;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.rbkmoney.analytics.domain.db.Tables.PARTY;
-import static com.rbkmoney.analytics.domain.db.Tables.SHOP;
+import static com.rbkmoney.analytics.domain.db.Tables.*;
 
 @Component
 public class PostgresPartyDao extends AbstractGenericDao {
@@ -24,10 +25,16 @@ public class PostgresPartyDao extends AbstractGenericDao {
 
     private final RowMapper<Shop> shopRowMapper;
 
+    private final RowMapper<CurrentContractor> currentContractorRowMapper;
+
+    private final RowMapper<ContractRef> contractRefRowMapper;
+
     public PostgresPartyDao(DataSource postgresDatasource) {
         super(postgresDatasource);
         this.partyRowMapper = new RecordRowMapper<>(PARTY, Party.class);
         this.shopRowMapper = new RecordRowMapper<>(SHOP, Shop.class);
+        this.contractRefRowMapper = new RecordRowMapper<>(CONTRACT_REF, ContractRef.class);
+        this.currentContractorRowMapper = new RecordRowMapper<>(CURRENT_CONTRACTOR, CurrentContractor.class);
     }
 
     public void saveParty(Party party) {
@@ -43,13 +50,35 @@ public class PostgresPartyDao extends AbstractGenericDao {
     public void saveParty(List<Party> partyList) {
         List<Query> queries = partyList.stream()
                 .map(party -> getDslContext().newRecord(PARTY, party))
-                .map(partyRecord -> {
-                    return getDslContext()
-                            .insertInto(PARTY).set(partyRecord)
-                            .onConflict(PARTY.PARTY_ID)
-                            .doUpdate()
-                            .set(partyRecord);
-                })
+                .map(partyRecord -> getDslContext()
+                        .insertInto(PARTY).set(partyRecord)
+                        .onConflict(PARTY.PARTY_ID)
+                        .doUpdate()
+                        .set(partyRecord))
+                .collect(Collectors.toList());
+        batchExecute(queries);
+    }
+
+    public void saveContractRefs(List<ContractRef> contractRefs) {
+        List<Query> queries = contractRefs.stream()
+                .map(party -> getDslContext().newRecord(CONTRACT_REF, party))
+                .map(partyRecord -> getDslContext()
+                        .insertInto(CONTRACT_REF).set(partyRecord)
+                        .onConflict(CONTRACT_REF.CONTRACT_ID)
+                        .doUpdate()
+                        .set(partyRecord))
+                .collect(Collectors.toList());
+        batchExecute(queries);
+    }
+
+    public void saveContractor(List<CurrentContractor> currentContractors) {
+        List<Query> queries = currentContractors.stream()
+                .map(contractor -> getDslContext().newRecord(CURRENT_CONTRACTOR, contractor))
+                .map(currentContractorRecord -> getDslContext()
+                        .insertInto(CURRENT_CONTRACTOR).set(currentContractorRecord)
+                        .onConflict(CURRENT_CONTRACTOR.CONTRACTOR_ID)
+                        .doUpdate()
+                        .set(currentContractorRecord))
                 .collect(Collectors.toList());
         batchExecute(queries);
     }
@@ -59,6 +88,13 @@ public class PostgresPartyDao extends AbstractGenericDao {
                 .where(PARTY.PARTY_ID.eq(partyId))
                 .forUpdate();
         return fetchOne(query, partyRowMapper);
+    }
+
+    public ContractRef getContractForUpdate(String contractId) {
+        Query query = getDslContext().selectFrom(CONTRACT_REF)
+                .where(CONTRACT_REF.CONTRACT_ID.eq(contractId))
+                .forUpdate();
+        return fetchOne(query, contractRefRowMapper);
     }
 
     public void saveShop(Shop shop) {
@@ -74,13 +110,11 @@ public class PostgresPartyDao extends AbstractGenericDao {
     public void saveShop(List<Shop> shops) {
         List<Query> queries = shops.stream()
                 .map(shop -> getDslContext().newRecord(SHOP, shop))
-                .map(shopRecord -> {
-                    return getDslContext()
-                            .insertInto(SHOP).set(shopRecord)
-                            .onConflict(SHOP.PARTY_ID, SHOP.SHOP_ID)
-                            .doUpdate()
-                            .set(shopRecord);
-                })
+                .map(shopRecord -> getDslContext()
+                        .insertInto(SHOP).set(shopRecord)
+                        .onConflict(SHOP.PARTY_ID, SHOP.SHOP_ID)
+                        .doUpdate()
+                        .set(shopRecord))
                 .collect(Collectors.toList());
         batchExecute(queries);
     }
@@ -92,5 +126,11 @@ public class PostgresPartyDao extends AbstractGenericDao {
         return fetchOne(query, shopRowMapper);
     }
 
+    public CurrentContractor getContractorForUpdate(String contractorId) {
+        Query query = getDslContext().selectFrom(CURRENT_CONTRACTOR)
+                .where(CURRENT_CONTRACTOR.CONTRACTOR_ID.eq(contractorId))
+                .forUpdate();
+        return fetchOne(query, currentContractorRowMapper);
+    }
 
 }

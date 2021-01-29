@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS analytics.party
-DROP TABLE IF EXISTS analytics.shop
+DROP TABLE IF EXISTS analytics.party;
+DROP TABLE IF EXISTS analytics.shop;
 
 CREATE TABLE analytics.party
 (
@@ -32,8 +32,9 @@ CREATE TABLE analytics.shop
     event_time                 TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     party_id                   CHARACTER VARYING           NOT NULL,
     shop_id                    CHARACTER VARYING           NOT NULL,
+
+    contract_id                CHARACTER VARYING           NOT NULL,
     category_id                INT,
-    contract_id                CHARACTER VARYING,
     payout_tool_id             CHARACTER VARYING,
     payout_schedule_id         INT,
     created_at                 TIMESTAMP WITHOUT TIME ZONE,
@@ -74,6 +75,7 @@ CREATE TABLE analytics.shop
     international_legal_entity_trading_name       CHARACTER VARYING,
     international_legal_entity_registered_address CHARACTER VARYING,
     international_legal_entity_registered_number  CHARACTER VARYING,
+    international_actual_address                  CHARACTER VARYING,
 
     private_entity_type                           analytics.private_entity,
     russian_private_entity_first_name             CHARACTER VARYING,
@@ -88,4 +90,60 @@ CREATE TABLE analytics.shop
 
 CREATE UNIQUE INDEX party_id_shop_id_uidx ON analytics.shop (party_id, shop_id);
 CREATE INDEX shop_created_at_idx ON analytics.shop (created_at);
-CREATE INDEX contract_contract_id_idx ON analytics.shop (contractor_id);
+
+CREATE TABLE analytics.contract_ref
+(
+    id                         BIGSERIAL                   NOT NULL,
+    event_id                   BIGINT                      NOT NULL,
+    event_time                 TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    party_id                   CHARACTER VARYING           NOT NULL,
+    contract_id                CHARACTER VARYING           NOT NULL,
+    contractor_id              CHARACTER VARYING           NOT NULL,
+
+    CONSTRAINT contract_ref_pkey PRIMARY KEY (id)
+);
+CREATE UNIQUE INDEX contract_ref_uidx ON analytics.contract_ref (contract_id);
+
+CREATE TABLE analytics.current_contractor
+(
+    id                         BIGSERIAL                   NOT NULL,
+    event_id                   BIGINT                      NOT NULL,
+    event_time                 TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    party_id                   CHARACTER VARYING           NOT NULL,
+
+    contractor_id                                 CHARACTER VARYING NOT NULL,
+    contractor_type                               analytics.contractor,
+    reg_user_email                                CHARACTER VARYING,
+    legal_entity_type                             analytics.legal_entity,
+    russian_legal_entity_name                     CHARACTER VARYING,
+    russian_legal_entity_registered_number        CHARACTER VARYING,
+    russian_legal_entity_inn                      CHARACTER VARYING,
+    russian_legal_entity_actual_address           CHARACTER VARYING,
+    russian_legal_entity_post_address             CHARACTER VARYING,
+    russian_legal_entity_representative_position  CHARACTER VARYING,
+    russian_legal_entity_representative_full_name CHARACTER VARYING,
+    russian_legal_entity_representative_document  CHARACTER VARYING,
+    russian_legal_entity_bank_account             CHARACTER VARYING,
+    russian_legal_entity_bank_name                CHARACTER VARYING,
+    russian_legal_entity_bank_post_account        CHARACTER VARYING,
+    russian_legal_entity_bank_bik                 CHARACTER VARYING,
+
+    international_legal_entity_name               CHARACTER VARYING,
+    international_legal_entity_trading_name       CHARACTER VARYING,
+    international_legal_entity_registered_address CHARACTER VARYING,
+    international_legal_entity_registered_number  CHARACTER VARYING,
+    international_actual_address                  CHARACTER VARYING,
+
+    private_entity_type                           analytics.private_entity,
+    russian_private_entity_first_name             CHARACTER VARYING,
+    russian_private_entity_second_name            CHARACTER VARYING,
+    russian_private_entity_middle_name            CHARACTER VARYING,
+    russian_private_entity_phone_number           CHARACTER VARYING,
+    russian_private_entity_email                  CHARACTER VARYING,
+
+    contractor_identification_level               analytics.contractor_identification_lvl,
+
+    CONSTRAINT contractor_pkey PRIMARY KEY (id)
+);
+
+CREATE UNIQUE INDEX contractor_id_idx ON analytics.current_contractor (contractor_id);

@@ -5,7 +5,6 @@ import com.rbkmoney.analytics.dao.model.*;
 import com.rbkmoney.analytics.dao.repository.clickhouse.*;
 import com.rbkmoney.analytics.dao.repository.clickhouse.iface.ClickHousePaymentRepository;
 import com.rbkmoney.analytics.dao.repository.postgres.PostgresBalanceChangesRepository;
-import com.rbkmoney.analytics.service.PartyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
