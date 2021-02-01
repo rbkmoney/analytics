@@ -198,10 +198,10 @@ public class PartyListenerTest extends KafkaAbstractTest {
                 Thread.sleep(1000);
                 return false;
             }
-            Integer lastPartyCount = postgresJdbcTemplate.queryForObject(String.format(
-                    "SELECT count(*) FROM analytics.shop WHERE shop_id = '%s' AND russian_legal_entity_inn = '%s'",
+            Integer lastShopCount = postgresJdbcTemplate.queryForObject(String.format(
+                    "SELECT count(*) FROM analytics.shop WHERE shop_id = '%s' AND russian_legal_entity_inn = '%s' ",
                     lastShopId, russianLegalEntity.getInn()), Integer.class);
-            if (lastPartyCount <= 0) {
+            if (lastShopCount <= 0) {
                 Thread.sleep(1000);
                 return false;
             }
@@ -209,6 +209,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
         });
 
         checkContractorFields(russianLegalEntity);
+
         checkShopFields(russianLegalEntity, lastPartyId, lastShopId);
     }
 

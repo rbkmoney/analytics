@@ -35,7 +35,7 @@
         <analytics-proto.version>1.25-2ec5116</analytics-proto.version>
         <mg-event-sink-listener-spring-boot-starter.version>0.0.5-SNAPSHOT</mg-event-sink-listener-spring-boot-starter.version>
         <db-common-lib.version>0.0.3</db-common-lib.version>
-        <sink-common-lib.version>0.0.4</sink-common-lib.version>
+        <sink-common-lib.version>0.0.7</sink-common-lib.version>
         <schedlock.version>4.14.0</schedlock.version>
         <db.port>5432</db.port>
         <db.user>postgres</db.user>
@@ -43,6 +43,7 @@
         <db.name>analytics</db.name>
         <db.schema>analytics</db.schema>
         <db.url>jdbc:postgresql://localhost:${db.port}/${db.name}</db.url>
+        <xrates-proto.version>1.20-6c219ac</xrates-proto.version>
     </properties>
 
     <dependencies>
@@ -106,6 +107,11 @@
             <groupId>com.rbkmoney</groupId>
             <artifactId>db-common-lib</artifactId>
             <version>${db-common-lib.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.rbkmoney</groupId>
+            <artifactId>xrates-proto</artifactId>
+            <version>${xrates-proto.version}</version>
         </dependency>
 
         <!--spring-->

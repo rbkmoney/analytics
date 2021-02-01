@@ -88,6 +88,14 @@ public class KafkaConfig {
         return factory;
     }
 
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, MachineEvent> rateContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, MachineEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        String consumerGroup = consumerGroupIdService.generateGroupId(RESULT_ANALYTICS);
+        initDefaultListenerProperties(factory, consumerGroup, new MachineEventDeserializer());
+        return factory;
+    }
+
     private <T> void initDefaultListenerProperties(
             ConcurrentKafkaListenerContainerFactory<String, T> factory,
             String consumerGroup, Deserializer<T> deserializer) {

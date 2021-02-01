@@ -3,7 +3,7 @@ package com.rbkmoney.analytics.service.model;
 import lombok.Data;
 
 @Data
-public class GeneralKey {
+public class PartyGeneralKey {
 
     private final String partyId;
 

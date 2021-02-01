@@ -4,7 +4,7 @@ import com.rbkmoney.analytics.domain.db.tables.pojos.Contract;
 import com.rbkmoney.analytics.listener.handler.merger.ContractMerger;
 import com.rbkmoney.analytics.listener.mapper.ChangeHandler;
 import com.rbkmoney.analytics.service.PartyManagementService;
-import com.rbkmoney.analytics.service.model.GeneralKey;
+import com.rbkmoney.analytics.service.model.PartyGeneralKey;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class ContractEventHandler implements PartyManagementEventHandler {
         final List<Contract> contractRefs = contractRefHandlers.stream()
                 .filter(changeHandler -> changeHandler.accept(change))
                 .flatMap(changeHandler -> changeHandler.handleChange(change, machineEvent).stream())
-                .collect(Collectors.groupingBy(o -> new GeneralKey(o.getPartyId(), o.getContractId()), Collectors.toList()))
+                .collect(Collectors.groupingBy(o -> new PartyGeneralKey(o.getPartyId(), o.getContractId()), Collectors.toList()))
                 .entrySet().stream()
                 .map(shopKeyListEntry -> contractMerger.merge(shopKeyListEntry.getKey(), shopKeyListEntry.getValue()))
                 .collect(Collectors.toList());

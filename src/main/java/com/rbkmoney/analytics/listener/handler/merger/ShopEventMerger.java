@@ -2,7 +2,7 @@ package com.rbkmoney.analytics.listener.handler.merger;
 
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
 import com.rbkmoney.analytics.service.PartyManagementService;
-import com.rbkmoney.analytics.service.model.GeneralKey;
+import com.rbkmoney.analytics.service.model.PartyGeneralKey;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +14,7 @@ public class ShopEventMerger {
 
     private final PartyManagementService partyManagementService;
 
-    public Shop mergeShop(GeneralKey key, List<Shop> shops) {
+    public Shop mergeShop(PartyGeneralKey key, List<Shop> shops) {
         Shop targetShop = partyManagementService.getShop(key);
         if (targetShop == null) {
             targetShop = new Shop();

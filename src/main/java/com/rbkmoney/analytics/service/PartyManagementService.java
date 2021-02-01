@@ -8,7 +8,7 @@ import com.rbkmoney.analytics.domain.db.tables.pojos.Contract;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Contractor;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
-import com.rbkmoney.analytics.service.model.GeneralKey;
+import com.rbkmoney.analytics.service.model.PartyGeneralKey;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -52,9 +52,9 @@ public class PartyManagementService {
         contractorDao.saveContractor(currentContractors);
     }
 
-    public Shop getShop(GeneralKey generalKey) {
-        Shop shop = shopDao.getShopForUpdate(generalKey.getPartyId(), generalKey.getRefId());
-        log.debug("Get shop from DB by partyId={}, shopId={}: {}", generalKey.getPartyId(), generalKey.getRefId(), shop);
+    public Shop getShop(PartyGeneralKey partyGeneralKey) {
+        Shop shop = shopDao.getShopForUpdate(partyGeneralKey.getPartyId(), partyGeneralKey.getRefId());
+        log.debug("Get shop from DB by partyId={}, shopId={}: {}", partyGeneralKey.getPartyId(), partyGeneralKey.getRefId(), shop);
         return shop;
     }
 

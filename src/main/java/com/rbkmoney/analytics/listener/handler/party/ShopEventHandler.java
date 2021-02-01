@@ -4,7 +4,7 @@ import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
 import com.rbkmoney.analytics.listener.handler.merger.ShopEventMerger;
 import com.rbkmoney.analytics.listener.mapper.ChangeHandler;
 import com.rbkmoney.analytics.service.PartyManagementService;
-import com.rbkmoney.analytics.service.model.GeneralKey;
+import com.rbkmoney.analytics.service.model.PartyGeneralKey;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class ShopEventHandler implements PartyManagementEventHandler {
         final List<Shop> shops = shopHandlers.stream()
                 .filter(changeHandler -> changeHandler.accept(change))
                 .flatMap(changeHandler -> changeHandler.handleChange(change, machineEvent).stream())
-                .collect(Collectors.groupingBy(o -> new GeneralKey(o.getPartyId(), o.getShopId()), Collectors.toList()))
+                .collect(Collectors.groupingBy(o -> new PartyGeneralKey(o.getPartyId(), o.getShopId()), Collectors.toList()))
                 .entrySet().stream()
                 .map(shopKeyListEntry -> shopEventMerger.mergeShop(shopKeyListEntry.getKey(), shopKeyListEntry.getValue()))
                 .collect(Collectors.toList());

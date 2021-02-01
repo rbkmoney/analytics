@@ -2,7 +2,7 @@ package com.rbkmoney.analytics.listener.handler.merger;
 
 import com.rbkmoney.analytics.domain.db.tables.pojos.Contract;
 import com.rbkmoney.analytics.service.PartyManagementService;
-import com.rbkmoney.analytics.service.model.GeneralKey;
+import com.rbkmoney.analytics.service.model.PartyGeneralKey;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +14,7 @@ public class ContractMerger {
 
     private final PartyManagementService partyManagementService;
 
-    public Contract merge(GeneralKey key, List<Contract> contractRefs) {
+    public Contract merge(PartyGeneralKey key, List<Contract> contractRefs) {
         Contract targetContract = partyManagementService.getContract(key.getRefId());
         if (targetContract == null) {
             targetContract = new Contract();
