@@ -1,7 +1,7 @@
 package com.rbkmoney.analytics.service;
 
 import com.rbkmoney.analytics.AnalyticsApplication;
-import com.rbkmoney.analytics.dao.repository.postgres.DominantDao;
+import com.rbkmoney.analytics.dao.repository.postgres.party.management.DominantDao;
 import com.rbkmoney.analytics.listener.KafkaAbstractTest;
 import com.rbkmoney.analytics.utils.TestData;
 import com.rbkmoney.damsel.domain.CategoryType;

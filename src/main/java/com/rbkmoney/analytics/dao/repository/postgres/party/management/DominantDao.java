@@ -1,4 +1,4 @@
-package com.rbkmoney.analytics.dao.repository.postgres;
+package com.rbkmoney.analytics.dao.repository.postgres.party.management;
 
 import com.rbkmoney.analytics.domain.db.tables.pojos.Dominant;
 import com.rbkmoney.analytics.domain.db.tables.records.DominantRecord;
@@ -18,7 +18,8 @@ public class DominantDao extends AbstractGenericDao {
     }
 
     public void updateVersion(long version, long oldVersion) {
-        Query query = getDslContext().update(DOMINANT)
+        Query query = getDslContext()
+                .update(DOMINANT)
                 .set(DOMINANT.LAST_VERSION, version)
                 .where(DOMINANT.LAST_VERSION.eq(oldVersion));
         execute(query);
@@ -33,8 +34,9 @@ public class DominantDao extends AbstractGenericDao {
     }
 
     public Long getLastVersion() {
-        Query query = getDslContext().select(DOMINANT.LAST_VERSION).from(DOMINANT);
-
+        Query query = getDslContext()
+                .select(DOMINANT.LAST_VERSION)
+                .from(DOMINANT);
         return fetchOne(query, Long.class);
     }
 

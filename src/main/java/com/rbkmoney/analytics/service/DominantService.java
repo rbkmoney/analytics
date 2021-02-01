@@ -1,6 +1,6 @@
 package com.rbkmoney.analytics.service;
 
-import com.rbkmoney.analytics.dao.repository.postgres.DominantDao;
+import com.rbkmoney.analytics.dao.repository.postgres.party.management.DominantDao;
 import com.rbkmoney.analytics.listener.handler.dominant.DominantHandler;
 import com.rbkmoney.analytics.utils.JsonUtil;
 import com.rbkmoney.damsel.domain_config.Commit;

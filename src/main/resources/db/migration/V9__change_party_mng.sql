@@ -1,6 +1,10 @@
 DROP TABLE IF EXISTS analytics.party;
 DROP TABLE IF EXISTS analytics.shop;
 
+DROP TYPE IF EXISTS analytics.contractor;
+
+CREATE TYPE analytics.contractor_type AS ENUM ('registered_user', 'legal_entity', 'private_entity');
+
 CREATE TABLE analytics.party
 (
     id                                            BIGSERIAL                   NOT NULL,
@@ -55,7 +59,7 @@ CREATE TABLE analytics.shop
     account_payout             CHARACTER VARYING,
 
     contractor_id                                 CHARACTER VARYING,
-    contractor_type                               analytics.contractor,
+    contractor_type                               analytics.contractor_type,
     reg_user_email                                CHARACTER VARYING,
     legal_entity_type                             analytics.legal_entity,
     russian_legal_entity_name                     CHARACTER VARYING,
@@ -91,7 +95,7 @@ CREATE TABLE analytics.shop
 CREATE UNIQUE INDEX party_id_shop_id_uidx ON analytics.shop (party_id, shop_id);
 CREATE INDEX shop_created_at_idx ON analytics.shop (created_at);
 
-CREATE TABLE analytics.contract_ref
+CREATE TABLE analytics.contract
 (
     id                         BIGSERIAL                   NOT NULL,
     event_id                   BIGINT                      NOT NULL,
@@ -100,11 +104,11 @@ CREATE TABLE analytics.contract_ref
     contract_id                CHARACTER VARYING           NOT NULL,
     contractor_id              CHARACTER VARYING           NOT NULL,
 
-    CONSTRAINT contract_ref_pkey PRIMARY KEY (id)
+    CONSTRAINT contract_pkey PRIMARY KEY (id)
 );
-CREATE UNIQUE INDEX contract_ref_uidx ON analytics.contract_ref (contract_id);
+CREATE UNIQUE INDEX contract_uidx ON analytics.contract (contract_id);
 
-CREATE TABLE analytics.current_contractor
+CREATE TABLE analytics.contractor
 (
     id                         BIGSERIAL                   NOT NULL,
     event_id                   BIGINT                      NOT NULL,
@@ -112,7 +116,7 @@ CREATE TABLE analytics.current_contractor
     party_id                   CHARACTER VARYING           NOT NULL,
 
     contractor_id                                 CHARACTER VARYING NOT NULL,
-    contractor_type                               analytics.contractor,
+    contractor_type                               analytics.contractor_type,
     reg_user_email                                CHARACTER VARYING,
     legal_entity_type                             analytics.legal_entity,
     russian_legal_entity_name                     CHARACTER VARYING,
@@ -146,4 +150,4 @@ CREATE TABLE analytics.current_contractor
     CONSTRAINT contractor_pkey PRIMARY KEY (id)
 );
 
-CREATE UNIQUE INDEX contractor_id_idx ON analytics.current_contractor (contractor_id);
+CREATE UNIQUE INDEX contractor_id_idx ON analytics.contractor (contractor_id);

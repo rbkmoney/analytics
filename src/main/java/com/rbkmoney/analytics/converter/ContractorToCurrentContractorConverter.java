@@ -1,7 +1,5 @@
 package com.rbkmoney.analytics.converter;
 
-import com.rbkmoney.analytics.domain.db.tables.pojos.CurrentContractor;
-import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
 import com.rbkmoney.damsel.domain.Contractor;
 import com.rbkmoney.damsel.domain.InternationalLegalEntity;
 import com.rbkmoney.damsel.domain.RussianLegalEntity;
@@ -11,12 +9,12 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ContractorToCurrentContractorConverter implements Converter<Contractor, CurrentContractor> {
+public class ContractorToCurrentContractorConverter implements Converter<Contractor, com.rbkmoney.analytics.domain.db.tables.pojos.Contractor> {
 
     @Override
-    public CurrentContractor convert(Contractor contractor) {
-        CurrentContractor currentContractor = new CurrentContractor();
-        currentContractor.setContractorType(TBaseUtil.unionFieldToEnum(contractor, com.rbkmoney.analytics.domain.db.enums.Contractor.class));
+    public com.rbkmoney.analytics.domain.db.tables.pojos.Contractor convert(Contractor contractor) {
+        com.rbkmoney.analytics.domain.db.tables.pojos.Contractor currentContractor = new com.rbkmoney.analytics.domain.db.tables.pojos.Contractor();
+        currentContractor.setContractorType(TBaseUtil.unionFieldToEnum(contractor, com.rbkmoney.analytics.domain.db.enums.ContractorType.class));
         if (contractor.isSetRegisteredUser()) {
             currentContractor.setRegUserEmail(contractor.getRegisteredUser().getEmail());
         } else if (contractor.isSetLegalEntity()) {

@@ -2,9 +2,8 @@ package com.rbkmoney.analytics.listener.mapper.party.contractor;
 
 import com.rbkmoney.analytics.converter.ContractorToCurrentContractorConverter;
 import com.rbkmoney.analytics.domain.db.enums.ContractorIdentificationLvl;
-import com.rbkmoney.analytics.domain.db.tables.pojos.CurrentContractor;
+import com.rbkmoney.analytics.domain.db.tables.pojos.Contractor;
 import com.rbkmoney.analytics.listener.mapper.party.AbstractClaimChangeHandler;
-import com.rbkmoney.damsel.domain.Contractor;
 import com.rbkmoney.damsel.domain.PartyContractor;
 import com.rbkmoney.damsel.payment_processing.ClaimEffect;
 import com.rbkmoney.damsel.payment_processing.ContractorEffectUnit;
@@ -21,7 +20,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ContractorCreatedHandler extends AbstractClaimChangeHandler<List<CurrentContractor>> {
+public class ContractorCreatedHandler extends AbstractClaimChangeHandler<List<Contractor>> {
 
     private final ContractorToCurrentContractorConverter contractorToShopConverter;
 
@@ -32,9 +31,9 @@ public class ContractorCreatedHandler extends AbstractClaimChangeHandler<List<Cu
     }
 
     @Override
-    public List<CurrentContractor> handleChange(PartyChange change, MachineEvent event) {
+    public List<Contractor> handleChange(PartyChange change, MachineEvent event) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
-        List<CurrentContractor> currentContractors = new ArrayList<>();
+        List<Contractor> currentContractors = new ArrayList<>();
         for (ClaimEffect claimEffect : claimEffects) {
             if (claimEffect.isSetContractorEffect() && claimEffect.getContractorEffect().getEffect().isSetCreated()) {
                 currentContractors.add(handleEvent(event, claimEffect));
@@ -43,17 +42,17 @@ public class ContractorCreatedHandler extends AbstractClaimChangeHandler<List<Cu
         return currentContractors;
     }
 
-    private CurrentContractor handleEvent(MachineEvent event, ClaimEffect effect) {
+    private Contractor handleEvent(MachineEvent event, ClaimEffect effect) {
         ContractorEffectUnit contractorEffect = effect.getContractorEffect();
         PartyContractor partyContractor = contractorEffect.getEffect().getCreated();
-        Contractor contractor = partyContractor.getContractor();
+        com.rbkmoney.damsel.domain.Contractor contractor = partyContractor.getContractor();
 
         log.debug("ContractorCreatedHandler contractor: {}", contractor);
 
         String contractorId = contractorEffect.getId();
         String partyId = event.getSourceId();
 
-        CurrentContractor currentContractor = contractorToShopConverter.convert(contractor);
+        Contractor currentContractor = contractorToShopConverter.convert(contractor);
         currentContractor.setPartyId(partyId);
         currentContractor.setEventId(event.getEventId());
         currentContractor.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));

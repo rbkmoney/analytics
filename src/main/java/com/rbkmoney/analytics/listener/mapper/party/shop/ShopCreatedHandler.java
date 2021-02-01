@@ -3,8 +3,8 @@ package com.rbkmoney.analytics.listener.mapper.party.shop;
 import com.rbkmoney.analytics.converter.ContractorToShopConverter;
 import com.rbkmoney.analytics.domain.db.enums.Blocking;
 import com.rbkmoney.analytics.domain.db.enums.Suspension;
-import com.rbkmoney.analytics.domain.db.tables.pojos.ContractRef;
-import com.rbkmoney.analytics.domain.db.tables.pojos.CurrentContractor;
+import com.rbkmoney.analytics.domain.db.tables.pojos.Contract;
+import com.rbkmoney.analytics.domain.db.tables.pojos.Contractor;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
 import com.rbkmoney.analytics.listener.mapper.party.AbstractClaimChangeHandler;
 import com.rbkmoney.analytics.service.PartyManagementService;
@@ -52,8 +52,8 @@ public class ShopCreatedHandler extends AbstractClaimChangeHandler<List<Shop>> {
         String partyId = event.getSourceId();
 
         final String contractId = shopCreated.getContractId();
-        final ContractRef contract = partyManagementService.getContract(contractId);
-        final CurrentContractor currentContractor = partyManagementService.getCurrentContractor(contract.getContractorId());
+        final Contract contract = partyManagementService.getContract(contractId);
+        final Contractor currentContractor = partyManagementService.getContractorById(contract.getContractorId());
 
         Shop shop = contractorToShopConverter.convert(currentContractor);
         shop.setEventId(event.getEventId());

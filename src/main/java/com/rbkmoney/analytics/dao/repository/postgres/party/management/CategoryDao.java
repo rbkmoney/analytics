@@ -1,4 +1,4 @@
-package com.rbkmoney.analytics.dao.repository.postgres;
+package com.rbkmoney.analytics.dao.repository.postgres.party.management;
 
 import com.rbkmoney.analytics.domain.db.tables.pojos.Category;
 import com.rbkmoney.analytics.domain.db.tables.records.CategoryRecord;
@@ -25,7 +25,7 @@ public class CategoryDao extends AbstractGenericDao {
     public void saveCategory(Category category) {
         CategoryRecord categoryRecord = getDslContext().newRecord(CATEGORY, category);
         Query query = getDslContext()
-                .insertInto(CATEGORY).set(categoryRecord)
+                .insertInto(CATEGORY)
                 .set(categoryRecord);
         execute(query);
     }
@@ -50,8 +50,8 @@ public class CategoryDao extends AbstractGenericDao {
 
     public Category getCategory(Integer categoryId, Long versionId) {
         Query query = getDslContext().selectFrom(CATEGORY)
-                .where(CATEGORY.CATEGORY_ID.eq(categoryId)).and(CATEGORY.VERSION_ID.eq(versionId));
-
+                .where(CATEGORY.CATEGORY_ID.eq(categoryId))
+                .and(CATEGORY.VERSION_ID.eq(versionId));
         return fetchOne(query, categoryRowMapper);
     }
 

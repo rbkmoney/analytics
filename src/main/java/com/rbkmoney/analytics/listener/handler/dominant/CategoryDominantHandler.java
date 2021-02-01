@@ -1,6 +1,6 @@
 package com.rbkmoney.analytics.listener.handler.dominant;
 
-import com.rbkmoney.analytics.dao.repository.postgres.CategoryDao;
+import com.rbkmoney.analytics.dao.repository.postgres.party.management.CategoryDao;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Category;
 import com.rbkmoney.damsel.domain.CategoryObject;
 import com.rbkmoney.damsel.domain.DomainObject;

@@ -1,4 +1,4 @@
-package com.rbkmoney.analytics.listener.handler.party;
+package com.rbkmoney.analytics.listener.handler.merger;
 
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
 import com.rbkmoney.analytics.service.PartyManagementService;

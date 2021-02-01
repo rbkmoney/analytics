@@ -1,6 +1,6 @@
-package com.rbkmoney.analytics.listener.handler.party;
+package com.rbkmoney.analytics.listener.handler.merger;
 
-import com.rbkmoney.analytics.domain.db.tables.pojos.CurrentContractor;
+import com.rbkmoney.analytics.domain.db.tables.pojos.Contractor;
 import com.rbkmoney.analytics.service.PartyManagementService;
 import com.rbkmoney.analytics.service.model.GeneralKey;
 import lombok.RequiredArgsConstructor;
@@ -14,12 +14,12 @@ public class ContractorEventMerger {
 
     private final PartyManagementService partyManagementService;
 
-    public CurrentContractor merge(GeneralKey key, List<CurrentContractor> currentContractors) {
-        CurrentContractor targetContractor = partyManagementService.getCurrentContractor(key.getRefId());
+    public Contractor merge(GeneralKey key, List<Contractor> currentContractors) {
+        Contractor targetContractor = partyManagementService.getContractorById(key.getRefId());
         if (targetContractor == null) {
-            targetContractor = new CurrentContractor();
+            targetContractor = new Contractor();
         }
-        for (CurrentContractor currentContractor : currentContractors) {
+        for (Contractor currentContractor : currentContractors) {
             targetContractor.setPartyId(currentContractor.getPartyId() != null ? currentContractor.getPartyId() : targetContractor.getPartyId());
             targetContractor.setEventId(currentContractor.getEventId());
             targetContractor.setEventTime(currentContractor.getEventTime());

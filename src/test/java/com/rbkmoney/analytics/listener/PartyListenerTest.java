@@ -1,11 +1,13 @@
 package com.rbkmoney.analytics.listener;
 
 import com.rbkmoney.analytics.AnalyticsApplication;
-import com.rbkmoney.analytics.dao.repository.postgres.PostgresPartyDao;
-import com.rbkmoney.analytics.domain.db.enums.Contractor;
+import com.rbkmoney.analytics.dao.repository.postgres.party.management.ContractorDao;
+import com.rbkmoney.analytics.dao.repository.postgres.party.management.PartyDao;
+import com.rbkmoney.analytics.dao.repository.postgres.party.management.ShopDao;
+import com.rbkmoney.analytics.domain.db.enums.ContractorType;
 import com.rbkmoney.analytics.domain.db.enums.LegalEntity;
 import com.rbkmoney.analytics.domain.db.enums.Suspension;
-import com.rbkmoney.analytics.domain.db.tables.pojos.CurrentContractor;
+import com.rbkmoney.analytics.domain.db.tables.pojos.Contractor;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
 import com.rbkmoney.damsel.domain.PartyContractor;
@@ -66,7 +68,13 @@ public class PartyListenerTest extends KafkaAbstractTest {
     }
 
     @Autowired
-    private PostgresPartyDao postgresPartyDao;
+    private PartyDao partyDao;
+
+    @Autowired
+    private ShopDao shopDao;
+
+    @Autowired
+    private ContractorDao contractorDao;
 
     @Autowired
     private JdbcTemplate postgresJdbcTemplate;
@@ -80,7 +88,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
         sinkEvents.forEach(this::produceMessageToParty);
 
         await().atMost(60, SECONDS).until(() -> {
-            Integer partyCount = postgresJdbcTemplate.queryForObject("SELECT count(*) FROM analytics.current_contractor" +
+            Integer partyCount = postgresJdbcTemplate.queryForObject("SELECT count(*) FROM analytics.contractor" +
                     " WHERE contractor_identification_level = 'partial'", Integer.class);
             Integer shopCount = postgresJdbcTemplate.queryForObject(String.format("SELECT count(*) FROM analytics.shop" +
                     " WHERE account_settlement = '%s'", SETTLEMENT_ID), Integer.class);
@@ -96,17 +104,17 @@ public class PartyListenerTest extends KafkaAbstractTest {
         sinkEvents.forEach(this::produceMessageToParty);
 
         await().atMost(60, SECONDS).until(() -> {
-            Party party = postgresPartyDao.getPartyForUpdate(partyId);
+            Party party = partyDao.getPartyById(partyId);
             if (party == null) {
                 Thread.sleep(1000);
                 return false;
             }
-            Integer partyCount = postgresJdbcTemplate.queryForObject("SELECT count(*) FROM analytics.current_contractor" +
+            Integer partyCount = postgresJdbcTemplate.queryForObject("SELECT count(*) FROM analytics.contractor" +
                     " WHERE contractor_identification_level = 'partial'", Integer.class);
             return checkResult(partyCount);
         });
 
-        Party party = postgresPartyDao.getPartyForUpdate(partyId);
+        Party party = partyDao.getPartyById(partyId);
         Assert.assertFalse(party.getPartyId().isEmpty());
         Assert.assertEquals(PartyFlowGenerator.PARTY_BLOCK_REASON, party.getBlockedReason());
         Assert.assertNotNull(party.getBlockedSince());
@@ -141,7 +149,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
             return true;
         });
 
-        Shop shop = postgresPartyDao.getShopForUpdate(partyId, shopId);
+        Shop shop = shopDao.getShopForUpdate(partyId, shopId);
         Assert.assertEquals(partyId, shop.getPartyId());
         Assert.assertEquals(shopId, shop.getShopId());
         Assert.assertEquals(PartyFlowGenerator.CURRENCY_SYMBOL, shop.getAccountCurrencyCode());
@@ -158,7 +166,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
         Assert.assertEquals(PartyFlowGenerator.PAYOUT_TOOL_ID, shop.getPayoutToolId());
         Assert.assertEquals(PartyFlowGenerator.SHOP_ACCOUNT_PAYOUT.toString(), shop.getAccountPayout());
         Assert.assertEquals(String.valueOf(SETTLEMENT_ID), shop.getAccountSettlement());
-        Assert.assertEquals(Contractor.legal_entity, shop.getContractorType());
+        Assert.assertEquals(ContractorType.legal_entity, shop.getContractorType());
         Assert.assertEquals(LegalEntity.russian_legal_entity, shop.getLegalEntityType());
         Assert.assertNotNull(shop.getRussianLegalEntityActualAddress());
         Assert.assertNotNull(shop.getRussianLegalEntityBankAccount());
@@ -219,7 +227,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
                 return false;
             }
             Integer lastPartyCount = postgresJdbcTemplate.queryForObject(String.format(
-                    "SELECT count(*) FROM analytics.current_contractor WHERE party_id = '%s' and russian_legal_entity_inn = '%s'", partyId, russianLegalEntity.getInn()), Integer.class);
+                    "SELECT count(*) FROM analytics.contractor WHERE party_id = '%s' and russian_legal_entity_inn = '%s'", partyId, russianLegalEntity.getInn()), Integer.class);
             if (lastPartyCount <= 0) {
                 Thread.sleep(1000);
                 return false;
@@ -255,7 +263,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
             }
             return true;
         });
-        Shop shop = postgresPartyDao.getShopForUpdate(partyId, shopId);
+        Shop shop = shopDao.getShopForUpdate(partyId, shopId);
         Assert.assertNotNull(shop.getShopId());
         Assert.assertNotNull(shop.getPartyId());
         Assert.assertNotNull(shop.getSuspensionActiveSince());
@@ -300,7 +308,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
             }
             return true;
         });
-        Shop shop = postgresPartyDao.getShopForUpdate(partyId, shopId);
+        Shop shop = shopDao.getShopForUpdate(partyId, shopId);
         Assert.assertNotNull(shop.getShopId());
         Assert.assertNotNull(shop.getPartyId());
         Assert.assertNotNull(shop.getCreatedAt());
@@ -327,7 +335,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
         sinkEvents.forEach(this::produceMessageToParty);
         await().atMost(60, SECONDS).until(() -> {
             Integer lastPartyCount = postgresJdbcTemplate.queryForObject(String.format(
-                    "SELECT count(*) FROM analytics.current_contractor "
+                    "SELECT count(*) FROM analytics.contractor "
                             + "WHERE party_id = '%s' and russian_legal_entity_inn = '%s'",
                     partyId, russianLegalEntity.getInn()), Integer.class);
             if (lastPartyCount <= 0) {
@@ -341,7 +349,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
     }
 
     private void checkContractorFields(RussianLegalEntity russianLegalEntity) {
-        CurrentContractor contractorForUpdate = postgresPartyDao.getContractorForUpdate(CONTRACTOR_ID);
+        Contractor contractorForUpdate = contractorDao.getContractorById(CONTRACTOR_ID);
         Assert.assertEquals(russianLegalEntity.getInn(), contractorForUpdate.getRussianLegalEntityInn());
         Assert.assertEquals(russianLegalEntity.getActualAddress(), contractorForUpdate.getRussianLegalEntityActualAddress());
         Assert.assertEquals(russianLegalEntity.getRussianBankAccount().getAccount(), contractorForUpdate.getRussianLegalEntityBankAccount());
@@ -357,7 +365,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
     }
 
     private void checkShopFields(RussianLegalEntity russianLegalEntity, String partyId, String shopId) {
-        Shop contractorForUpdate = postgresPartyDao.getShopForUpdate(partyId, shopId);
+        Shop contractorForUpdate = shopDao.getShopForUpdate(partyId, shopId);
         Assert.assertEquals(russianLegalEntity.getInn(), contractorForUpdate.getRussianLegalEntityInn());
         Assert.assertEquals(russianLegalEntity.getActualAddress(), contractorForUpdate.getRussianLegalEntityActualAddress());
         Assert.assertEquals(russianLegalEntity.getRussianBankAccount().getAccount(), contractorForUpdate.getRussianLegalEntityBankAccount());

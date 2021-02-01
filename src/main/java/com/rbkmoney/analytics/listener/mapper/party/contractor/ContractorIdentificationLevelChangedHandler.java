@@ -1,7 +1,7 @@
 package com.rbkmoney.analytics.listener.mapper.party.contractor;
 
 import com.rbkmoney.analytics.domain.db.enums.ContractorIdentificationLvl;
-import com.rbkmoney.analytics.domain.db.tables.pojos.CurrentContractor;
+import com.rbkmoney.analytics.domain.db.tables.pojos.Contractor;
 import com.rbkmoney.analytics.listener.mapper.party.AbstractClaimChangeHandler;
 import com.rbkmoney.damsel.domain.ContractorIdentificationLevel;
 import com.rbkmoney.damsel.payment_processing.ClaimEffect;
@@ -19,7 +19,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ContractorIdentificationLevelChangedHandler extends AbstractClaimChangeHandler<List<CurrentContractor>> {
+public class ContractorIdentificationLevelChangedHandler extends AbstractClaimChangeHandler<List<Contractor>> {
 
     @Override
     public boolean accept(PartyChange change) {
@@ -28,9 +28,9 @@ public class ContractorIdentificationLevelChangedHandler extends AbstractClaimCh
     }
 
     @Override
-    public List<CurrentContractor> handleChange(PartyChange change, MachineEvent event) {
+    public List<Contractor> handleChange(PartyChange change, MachineEvent event) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
-        List<CurrentContractor> shops = new ArrayList<>();
+        List<Contractor> shops = new ArrayList<>();
         for (ClaimEffect claimEffect : claimEffects) {
             if (claimEffect.isSetContractorEffect() && claimEffect.getContractorEffect().getEffect().isSetIdentificationLevelChanged()) {
                 shops.add(handleEvent(event, claimEffect));
@@ -39,13 +39,13 @@ public class ContractorIdentificationLevelChangedHandler extends AbstractClaimCh
         return shops;
     }
 
-    private CurrentContractor handleEvent(MachineEvent event, ClaimEffect effect) {
+    private Contractor handleEvent(MachineEvent event, ClaimEffect effect) {
         ContractorEffectUnit contractorEffect = effect.getContractorEffect();
         ContractorIdentificationLevel identificationLevelChanged = contractorEffect.getEffect().getIdentificationLevelChanged();
         String contractorId = contractorEffect.getId();
         String partyId = event.getSourceId();
 
-        CurrentContractor currentContractor = new CurrentContractor();
+        Contractor currentContractor = new Contractor();
         currentContractor.setPartyId(partyId);
         currentContractor.setEventId(event.getEventId());
         currentContractor.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));

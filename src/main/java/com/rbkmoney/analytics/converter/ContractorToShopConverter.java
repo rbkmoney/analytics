@@ -1,15 +1,15 @@
 package com.rbkmoney.analytics.converter;
 
-import com.rbkmoney.analytics.domain.db.tables.pojos.CurrentContractor;
+import com.rbkmoney.analytics.domain.db.tables.pojos.Contractor;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ContractorToShopConverter implements Converter<CurrentContractor, Shop> {
+public class ContractorToShopConverter implements Converter<Contractor, Shop> {
 
     @Override
-    public Shop convert(CurrentContractor contractor) {
+    public Shop convert(Contractor contractor) {
         Shop shop = new Shop();
         shop.setContractorType(contractor.getContractorType());
         shop.setRegUserEmail(contractor.getRegUserEmail());

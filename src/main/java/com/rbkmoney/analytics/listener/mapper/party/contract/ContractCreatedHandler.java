@@ -1,6 +1,6 @@
 package com.rbkmoney.analytics.listener.mapper.party.contract;
 
-import com.rbkmoney.analytics.domain.db.tables.pojos.ContractRef;
+import com.rbkmoney.analytics.domain.db.tables.pojos.Contract;
 import com.rbkmoney.analytics.listener.mapper.party.AbstractClaimChangeHandler;
 import com.rbkmoney.damsel.domain.Contractor;
 import com.rbkmoney.damsel.payment_processing.ClaimEffect;
@@ -19,7 +19,7 @@ import java.util.UUID;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ContractCreatedHandler extends AbstractClaimChangeHandler<List<ContractRef>> {
+public class ContractCreatedHandler extends AbstractClaimChangeHandler<List<Contract>> {
 
     @Override
     public boolean accept(PartyChange change) {
@@ -29,20 +29,20 @@ public class ContractCreatedHandler extends AbstractClaimChangeHandler<List<Cont
     }
 
     @Override
-    public List<ContractRef> handleChange(PartyChange change, MachineEvent event) {
+    public List<Contract> handleChange(PartyChange change, MachineEvent event) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
-        List<ContractRef> shops = new ArrayList<>();
+        List<Contract> contracts = new ArrayList<>();
         for (ClaimEffect claimEffect : claimEffects) {
             if (claimEffect.isSetContractEffect()
                     && claimEffect.getContractEffect().getEffect().isSetCreated()
                     && claimEffect.getContractEffect().getEffect().getCreated().isSetContractor()) {
-                shops.add(handleEvent(event, claimEffect));
+                contracts.add(handleEvent(event, claimEffect));
             }
         }
-        return shops;
+        return contracts;
     }
 
-    private ContractRef handleEvent(MachineEvent event, ClaimEffect effect) {
+    private Contract handleEvent(MachineEvent event, ClaimEffect effect) {
         String partyId = event.getSourceId();
         ContractEffectUnit contractEffectUnit = effect.getContractEffect();
         com.rbkmoney.damsel.domain.Contract contractCreated = contractEffectUnit.getEffect().getCreated();
@@ -50,17 +50,17 @@ public class ContractCreatedHandler extends AbstractClaimChangeHandler<List<Cont
 
         log.debug("ContractCreatedHandler contractor: {}", contractor);
 
-        ContractRef contractRef = new ContractRef();
-        contractRef.setPartyId(partyId);
-        contractRef.setEventId(event.getEventId());
-        contractRef.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
+        Contract contract = new Contract();
+        contract.setPartyId(partyId);
+        contract.setEventId(event.getEventId());
+        contract.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         String contractorId = initContractorId(contractCreated);
-        contractRef.setContractorId(contractorId);
-        contractRef.setContractId( contractEffectUnit.getContractId());
+        contract.setContractorId(contractorId);
+        contract.setContractId(contractEffectUnit.getContractId());
 
-        log.debug("ContractCreatedHandler result contract: {}", contractRef);
+        log.debug("ContractCreatedHandler result contract: {}", contract);
 
-        return contractRef;
+        return contract;
     }
 
     private String initContractorId(com.rbkmoney.damsel.domain.Contract contractCreated) {

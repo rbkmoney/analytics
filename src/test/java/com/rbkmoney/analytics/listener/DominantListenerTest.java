@@ -1,7 +1,7 @@
 package com.rbkmoney.analytics.listener;
 
 import com.rbkmoney.analytics.AnalyticsApplication;
-import com.rbkmoney.analytics.dao.repository.postgres.CategoryDao;
+import com.rbkmoney.analytics.dao.repository.postgres.party.management.CategoryDao;
 import com.rbkmoney.analytics.service.DominantService;
 import com.rbkmoney.analytics.utils.TestData;
 import com.rbkmoney.damsel.domain.*;
@@ -26,7 +26,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.time.Duration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.anyInt;
