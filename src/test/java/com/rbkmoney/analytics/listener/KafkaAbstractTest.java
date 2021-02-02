@@ -24,6 +24,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.KafkaContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -41,7 +42,9 @@ public abstract class KafkaAbstractTest {
     public static final String PAYOUT_TOPIC = "payout";
 
     @ClassRule
-    public static KafkaContainer kafka = new KafkaContainer(CONFLUENT_PLATFORM_VERSION).withEmbeddedZookeeper();
+    public static KafkaContainer kafka = new KafkaContainer(DockerImageName
+            .parse("confluentinc/cp-kafka:" + CONFLUENT_PLATFORM_VERSION))
+            .withEmbeddedZookeeper();
 
     @Value("${kafka.topic.event.sink.initial}")
     public String eventSinkTopic;
