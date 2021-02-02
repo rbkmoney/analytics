@@ -1,36 +1,33 @@
 package com.rbkmoney.analytics.listener;
 
 import com.rbkmoney.analytics.AnalyticsApplication;
-import com.rbkmoney.analytics.config.KafkaConfig;
-import com.rbkmoney.analytics.config.SerializeConfig;
-import com.rbkmoney.analytics.listener.handler.rate.RateMachineEventHandler;
+import com.rbkmoney.analytics.dao.repository.postgres.RateDao;
 import com.rbkmoney.analytics.utils.KafkaAbstractTest;
 import com.rbkmoney.analytics.utils.RateSinkEventTestUtils;
 import com.rbkmoney.machinegun.eventsink.SinkEvent;
-import com.rbkmoney.mg.event.sink.service.ConsumerGroupIdService;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Before;
+import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
-import org.springframework.kafka.listener.MessageListenerContainer;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 
-import static org.mockito.ArgumentMatchers.any;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
+import static org.junit.Assert.*;
 
 @Slf4j
 @RunWith(SpringRunner.class)
@@ -59,11 +56,11 @@ public class RateListenerTest extends KafkaAbstractTest {
         }
     }
 
-    @MockBean
-    RateMachineEventHandler eventHandler;
-
     @Value("${kafka.topic.rate.initial}")
     public String rateTopic;
+
+    @Autowired
+    private JdbcTemplate postgresJdbcTemplate;
 
     @Test
     public void handle() throws InterruptedException {
@@ -72,7 +69,17 @@ public class RateListenerTest extends KafkaAbstractTest {
         final List<SinkEvent> sinkEvents = RateSinkEventTestUtils.create(sourceId);
         sinkEvents.forEach(event -> produceMessageToTopic(rateTopic, event));
 
-        Mockito.verify(eventHandler, Mockito.after(1000).times(1)).handle(any(), any());
+        await().atMost(60, SECONDS).until(() -> {
+            Integer count = postgresJdbcTemplate.queryForObject("SELECT count(*) FROM analytics.rate", Integer.class);
+            if (count == 0) {
+                Thread.sleep(1000);
+                return false;
+            }
+            return true;
+        });
+        final List<Map<String, Object>> maps = postgresJdbcTemplate.queryForList("SELECT * FROM analytics.rate");
+
+        assertEquals(4, maps.size());
     }
 
 }

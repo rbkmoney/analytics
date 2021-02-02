@@ -43,6 +43,7 @@ public class RateCreatedMapper implements Mapper<Change, MachineEvent, List<Rate
     private Rate initRate(MachineEvent event, TimestampInterval interval, Quote quote) {
         Rate rate = new Rate();
         rate.setSourceId(event.getSourceId());
+        rate.setEventId(event.getEventId());
         rate.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
 
         // Quote
