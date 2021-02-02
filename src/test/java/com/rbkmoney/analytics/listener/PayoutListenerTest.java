@@ -3,6 +3,7 @@ package com.rbkmoney.analytics.listener;
 import com.rbkmoney.analytics.AnalyticsApplication;
 import com.rbkmoney.analytics.dao.repository.postgres.PostgresBalanceChangesRepository;
 import com.rbkmoney.analytics.utils.FileUtil;
+import com.rbkmoney.analytics.utils.KafkaAbstractTest;
 import com.rbkmoney.damsel.domain.CurrencyRef;
 import com.rbkmoney.damsel.geo_ip.GeoIpServiceSrv;
 import com.rbkmoney.damsel.payout_processing.*;

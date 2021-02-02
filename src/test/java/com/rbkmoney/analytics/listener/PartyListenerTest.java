@@ -10,6 +10,8 @@ import com.rbkmoney.analytics.domain.db.enums.Suspension;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Contractor;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
+import com.rbkmoney.analytics.utils.KafkaAbstractTest;
+import com.rbkmoney.analytics.utils.PartyFlowGenerator;
 import com.rbkmoney.damsel.domain.PartyContractor;
 import com.rbkmoney.damsel.domain.RussianLegalEntity;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
@@ -35,7 +37,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
-import static com.rbkmoney.analytics.listener.PartyFlowGenerator.*;
+import static com.rbkmoney.analytics.utils.PartyFlowGenerator.*;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 
@@ -85,7 +87,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
         String shopId = UUID.randomUUID().toString();
         List<SinkEvent> sinkEvents = PartyFlowGenerator.generatePartyFlow(partyId, shopId);
 
-        sinkEvents.forEach(this::produceMessageToParty);
+        sinkEvents.forEach(event -> produceMessageToTopic(this.partyTopic, event));
 
         await().atMost(60, SECONDS).until(() -> {
             Integer partyCount = postgresJdbcTemplate.queryForObject("SELECT count(*) FROM analytics.contractor" +
@@ -101,7 +103,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
         String partyId = UUID.randomUUID().toString();
         List<SinkEvent> sinkEvents = PartyFlowGenerator.generatePartyContractorFlow(partyId);
 
-        sinkEvents.forEach(this::produceMessageToParty);
+        sinkEvents.forEach(event -> produceMessageToTopic(this.partyTopic, event));
 
         await().atMost(60, SECONDS).until(() -> {
             Party party = partyDao.getPartyById(partyId);
@@ -138,7 +140,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
         String partyId = UUID.randomUUID().toString();
         String shopId = UUID.randomUUID().toString();
         List<SinkEvent> sinkEvents = PartyFlowGenerator.generateShopFlow(partyId, shopId);
-        sinkEvents.forEach(this::produceMessageToParty);
+        sinkEvents.forEach(event -> produceMessageToTopic(this.partyTopic, event));
         await().atMost(60, SECONDS).until(() -> {
             Integer lastShopCount = postgresJdbcTemplate.queryForObject(String.format(
                     "SELECT count(*) FROM analytics.shop WHERE shop_id = '%s' AND suspension = 'suspended'", shopId), Integer.class);
@@ -191,9 +193,9 @@ public class PartyListenerTest extends KafkaAbstractTest {
         PartyContractor partyContractor = PartyFlowGenerator.buildRussianLegalPartyContractor();
         RussianLegalEntity russianLegalEntity = partyContractor.getContractor().getLegalEntity().getRussianLegalEntity();
         List<SinkEvent> sinkEvents = PartyFlowGenerator.generatePartyFlowWithCount(count, lastPartyId, lastShopId, partyContractor);
-        sinkEvents.forEach(this::produceMessageToParty);
+        sinkEvents.forEach(event -> produceMessageToTopic(this.partyTopic, event));
         await().atMost(120, SECONDS).until(() -> {
-            Integer partyCount = postgresJdbcTemplate.queryForObject("SELECT count(*) FROM analytics.party" , Integer.class);
+            Integer partyCount = postgresJdbcTemplate.queryForObject("SELECT count(*) FROM analytics.party", Integer.class);
             if (partyCount < count) {
                 Thread.sleep(1000);
                 return false;
@@ -220,9 +222,9 @@ public class PartyListenerTest extends KafkaAbstractTest {
         PartyContractor partyContractor = PartyFlowGenerator.buildRussianLegalPartyContractor();
         RussianLegalEntity russianLegalEntity = partyContractor.getContractor().getLegalEntity().getRussianLegalEntity();
         List<SinkEvent> sinkEvents = PartyFlowGenerator.generatePartyFlowWithMultiplePartyChange(count, partyId, partyContractor);
-        sinkEvents.forEach(this::produceMessageToParty);
+        sinkEvents.forEach(event -> produceMessageToTopic(this.partyTopic, event));
         await().atMost(60, SECONDS).until(() -> {
-            Integer partyCount = postgresJdbcTemplate.queryForObject("SELECT count(*) FROM analytics.party" , Integer.class);
+            Integer partyCount = postgresJdbcTemplate.queryForObject("SELECT count(*) FROM analytics.party", Integer.class);
             if (partyCount < count) {
                 Thread.sleep(1000);
                 return false;
@@ -249,7 +251,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
         String payoutToolId = "testPayoutToolId";
         PartyChange shopPayoutToolChangedPartyChange = buildShopPayoutToolChangedPartyChange(shopId, payoutToolId);
         List<SinkEvent> sinkEvents = PartyFlowGenerator.generatePartyFlowWithMultiplePartyShopChange(count, partyId, shopId, contractId, shopPayoutToolChangedPartyChange);
-        sinkEvents.forEach(this::produceMessageToParty);
+        sinkEvents.forEach(event -> produceMessageToTopic(this.partyTopic, event));
         await().atMost(60, SECONDS).until(() -> {
             Integer shopCount = postgresJdbcTemplate.queryForObject("SELECT count(*) FROM analytics.shop", Integer.class);
             if (shopCount < count) {
@@ -299,7 +301,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
         String payoutToolId = "testPayoutToolId";
         PartyChange shopPayoutToolChangedPartyChange = buildShopPayoutToolChangedPartyChange(shopId, payoutToolId);
         List<SinkEvent> sinkEvents = PartyFlowGenerator.generatePartyFlowWithMultipleShopInOneChange(partyId, shopId, contractId, shopPayoutToolChangedPartyChange);
-        sinkEvents.forEach(this::produceMessageToParty);
+        sinkEvents.forEach(event -> produceMessageToTopic(this.partyTopic, event));
         await().atMost(60, SECONDS).until(() -> {
             Integer lastShopCount = postgresJdbcTemplate.queryForObject(String.format(
                     "SELECT count(*) FROM analytics.shop WHERE party_id = '%s' and shop_id = '%s' and payout_tool_id = '%s'", partyId, shopId, payoutToolId), Integer.class);
@@ -333,7 +335,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
         RussianLegalEntity russianLegalEntity = PartyFlowGenerator.buildRussianLegalEntity();
         legalEntity.setRussianLegalEntity(russianLegalEntity);
         List<SinkEvent> sinkEvents = generatePartyFlowWithContract(partyId, legalEntity);
-        sinkEvents.forEach(this::produceMessageToParty);
+        sinkEvents.forEach(event -> produceMessageToTopic(this.partyTopic, event));
         await().atMost(60, SECONDS).until(() -> {
             Integer lastPartyCount = postgresJdbcTemplate.queryForObject(String.format(
                     "SELECT count(*) FROM analytics.contractor "

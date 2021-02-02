@@ -8,10 +8,12 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Slf4j
+@Component
 @RequiredArgsConstructor
 public class RateListener {
 
@@ -26,9 +28,7 @@ public class RateListener {
                        Acknowledgment ack) throws InterruptedException {
         log.info("Got RateListener listen offsets: {}, partition: {}, batch.size: {}", offsets, partition, batch.size());
         rateMachineEventHandler.handle(batch, ack);
-        ack.acknowledge();
         log.info("Batch RateListener has been committed, size={}", batch.size());
     }
-
 
 }
