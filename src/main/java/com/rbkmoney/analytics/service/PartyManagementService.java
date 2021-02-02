@@ -53,7 +53,7 @@ public class PartyManagementService {
     }
 
     public Shop getShop(PartyGeneralKey partyGeneralKey) {
-        Shop shop = shopDao.getShopForUpdate(partyGeneralKey.getPartyId(), partyGeneralKey.getRefId());
+        Shop shop = shopDao.getShopByPartyIdAndShopId(partyGeneralKey.getPartyId(), partyGeneralKey.getRefId());
         log.debug("Get shop from DB by partyId={}, shopId={}: {}", partyGeneralKey.getPartyId(), partyGeneralKey.getRefId(), shop);
         return shop;
     }

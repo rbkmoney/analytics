@@ -149,7 +149,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
             return true;
         });
 
-        Shop shop = shopDao.getShopForUpdate(partyId, shopId);
+        Shop shop = shopDao.getShopByPartyIdAndShopId(partyId, shopId);
         Assert.assertEquals(partyId, shop.getPartyId());
         Assert.assertEquals(shopId, shop.getShopId());
         Assert.assertEquals(PartyFlowGenerator.CURRENCY_SYMBOL, shop.getAccountCurrencyCode());
@@ -264,7 +264,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
             }
             return true;
         });
-        Shop shop = shopDao.getShopForUpdate(partyId, shopId);
+        Shop shop = shopDao.getShopByPartyIdAndShopId(partyId, shopId);
         Assert.assertNotNull(shop.getShopId());
         Assert.assertNotNull(shop.getPartyId());
         Assert.assertNotNull(shop.getSuspensionActiveSince());
@@ -309,7 +309,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
             }
             return true;
         });
-        Shop shop = shopDao.getShopForUpdate(partyId, shopId);
+        Shop shop = shopDao.getShopByPartyIdAndShopId(partyId, shopId);
         Assert.assertNotNull(shop.getShopId());
         Assert.assertNotNull(shop.getPartyId());
         Assert.assertNotNull(shop.getCreatedAt());
@@ -366,7 +366,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
     }
 
     private void checkShopFields(RussianLegalEntity russianLegalEntity, String partyId, String shopId) {
-        Shop contractorForUpdate = shopDao.getShopForUpdate(partyId, shopId);
+        Shop contractorForUpdate = shopDao.getShopByPartyIdAndShopId(partyId, shopId);
         Assert.assertEquals(russianLegalEntity.getInn(), contractorForUpdate.getRussianLegalEntityInn());
         Assert.assertEquals(russianLegalEntity.getActualAddress(), contractorForUpdate.getRussianLegalEntityActualAddress());
         Assert.assertEquals(russianLegalEntity.getRussianBankAccount().getAccount(), contractorForUpdate.getRussianLegalEntityBankAccount());

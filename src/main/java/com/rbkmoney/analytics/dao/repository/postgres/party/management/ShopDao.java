@@ -46,10 +46,9 @@ public class ShopDao extends AbstractGenericDao {
         batchExecute(queries);
     }
 
-    public Shop getShopForUpdate(String partyId, String shopId) {
+    public Shop getShopByPartyIdAndShopId(String partyId, String shopId) {
         Query query = getDslContext().selectFrom(SHOP)
-                .where(SHOP.PARTY_ID.eq(partyId).and(SHOP.SHOP_ID.eq(shopId)))
-                .forUpdate();
+                .where(SHOP.PARTY_ID.eq(partyId).and(SHOP.SHOP_ID.eq(shopId)));
         return fetchOne(query, shopRowMapper);
     }
 

@@ -105,7 +105,7 @@ public class PostgresRepositoryTest {
     public void testShopSave() {
         Shop shop = EnhancedRandom.random(Shop.class);
         shopDao.saveShop(shop);
-        Shop savedShop = shopDao.getShopForUpdate(shop.getPartyId(), shop.getShopId());
+        Shop savedShop = shopDao.getShopByPartyIdAndShopId(shop.getPartyId(), shop.getShopId());
         Assert.assertEquals(shop, savedShop);
     }
 
@@ -128,7 +128,7 @@ public class PostgresRepositoryTest {
         secondShop.setPartyId(firstShop.getPartyId());
         secondShop.setShopId(firstShop.getShopId());
         shopDao.saveShop(secondShop);
-        Shop savedShop = shopDao.getShopForUpdate(secondShop.getPartyId(), secondShop.getShopId());
+        Shop savedShop = shopDao.getShopByPartyIdAndShopId(secondShop.getPartyId(), secondShop.getShopId());
         Assert.assertEquals(secondShop, savedShop);
     }
 
