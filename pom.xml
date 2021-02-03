@@ -43,6 +43,7 @@
         <db.name>analytics</db.name>
         <db.schema>analytics</db.schema>
         <db.url>jdbc:postgresql://localhost:${db.port}/${db.name}</db.url>
+        <xrates-proto.version>1.20-6c219ac</xrates-proto.version>
     </properties>
 
     <dependencies>
