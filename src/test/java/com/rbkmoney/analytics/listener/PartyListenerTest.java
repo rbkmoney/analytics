@@ -169,7 +169,6 @@ public class PartyListenerTest extends KafkaAbstractTest {
         Assert.assertEquals(PartyFlowGenerator.SHOP_ACCOUNT_PAYOUT.toString(), shop.getAccountPayout());
         Assert.assertEquals(String.valueOf(SETTLEMENT_ID), shop.getAccountSettlement());
         Assert.assertEquals(ContractorType.legal_entity, shop.getContractorType());
-        Assert.assertEquals(LegalEntity.russian_legal_entity, shop.getLegalEntityType());
         Assert.assertNotNull(shop.getRussianLegalEntityActualAddress());
         Assert.assertNotNull(shop.getRussianLegalEntityBankAccount());
         Assert.assertNotNull(shop.getRussianLegalEntityBankBik());
