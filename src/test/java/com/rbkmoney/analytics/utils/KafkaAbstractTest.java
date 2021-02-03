@@ -1,4 +1,4 @@
-package com.rbkmoney.analytics.listener;
+package com.rbkmoney.analytics.utils;
 
 import com.rbkmoney.analytics.serde.MachineEventDeserializer;
 import com.rbkmoney.analytics.serde.PayoutEventDeserializer;
@@ -24,6 +24,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.KafkaContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -39,9 +40,12 @@ public abstract class KafkaAbstractTest {
 
     public static final String EVENT_SINK_TOPIC = "event_sink";
     public static final String PAYOUT_TOPIC = "payout";
+    public static final String RATE_TOPIC = "mg-events-rates";
 
     @ClassRule
-    public static KafkaContainer kafka = new KafkaContainer(CONFLUENT_PLATFORM_VERSION).withEmbeddedZookeeper();
+    public static KafkaContainer kafka = new KafkaContainer(DockerImageName
+            .parse("confluentinc/cp-kafka:" + CONFLUENT_PLATFORM_VERSION))
+            .withEmbeddedZookeeper();
 
     @Value("${kafka.topic.event.sink.initial}")
     public String eventSinkTopic;
@@ -71,6 +75,7 @@ public abstract class KafkaAbstractTest {
                     .applyTo(configurableApplicationContext.getEnvironment());
             initTopic(EVENT_SINK_TOPIC, MachineEventDeserializer.class);
             initTopic(PAYOUT_TOPIC, PayoutEventDeserializer.class);
+            initTopic(RATE_TOPIC, MachineEventDeserializer.class);
             kafka.start();
         }
 
@@ -100,20 +105,20 @@ public abstract class KafkaAbstractTest {
         return new KafkaConsumer<>(props);
     }
 
-    void produceMessageToEventSink(SinkEvent sinkEvent) {
+    protected void produceMessageToTopic(String topicName, SinkEvent sinkEvent) {
         try (Producer<String, SinkEvent> producer = createProducerAggr()) {
             ProducerRecord<String, SinkEvent> producerRecord = new ProducerRecord<>(
-                    eventSinkTopic,
+                    topicName,
                     sinkEvent.getEvent().getSourceId(),
                     sinkEvent);
             producer.send(producerRecord).get();
-            log.info("produceMessageToEventSink() sinkEvent: {}", sinkEvent);
+            log.info("produceMessage to {} sinkEvent: {}", topicName, sinkEvent);
         } catch (Exception e) {
-            log.error("Error when produceMessageToEventSink e:", e);
+            log.error("Error when produce message to {} e:", topicName, e);
         }
     }
 
-    void produceMessageToPayout(Event payoutEvent) {
+    protected void produceMessageToPayout(Event payoutEvent) {
         try (Producer<String, Event> producer = createProducerAggr()) {
             ProducerRecord<String, Event> producerRecord = new ProducerRecord<>(
                     payoutTopic,
@@ -123,19 +128,6 @@ public abstract class KafkaAbstractTest {
             log.info("produceMessageToPayout() payoutEvent: {}", payoutEvent);
         } catch (Exception e) {
             log.error("Error when produceMessageToPayout e:", e);
-        }
-    }
-
-    void produceMessageToParty(SinkEvent partyEvent) {
-        try (Producer<String, SinkEvent> producer = createProducerAggr()) {
-            ProducerRecord<String, SinkEvent> producerRecord = new ProducerRecord<>(
-                    partyTopic,
-                    partyEvent.getEvent().getSourceId(),
-                    partyEvent);
-            producer.send(producerRecord).get();
-            log.info("produceMessageToParty() partyEvent: {}", partyEvent);
-        } catch (Exception e) {
-            log.error("Error when produceMessageToParty e:", e);
         }
     }
 

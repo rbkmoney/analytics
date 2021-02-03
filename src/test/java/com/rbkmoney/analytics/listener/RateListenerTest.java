@@ -1,40 +1,39 @@
-package com.rbkmoney.analytics.service;
+package com.rbkmoney.analytics.listener;
 
 import com.rbkmoney.analytics.AnalyticsApplication;
-import com.rbkmoney.analytics.dao.repository.postgres.party.management.DominantDao;
+import com.rbkmoney.analytics.dao.repository.postgres.RateDao;
 import com.rbkmoney.analytics.utils.KafkaAbstractTest;
-import com.rbkmoney.analytics.utils.TestData;
-import com.rbkmoney.damsel.domain.CategoryType;
-import com.rbkmoney.damsel.domain_config.Commit;
-import com.rbkmoney.damsel.domain_config.RepositorySrv;
+import com.rbkmoney.analytics.utils.RateSinkEventTestUtils;
+import com.rbkmoney.machinegun.eventsink.SinkEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.time.Duration;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import static org.mockito.Mockito.*;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
+import static org.junit.Assert.*;
 
 @Slf4j
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = AnalyticsApplication.class,
-        properties = {"kafka.state.cache.size=0"})
-@ContextConfiguration(initializers = {DominantServiceTest.Initializer.class})
-public class DominantServiceTest extends KafkaAbstractTest {
+@SpringBootTest(classes = {AnalyticsApplication.class}, properties = {"kafka.state.cache.size=0"})
+@ContextConfiguration(initializers = {RateListenerTest.Initializer.class})
+public class RateListenerTest extends KafkaAbstractTest {
 
     @ClassRule
     @SuppressWarnings("rawtypes")
@@ -57,29 +56,30 @@ public class DominantServiceTest extends KafkaAbstractTest {
         }
     }
 
-    @MockBean
-    private RepositorySrv.Iface dominantClient;
+    @Value("${kafka.topic.rate.initial}")
+    public String rateTopic;
 
     @Autowired
-    private DominantService dominantService;
-
-    @Autowired
-    private DominantDao dominantDao;
-
-    @Before
-    public void setUp() throws Exception {
-        Commit firstCommit = TestData.buildInsertCategoryCommit(64, "testName", "testDescription", CategoryType.test);
-        Commit secondCommit = TestData.buildUpdateCategoryCommit(64, "testNameNew", "testDescriptionNew", CategoryType.live, firstCommit.getOps().get(0).getInsert().getObject());
-        Map<Long, Commit> commitMap = new HashMap<>();
-        commitMap.put(1L, firstCommit);
-        commitMap.put(2L, secondCommit);
-        when(dominantClient.pullRange(anyLong(),anyInt())).thenReturn(commitMap);
-    }
+    private JdbcTemplate postgresJdbcTemplate;
 
     @Test
-    public void testDominantVersion() {
-        dominantService.pullDominantRange(10);
-        Assert.assertEquals(2, (long) dominantDao.getLastVersion());
+    public void handle() throws InterruptedException {
+        String sourceId = "CBR";
+
+        final List<SinkEvent> sinkEvents = RateSinkEventTestUtils.create(sourceId);
+        sinkEvents.forEach(event -> produceMessageToTopic(rateTopic, event));
+
+        await().atMost(60, SECONDS).until(() -> {
+            Integer count = postgresJdbcTemplate.queryForObject("SELECT count(*) FROM analytics.rate", Integer.class);
+            if (count == 0) {
+                Thread.sleep(1000);
+                return false;
+            }
+            return true;
+        });
+        final List<Map<String, Object>> maps = postgresJdbcTemplate.queryForList("SELECT * FROM analytics.rate");
+
+        assertEquals(4, maps.size());
     }
 
 }

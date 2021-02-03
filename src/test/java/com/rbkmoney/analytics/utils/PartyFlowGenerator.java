@@ -1,4 +1,4 @@
-package com.rbkmoney.analytics.listener;
+package com.rbkmoney.analytics.utils;
 
 import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.payment_processing.*;

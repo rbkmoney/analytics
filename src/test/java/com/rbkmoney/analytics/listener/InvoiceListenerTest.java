@@ -5,6 +5,7 @@ import com.rbkmoney.analytics.dao.repository.postgres.PostgresBalanceChangesRepo
 import com.rbkmoney.analytics.service.HgClientService;
 import com.rbkmoney.analytics.utils.BuildUtils;
 import com.rbkmoney.analytics.utils.EventRangeFactory;
+import com.rbkmoney.analytics.utils.KafkaAbstractTest;
 import com.rbkmoney.clickhouse.initializer.ChInitializer;
 import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.geo_ip.GeoIpServiceSrv;
@@ -109,10 +110,10 @@ public class InvoiceListenerTest extends KafkaAbstractTest {
 
         mockPayment(SOURCE_ID);
 
-        sinkEvents.forEach(this::produceMessageToEventSink);
+        sinkEvents.forEach(event -> produceMessageToTopic(this.eventSinkTopic, event));
 
         sinkEvents = InvoiceFlowGenerator.generateSuccessNotFullFlow("sourceID_2");
-        sinkEvents.forEach(this::produceMessageToEventSink);
+        sinkEvents.forEach(event -> produceMessageToTopic(this.eventSinkTopic, event));
 
         AtomicLong count = new AtomicLong();
 
@@ -156,7 +157,7 @@ public class InvoiceListenerTest extends KafkaAbstractTest {
 
         // test refund flow
         sinkEvents = InvoiceFlowGenerator.generateRefundedFlow(sourceID_refund_1);
-        sinkEvents.forEach(this::produceMessageToEventSink);
+        sinkEvents.forEach(event -> produceMessageToTopic(this.eventSinkTopic, event));
 
         //check sum for succeeded refund
         await().atMost(60, TimeUnit.SECONDS).until(() -> {
@@ -184,7 +185,7 @@ public class InvoiceListenerTest extends KafkaAbstractTest {
         mockAdjustment(source_adjustment, 7, FIRST);
 
         sinkEvents = InvoiceFlowGenerator.generateSuccessAdjustment(source_adjustment);
-        sinkEvents.forEach(this::produceMessageToEventSink);
+        sinkEvents.forEach(event -> produceMessageToTopic(this.eventSinkTopic, event));
 
         //check sum for succeeded refund
         await().atMost(60, TimeUnit.SECONDS).until(() -> {
@@ -204,7 +205,7 @@ public class InvoiceListenerTest extends KafkaAbstractTest {
         mockPayment(sourceChargeback);
         mockChargeback(sourceChargeback, 7, FIRST);
         sinkEvents = InvoiceFlowGenerator.generateChargebackFlow(sourceChargeback);
-        sinkEvents.forEach(this::produceMessageToEventSink);
+        sinkEvents.forEach(event -> produceMessageToTopic(this.eventSinkTopic, event));
 
 
         //check sum for succeeded chargeback

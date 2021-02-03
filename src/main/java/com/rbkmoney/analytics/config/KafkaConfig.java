@@ -33,6 +33,7 @@ import static org.apache.kafka.clients.consumer.OffsetResetStrategy.EARLIEST;
 public class KafkaConfig {
 
     private static final String RESULT_ANALYTICS = "result-analytics";
+    public static final String ANALYTICS_RATE = "rate";
 
     private static final String PARTY_RESULT_ANALYTICS = "party-result-analytics";
 
@@ -91,7 +92,7 @@ public class KafkaConfig {
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, MachineEvent> rateContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, MachineEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        String consumerGroup = consumerGroupIdService.generateGroupId(RESULT_ANALYTICS);
+        String consumerGroup = consumerGroupIdService.generateGroupId(ANALYTICS_RATE);
         initDefaultListenerProperties(factory, consumerGroup, new MachineEventDeserializer());
         return factory;
     }
