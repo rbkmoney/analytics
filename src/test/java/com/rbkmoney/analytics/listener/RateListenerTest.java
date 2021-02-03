@@ -78,7 +78,6 @@ public class RateListenerTest extends KafkaAbstractTest {
             return true;
         });
         final List<Map<String, Object>> maps = postgresJdbcTemplate.queryForList("SELECT * FROM analytics.rate");
-
         assertEquals(4, maps.size());
     }
 
