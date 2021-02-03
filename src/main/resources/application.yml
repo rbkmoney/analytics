@@ -1,28 +1,15 @@
 server:
-  port: '@server.port@'
+  port: @server.port@
+
 management:
   security:
     flag: false
-  server:
-    port: @management.port@
   metrics:
     export:
       statsd:
+        enabled: false
         flavor: etsy
-        enabled: false
-      prometheus:
-        enabled: false
-  endpoint:
-    health:
-      show-details: always
-    metrics:
-      enabled: true
-    prometheus:
-      enabled: true
-  endpoints:
-    web:
-      exposure:
-        include: health,info,prometheus
+  endpoint.health.show-details: always
 
 spring:
   application:
@@ -66,12 +53,10 @@ kafka:
       initial: payout
     party:
       initial: mg-events-party
-    rate:
-      initial: mg-events-rates
   consumer:
-      prefix: analytics
-      concurrency: 7
-      throttling-timeout-ms: 1000
+    prefix: analytics
+    concurrency: 7
+    throttling-timeout-ms: 1000
   ssl.enabled: false
   event-flow.resolver.enabled: false
   listener:
@@ -80,8 +65,6 @@ kafka:
     payout:
       enabled: true
     party:
-      enabled: true
-    rate:
       enabled: true
 
 service:

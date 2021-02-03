@@ -20,8 +20,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>11</java.version>
         <server.port>8022</server.port>
-        <management.port>8023</management.port>
-        <exposed.ports>${server.port} ${management.port}</exposed.ports>
+        <exposed.ports>${server.port}</exposed.ports>
         <dockerfile.base.service.tag>57e26d8ee999d7b0b50248c22afc63e6f926d276</dockerfile.base.service.tag>
         <dockerfile.registry>${env.REGISTRY}</dockerfile.registry>
         <shared.resources.version>0.3.6</shared.resources.version>
@@ -36,7 +35,7 @@
         <analytics-proto.version>1.25-2ec5116</analytics-proto.version>
         <mg-event-sink-listener-spring-boot-starter.version>0.0.5-SNAPSHOT</mg-event-sink-listener-spring-boot-starter.version>
         <db-common-lib.version>0.0.3</db-common-lib.version>
-        <sink-common-lib.version>0.0.7</sink-common-lib.version>
+        <sink-common-lib.version>0.0.4</sink-common-lib.version>
         <schedlock.version>4.14.0</schedlock.version>
         <db.port>5432</db.port>
         <db.user>postgres</db.user>
@@ -44,7 +43,6 @@
         <db.name>analytics</db.name>
         <db.schema>analytics</db.schema>
         <db.url>jdbc:postgresql://localhost:${db.port}/${db.name}</db.url>
-        <xrates-proto.version>1.20-6c219ac</xrates-proto.version>
     </properties>
 
     <dependencies>
@@ -56,8 +54,8 @@
         </dependency>
         <dependency>
             <groupId>com.rbkmoney</groupId>
-            <artifactId>custom-metrics-spring-boot-starter</artifactId>
-            <version>1.2.0</version>
+            <artifactId>spring-boot-starter-metrics-statsd</artifactId>
+            <version>1.1.0</version>
         </dependency>
         <dependency>
             <groupId>com.rbkmoney</groupId>

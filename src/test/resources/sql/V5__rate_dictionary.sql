@@ -8,6 +8,7 @@ CREATE DICTIONARY rate_dictionary (
     source_symbolic_code		String,
     source_exponent		        UInt32,
     destination_symbolic_code   String,
+    destination_exponent        UInt32,
     exchange_rate_rational_p    UInt64,
     exchange_rate_rational_q    UInt64
 )
