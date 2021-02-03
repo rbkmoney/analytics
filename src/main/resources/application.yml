@@ -98,4 +98,3 @@ cache:
     size: 10000
 
 caffeine.cache-expiration-seconds: 60
-
