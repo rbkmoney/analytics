@@ -143,7 +143,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
         sinkEvents.forEach(event -> produceMessageToTopic(this.partyTopic, event));
         await().atMost(60, SECONDS).until(() -> {
             Integer lastShopCount = postgresJdbcTemplate.queryForObject(String.format(
-                    "SELECT count(*) FROM analytics.shop WHERE shop_id = '%s' AND suspension = 'suspended'", shopId), Integer.class);
+                    "SELECT count(*) FROM analytics.shop WHERE shop_id = '%s' AND suspension = 'suspended' AND contractor_type='legal_entity'", shopId), Integer.class);
             if (lastShopCount <= 0) {
                 Thread.sleep(1000);
                 return false;

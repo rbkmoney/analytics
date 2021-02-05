@@ -1,5 +1,7 @@
 package com.rbkmoney.analytics.listener.mapper.party.contract;
 
+import com.rbkmoney.analytics.converter.ContractorToCurrentContractorConverter;
+import com.rbkmoney.analytics.dao.repository.postgres.party.management.ContractorDao;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Contract;
 import com.rbkmoney.analytics.listener.mapper.party.AbstractClaimChangeHandler;
 import com.rbkmoney.damsel.domain.Contractor;
@@ -20,6 +22,9 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class ContractCreatedHandler extends AbstractClaimChangeHandler<List<Contract>> {
+
+    private final ContractorToCurrentContractorConverter contractorToCurrentContractorConverter;
+    private final ContractorDao contractorDao;
 
     @Override
     public boolean accept(PartyChange change) {
@@ -54,7 +59,16 @@ public class ContractCreatedHandler extends AbstractClaimChangeHandler<List<Cont
         contract.setPartyId(partyId);
         contract.setEventId(event.getEventId());
         contract.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
+
         String contractorId = initContractorId(contractCreated);
+        com.rbkmoney.analytics.domain.db.tables.pojos.Contractor currentContractor = contractorToCurrentContractorConverter.convert(contractor);
+        currentContractor.setContractorId(contractorId);
+        currentContractor.setEventId(event.getEventId());
+        currentContractor.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
+        currentContractor.setPartyId(partyId);
+
+        contractorDao.saveContractor(currentContractor);
+
         contract.setContractorId(contractorId);
         contract.setContractId(contractEffectUnit.getContractId());
 

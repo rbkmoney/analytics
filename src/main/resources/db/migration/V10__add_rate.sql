@@ -15,4 +15,4 @@ CREATE TABLE analytics.rate (
 );
 
 CREATE UNIQUE INDEX rate_source_id_idx
-  ON analytics.rate (source_id, source_symbolic_code, destination_symbolic_code);
+  ON analytics.rate (source_id, source_symbolic_code, destination_symbolic_code, lower_bound_inclusive, upper_bound_exclusive);

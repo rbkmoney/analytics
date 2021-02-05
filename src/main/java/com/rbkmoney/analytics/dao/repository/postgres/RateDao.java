@@ -28,9 +28,9 @@ public class RateDao extends AbstractGenericDao {
                 .map(rate -> getDslContext().newRecord(RATE, rate))
                 .map(rateRecord -> getDslContext()
                         .insertInto(RATE).set(rateRecord)
-                        .onConflict(RATE.SOURCE_ID, RATE.SOURCE_SYMBOLIC_CODE, RATE.DESTINATION_SYMBOLIC_CODE)
-                        .doUpdate()
-                        .set(rateRecord))
+                        .onConflict(RATE.SOURCE_ID, RATE.SOURCE_SYMBOLIC_CODE, RATE.DESTINATION_SYMBOLIC_CODE,
+                                RATE.LOWER_BOUND_INCLUSIVE, RATE.UPPER_BOUND_EXCLUSIVE)
+                        .doNothing())
                 .collect(Collectors.toList());
         batchExecute(queries);
     }

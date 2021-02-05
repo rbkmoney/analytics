@@ -28,7 +28,7 @@ public class ContractDao extends AbstractGenericDao {
                 .map(party -> getDslContext().newRecord(CONTRACT, party))
                 .map(partyRecord -> getDslContext()
                         .insertInto(CONTRACT).set(partyRecord)
-                        .onConflict(CONTRACT.CONTRACT_ID)
+                        .onConflict(CONTRACT.ID)
                         .doUpdate()
                         .set(partyRecord))
                 .collect(Collectors.toList());

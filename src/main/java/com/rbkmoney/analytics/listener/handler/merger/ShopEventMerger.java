@@ -4,10 +4,12 @@ import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
 import com.rbkmoney.analytics.service.PartyManagementService;
 import com.rbkmoney.analytics.service.model.PartyGeneralKey;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ShopEventMerger {
@@ -73,6 +75,7 @@ public class ShopEventMerger {
             targetShop.setContractorIdentificationLevel(shop.getContractorIdentificationLevel() != null ? shop.getContractorIdentificationLevel() : targetShop.getContractorIdentificationLevel());
         }
 
+        log.debug("ShopEventMerger target shop: {}", targetShop);
         return targetShop;
     }
 }

@@ -34,6 +34,7 @@ public class ContractEventHandler implements PartyManagementEventHandler {
                 .collect(Collectors.toList());
         if (!contractRefs.isEmpty()) {
             partyManagementService.saveContractRefs(contractRefs);
+            log.debug("ContractEventHandler handle saveContractRefs: {}", contractRefs);
         }
     }
 

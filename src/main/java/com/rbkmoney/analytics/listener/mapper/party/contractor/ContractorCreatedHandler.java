@@ -22,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ContractorCreatedHandler extends AbstractClaimChangeHandler<List<Contractor>> {
 
-    private final ContractorToCurrentContractorConverter contractorToShopConverter;
+    private final ContractorToCurrentContractorConverter contractorToCurrentContractorConverter;
 
     @Override
     public boolean accept(PartyChange change) {
@@ -52,7 +52,7 @@ public class ContractorCreatedHandler extends AbstractClaimChangeHandler<List<Co
         String contractorId = contractorEffect.getId();
         String partyId = event.getSourceId();
 
-        Contractor currentContractor = contractorToShopConverter.convert(contractor);
+        Contractor currentContractor = contractorToCurrentContractorConverter.convert(contractor);
         currentContractor.setPartyId(partyId);
         currentContractor.setEventId(event.getEventId());
         currentContractor.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));

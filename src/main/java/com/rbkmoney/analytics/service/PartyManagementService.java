@@ -49,7 +49,7 @@ public class PartyManagementService {
 
     public void saveContractor(List<Contractor> currentContractors) {
         log.debug("Save contractors: {}", currentContractors);
-        contractorDao.saveContractor(currentContractors);
+        contractorDao.saveContractors(currentContractors);
     }
 
     public Shop getShop(PartyGeneralKey partyGeneralKey) {

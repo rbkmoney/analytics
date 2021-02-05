@@ -1,8 +1,10 @@
 package com.rbkmoney.analytics.dao.repository.postgres.party.management;
 
 import com.rbkmoney.analytics.domain.db.tables.pojos.Contractor;
+import com.rbkmoney.analytics.domain.db.tables.records.ContractorRecord;
 import com.rbkmoney.dao.impl.AbstractGenericDao;
 import com.rbkmoney.mapper.RecordRowMapper;
+import org.jooq.InsertOnDuplicateSetMoreStep;
 import org.jooq.Query;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
@@ -23,7 +25,17 @@ public class ContractorDao extends AbstractGenericDao {
         this.currentContractorRowMapper = new RecordRowMapper<>(CONTRACTOR, Contractor.class);
     }
 
-    public void saveContractor(List<Contractor> currentContractors) {
+    public void saveContractor(Contractor currentContractor) {
+        final ContractorRecord contractorRecord = getDslContext().newRecord(CONTRACTOR, currentContractor);
+        final InsertOnDuplicateSetMoreStep<ContractorRecord> query = getDslContext().insertInto(CONTRACTOR)
+                .set(contractorRecord)
+                .onConflict(CONTRACTOR.CONTRACTOR_ID)
+                .doUpdate()
+                .set(contractorRecord);
+        execute(query);
+    }
+
+    public void saveContractors(List<Contractor> currentContractors) {
         List<Query> queries = currentContractors.stream()
                 .map(contractor -> getDslContext().newRecord(CONTRACTOR, contractor))
                 .map(currentContractorRecord -> getDslContext()
