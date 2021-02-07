@@ -17,6 +17,7 @@ import com.rbkmoney.geck.common.util.TBaseUtil;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -54,6 +55,13 @@ public class ShopCreatedHandler extends AbstractClaimChangeHandler {
         final Contract contract = contractDao.getContractById(contractId);
         final Contractor currentContractor = contractorDao.getContractorById(contract.getContractorId());
 
+        Shop shop = initShop(event, shopCreated, shopId, partyId, contractId, currentContractor);
+
+        shopDao.saveShop(shop);
+    }
+
+    @NotNull
+    private Shop initShop(MachineEvent event, com.rbkmoney.damsel.domain.Shop shopCreated, String shopId, String partyId, String contractId, Contractor currentContractor) {
         Shop shop = contractorToShopConverter.convert(currentContractor);
         shop.setEventId(event.getEventId());
         shop.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
@@ -69,30 +77,29 @@ public class ShopCreatedHandler extends AbstractClaimChangeHandler {
             shop.setBlockedSince(TypeUtil.stringToLocalDateTime(shopCreated.getBlocking().getBlocked().getSince()));
         }
         shop.setSuspension(TBaseUtil.unionFieldToEnum(shopCreated.getSuspension(), Suspension.class));
-       if (shopCreated.getSuspension().isSetActive()) {
-           shop.setSuspensionActiveSince(TypeUtil.stringToLocalDateTime(shopCreated.getSuspension().getActive().getSince()));
-       } else if (shopCreated.getSuspension().isSetSuspended()) {
-           shop.setSuspensionSuspendedSince(TypeUtil.stringToLocalDateTime(shopCreated.getSuspension().getSuspended().getSince()));
-       }
-       shop.setDetailsName(shopCreated.getDetails().getName());
-       shop.setDetailsDescription(shopCreated.getDetails().getDescription());
-       if (shopCreated.getLocation().isSetUrl()) {
-           shop.setLocationUrl(shopCreated.getLocation().getUrl());
-       }
-       shop.setCategoryId(shopCreated.getCategory().getId());
-       if (shopCreated.isSetAccount()) {
-           shop.setAccountCurrencyCode(shopCreated.getAccount().getCurrency().getSymbolicCode());
-           shop.setAccountGuarantee(String.valueOf(shopCreated.getAccount().getGuarantee()));
-           shop.setAccountPayout(String.valueOf(shopCreated.getAccount().getPayout()));
-           shop.setAccountSettlement(String.valueOf(shopCreated.getAccount().getSettlement()));
-       }
-       shop.setContractId(contractId);
-       shop.setPayoutToolId(shopCreated.getPayoutToolId());
-       if (shopCreated.isSetPayoutSchedule()) {
-           shop.setPayoutScheduleId(shopCreated.getPayoutSchedule().getId());
-       }
-
-        shopDao.saveShop(shop);
+        if (shopCreated.getSuspension().isSetActive()) {
+            shop.setSuspensionActiveSince(TypeUtil.stringToLocalDateTime(shopCreated.getSuspension().getActive().getSince()));
+        } else if (shopCreated.getSuspension().isSetSuspended()) {
+            shop.setSuspensionSuspendedSince(TypeUtil.stringToLocalDateTime(shopCreated.getSuspension().getSuspended().getSince()));
+        }
+        shop.setDetailsName(shopCreated.getDetails().getName());
+        shop.setDetailsDescription(shopCreated.getDetails().getDescription());
+        if (shopCreated.getLocation().isSetUrl()) {
+            shop.setLocationUrl(shopCreated.getLocation().getUrl());
+        }
+        shop.setCategoryId(shopCreated.getCategory().getId());
+        if (shopCreated.isSetAccount()) {
+            shop.setAccountCurrencyCode(shopCreated.getAccount().getCurrency().getSymbolicCode());
+            shop.setAccountGuarantee(String.valueOf(shopCreated.getAccount().getGuarantee()));
+            shop.setAccountPayout(String.valueOf(shopCreated.getAccount().getPayout()));
+            shop.setAccountSettlement(String.valueOf(shopCreated.getAccount().getSettlement()));
+        }
+        shop.setContractId(contractId);
+        shop.setPayoutToolId(shopCreated.getPayoutToolId());
+        if (shopCreated.isSetPayoutSchedule()) {
+            shop.setPayoutScheduleId(shopCreated.getPayoutSchedule().getId());
+        }
+        return shop;
     }
 
 

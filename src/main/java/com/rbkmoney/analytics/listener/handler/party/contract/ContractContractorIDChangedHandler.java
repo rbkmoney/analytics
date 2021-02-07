@@ -17,6 +17,7 @@ import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -57,6 +58,12 @@ public class ContractContractorIDChangedHandler extends AbstractClaimChangeHandl
 
         final Contract mergedContract = contractMerger.merge(contractEffectUnit.getContractId(), contract);
         contractDao.saveContract(mergedContract);
+        final Shop shopByContractId = updateShop(event, partyId, contract, mergedContract);
+        log.debug("ContractorChangeIdHandler save shop: {} and contractor: {}", shopByContractId, mergedContract);
+    }
+
+    @Nullable
+    private Shop updateShop(MachineEvent event, String partyId, Contract contract, Contract mergedContract) {
         final Shop shopByContractId = shopDao.getShopByContractId(mergedContract.getContractId());
         if (shopByContractId != null) {
             final Contractor contractorById = contractorDao.getContractorById(contract.getContractorId());
@@ -66,7 +73,7 @@ public class ContractContractorIDChangedHandler extends AbstractClaimChangeHandl
             mergedShop.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
             shopDao.saveShop(mergedShop);
         }
-        log.debug("ContractorChangeIdHandler save shop: {} and contractor: {}", shopByContractId, mergedContract);
+        return shopByContractId;
     }
 
 }

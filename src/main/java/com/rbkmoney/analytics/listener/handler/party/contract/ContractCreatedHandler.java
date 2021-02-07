@@ -65,9 +65,9 @@ public class ContractCreatedHandler extends AbstractClaimChangeHandler {
         contract.setContractorId(contractorId);
         contract.setContractId(contractEffectUnit.getContractId());
 
-        log.debug("ContractCreatedHandler result contract: {}", contract);
         contractDao.saveContract(contract);
         contractorDao.saveContractor(currentContractor);
+        log.debug("ContractCreatedHandler result contract: {} currentContractor: {}", contract, currentContractor);
     }
 
     private String initContractorId(com.rbkmoney.damsel.domain.Contract contractCreated) {
