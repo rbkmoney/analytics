@@ -82,9 +82,10 @@ public class PartyFlowGenerator {
         List<SinkEvent> sinkEvents = new ArrayList<>();
         Long sequenceId = 0L;
         sinkEvents.add(buildSinkEvent(buildMessagePartyCreated(sequenceId++, partyId)));
-        sinkEvents.add(buildSinkEvent(buildContractCreated(sequenceId++, buildContract(CONTRACT_ID), partyId)));
-        sinkEvents.add(buildSinkEvent(buildContractorCreated(sequenceId++, buildPartyContractor(), partyId)));
-        sinkEvents.add(buildSinkEvent(buildContractorIdChange(sequenceId++, buildContract(CONTRACT_ID), partyId, CONTRACTOR_ID)));
+        final Contract contract = buildContract(CONTRACT_ID);
+        contract.setContractorId(CONTRACTOR_ID);
+        sinkEvents.add(buildSinkEvent(buildContractCreated(sequenceId++, contract, partyId)));
+        sinkEvents.add(buildSinkEvent(buildContractorCreated(sequenceId++, PartyFlowGenerator.buildRussianLegalPartyContractor(), partyId)));
         sinkEvents.add(buildSinkEvent(buildMessageShopCreated(sequenceId++, partyId, shopId, CONTRACT_ID)));
         sinkEvents.add(buildSinkEvent(buildMessageShopBlocking(sequenceId++, partyId, shopId)));
         sinkEvents.add(buildSinkEvent(buildMessageShopPayoutToolChanged(sequenceId++, partyId, shopId)));
@@ -113,7 +114,7 @@ public class PartyFlowGenerator {
                 final Contract contract = buildContract(contractId);
                 sinkEvents.add(buildSinkEvent(buildContractCreated(sequenceId++, contract, lastPartyId)));
                 sinkEvents.add(buildSinkEvent(buildContractorCreated(sequenceId++, contractor, lastPartyId)));
-                sinkEvents.add(buildSinkEvent(buildContractorIdChange(sequenceId++, contract, lastPartyId, contractId)));
+                sinkEvents.add(buildSinkEvent(buildContractorIdChange(sequenceId++, contract, lastPartyId, CONTRACTOR_ID)));
                 sinkEvents.add(buildSinkEvent(buildContractorIdentificationLevelChanged(sequenceId++, lastPartyId, contractId)));
                 sinkEvents.add(buildSinkEvent(buildMessageShopCreated(sequenceId++, lastPartyId, lastShopId, contractId)));
             } else {
@@ -123,7 +124,7 @@ public class PartyFlowGenerator {
                 sinkEvents.add(buildSinkEvent(buildContractCreated(sequenceId++, contract, partyId)));
                 final PartyContractor partyContractor = buildRussianLegalPartyContractor();
                 sinkEvents.add(buildSinkEvent(buildContractorCreated(sequenceId++, partyContractor, partyId)));
-                sinkEvents.add(buildSinkEvent(buildContractorIdChange(sequenceId++, contract, partyId, contractId)));
+                sinkEvents.add(buildSinkEvent(buildContractorIdChange(sequenceId++, contract, partyId, CONTRACTOR_ID)));
                 sinkEvents.add(buildSinkEvent(buildContractorIdentificationLevelChanged(sequenceId++, partyId, contractId)));
                 sinkEvents.add(buildSinkEvent(buildMessageShopCreated(sequenceId++, partyId, lastShopId, contractId)));
                 sinkEvents.add(buildSinkEvent(buildMessagePartyBlocking(sequenceId++, partyId)));
