@@ -1,14 +1,14 @@
-package com.rbkmoney.analytics.listener.mapper;
+package com.rbkmoney.analytics.listener.handler;
 
 import com.rbkmoney.analytics.constant.EventType;
 
-public interface ChangeHandler<C, P, T>  {
+public interface ChangeHandler<C, P>  {
 
     default boolean accept(C change) {
         return getChangeType().getFilter().match(change);
     }
 
-    T handleChange(C change, P parent);
+    void handleChange(C change, P parent);
 
     EventType getChangeType();
 

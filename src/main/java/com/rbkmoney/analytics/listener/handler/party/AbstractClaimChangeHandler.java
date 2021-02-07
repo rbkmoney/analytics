@@ -1,7 +1,7 @@
-package com.rbkmoney.analytics.listener.mapper.party;
+package com.rbkmoney.analytics.listener.handler.party;
 
 import com.rbkmoney.analytics.constant.EventType;
-import com.rbkmoney.analytics.listener.mapper.ChangeHandler;
+import com.rbkmoney.analytics.listener.handler.ChangeHandler;
 import com.rbkmoney.damsel.payment_processing.ClaimEffect;
 import com.rbkmoney.damsel.payment_processing.ClaimStatus;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
@@ -14,7 +14,7 @@ import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import java.util.List;
 import java.util.function.Predicate;
 
-public abstract class AbstractClaimChangeHandler<T> implements ChangeHandler<PartyChange, MachineEvent, T> {
+public abstract class AbstractClaimChangeHandler implements ChangeHandler<PartyChange, MachineEvent> {
 
     private static final Filter CLAIM_CREATED_FILTER = new PathConditionFilter(
             new PathConditionRule("claim_created.status.accepted", new IsNullCondition().not()));

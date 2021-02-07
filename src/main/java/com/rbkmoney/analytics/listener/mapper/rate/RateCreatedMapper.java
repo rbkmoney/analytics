@@ -1,4 +1,4 @@
-package com.rbkmoney.analytics.listener.mapper.party.rate;
+package com.rbkmoney.analytics.listener.mapper.rate;
 
 import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Rate;

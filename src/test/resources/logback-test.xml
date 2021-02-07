@@ -6,9 +6,10 @@
     <root level="warn">
         <appender-ref ref="CONSOLE"/>
     </root>
-    <logger name="com.rbkmoney" level="ALL"/>
-    <logger name="org.springframework.jdbc.core.JdbcTemplate" level="debug"/>
-    <logger name="org.apache.kafka.clients.consumer.ConsumerConfig" level="INFO"/>
-    <logger name="org.apache.kafka.clients.producer.ProducerConfig" level="INFO"/>
+<!--    <logger name="com.rbkmoney" level="ALL"/>-->
+    <logger name="com.rbkmoney.analytics.listener.handler.party" level="ALL"/>
+    <logger name="com.rbkmoney.analytics.dao.repository.postgres.party.management" level="ALL"/>
+<!--    <logger name="org.apache.kafka.clients.consumer.ConsumerConfig" level="INFO"/>-->
+<!--    <logger name="org.apache.kafka.clients.producer.ProducerConfig" level="INFO"/>-->
 
 </configuration>

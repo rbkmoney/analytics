@@ -1,23 +1,28 @@
-package com.rbkmoney.analytics.listener.mapper.party;
+package com.rbkmoney.analytics.listener.handler.party;
 
 import com.rbkmoney.analytics.constant.EventType;
+import com.rbkmoney.analytics.dao.repository.postgres.party.management.PartyDao;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
-import com.rbkmoney.analytics.listener.mapper.ChangeHandler;
+import com.rbkmoney.analytics.listener.handler.merger.PartyEventMerger;
+import com.rbkmoney.analytics.listener.handler.ChangeHandler;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
 import com.rbkmoney.damsel.payment_processing.PartyRevisionChanged;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
+@Slf4j
 @Component
 @RequiredArgsConstructor
-public class PartyRevisionChangedHandler implements ChangeHandler<PartyChange, MachineEvent, List<Party>> {
+public class PartyRevisionChangedHandler implements ChangeHandler<PartyChange, MachineEvent> {
+
+    private final PartyDao partyDao;
+    private final PartyEventMerger partyEventMerger;
 
     @Override
-    public List<Party> handleChange(PartyChange change, MachineEvent event) {
+    public void handleChange(PartyChange change, MachineEvent event) {
         PartyRevisionChanged partyRevisionChanged = change.getRevisionChanged();
         String partyId = event.getSourceId();
 
@@ -28,7 +33,10 @@ public class PartyRevisionChangedHandler implements ChangeHandler<PartyChange, M
         party.setRevisionId(String.valueOf(partyRevisionChanged.getRevision()));
         party.setRevisionChangedAt(TypeUtil.stringToLocalDateTime(partyRevisionChanged.getTimestamp()));
 
-        return List.of(party);
+        final Party mergedParty = partyEventMerger.mergeParty(partyId, party);
+        partyDao.saveParty(mergedParty);
+
+        log.debug("Party create event saveParty: {}", party);
     }
 
     @Override

@@ -106,7 +106,7 @@ CREATE TABLE analytics.contract
 
     CONSTRAINT contract_pkey PRIMARY KEY (id)
 );
-CREATE INDEX contract_uidx ON analytics.contract (contract_id);
+CREATE UNIQUE INDEX contract_uidx ON analytics.contract (contract_id);
 
 CREATE TABLE analytics.contractor
 (

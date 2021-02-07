@@ -1,5 +1,6 @@
 package com.rbkmoney.analytics.listener.handler.party;
 
+import com.rbkmoney.analytics.listener.handler.ChangeHandler;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
 import com.rbkmoney.damsel.payment_processing.PartyEventData;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
@@ -24,10 +25,7 @@ public class PartyMachineEventHandler {
     private int throttlingTimeout;
 
     private final MachineEventParser<PartyEventData> eventParser;
-    private final PartyManagementEventHandler shopEventHandler;
-    private final PartyManagementEventHandler contractEventHandler;
-    private final PartyManagementEventHandler contractorEventHandler;
-    private final PartyManagementEventHandler partyEventHandler;
+    private final List<ChangeHandler<PartyChange, MachineEvent>> partyHandlers;
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void handleMessages(List<MachineEvent> batch, Acknowledgment ack) throws InterruptedException {
@@ -51,10 +49,9 @@ public class PartyMachineEventHandler {
             log.debug("Party changes size: {}", eventData.getChanges().size());
             for (PartyChange change : eventData.getChanges()) {
                 log.debug("Party change: {}", change);
-                partyEventHandler.handle(machineEvent, change);
-                contractorEventHandler.handle(machineEvent, change);
-                contractEventHandler.handle(machineEvent, change);
-                shopEventHandler.handle(machineEvent, change);
+                partyHandlers.stream()
+                        .filter(changeHandler -> changeHandler.accept(change))
+                        .forEach(changeHandler -> changeHandler.handleChange(change, machineEvent));
             }
         }
     }

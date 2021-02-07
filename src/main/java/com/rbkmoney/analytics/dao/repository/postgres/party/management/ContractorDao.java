@@ -4,6 +4,7 @@ import com.rbkmoney.analytics.domain.db.tables.pojos.Contractor;
 import com.rbkmoney.analytics.domain.db.tables.records.ContractorRecord;
 import com.rbkmoney.dao.impl.AbstractGenericDao;
 import com.rbkmoney.mapper.RecordRowMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.jooq.InsertOnDuplicateSetMoreStep;
 import org.jooq.Query;
 import org.springframework.jdbc.core.RowMapper;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 
 import static com.rbkmoney.analytics.domain.db.Tables.CONTRACTOR;
 
+@Slf4j
 @Component
 public class ContractorDao extends AbstractGenericDao {
 
@@ -50,7 +52,9 @@ public class ContractorDao extends AbstractGenericDao {
     public Contractor getContractorById(String contractorId) {
         Query query = getDslContext().selectFrom(CONTRACTOR)
                 .where(CONTRACTOR.CONTRACTOR_ID.eq(contractorId));
-        return fetchOne(query, currentContractorRowMapper);
+        final Contractor contractor = fetchOne(query, currentContractorRowMapper);
+        log.debug("getContractorById: {} contractor: {}", contractorId, contractor);
+        return contractor;
     }
 
 }

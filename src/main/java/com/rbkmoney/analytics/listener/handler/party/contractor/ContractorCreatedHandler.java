@@ -1,9 +1,11 @@
-package com.rbkmoney.analytics.listener.mapper.party.contractor;
+package com.rbkmoney.analytics.listener.handler.party.contractor;
 
 import com.rbkmoney.analytics.converter.ContractorToCurrentContractorConverter;
+import com.rbkmoney.analytics.dao.repository.postgres.party.management.ContractorDao;
 import com.rbkmoney.analytics.domain.db.enums.ContractorIdentificationLvl;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Contractor;
-import com.rbkmoney.analytics.listener.mapper.party.AbstractClaimChangeHandler;
+import com.rbkmoney.analytics.listener.handler.merger.ContractorEventMerger;
+import com.rbkmoney.analytics.listener.handler.party.AbstractClaimChangeHandler;
 import com.rbkmoney.damsel.domain.PartyContractor;
 import com.rbkmoney.damsel.payment_processing.ClaimEffect;
 import com.rbkmoney.damsel.payment_processing.ContractorEffectUnit;
@@ -14,15 +16,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ContractorCreatedHandler extends AbstractClaimChangeHandler<List<Contractor>> {
+public class ContractorCreatedHandler extends AbstractClaimChangeHandler {
 
     private final ContractorToCurrentContractorConverter contractorToCurrentContractorConverter;
+    private final ContractorDao contractorDao;
 
     @Override
     public boolean accept(PartyChange change) {
@@ -31,18 +31,13 @@ public class ContractorCreatedHandler extends AbstractClaimChangeHandler<List<Co
     }
 
     @Override
-    public List<Contractor> handleChange(PartyChange change, MachineEvent event) {
-        List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
-        List<Contractor> currentContractors = new ArrayList<>();
-        for (ClaimEffect claimEffect : claimEffects) {
-            if (claimEffect.isSetContractorEffect() && claimEffect.getContractorEffect().getEffect().isSetCreated()) {
-                currentContractors.add(handleEvent(event, claimEffect));
-            }
-        }
-        return currentContractors;
+    public void handleChange(PartyChange change, MachineEvent event) {
+        getClaimStatus(change).getAccepted().getEffects().stream()
+                .filter(claimEffect -> claimEffect.isSetContractorEffect() && claimEffect.getContractorEffect().getEffect().isSetCreated())
+                .forEach(claimEffect -> handleEvent(event, claimEffect));
     }
 
-    private Contractor handleEvent(MachineEvent event, ClaimEffect effect) {
+    private void handleEvent(MachineEvent event, ClaimEffect effect) {
         ContractorEffectUnit contractorEffect = effect.getContractorEffect();
         PartyContractor partyContractor = contractorEffect.getEffect().getCreated();
         com.rbkmoney.damsel.domain.Contractor contractor = partyContractor.getContractor();
@@ -61,6 +56,6 @@ public class ContractorCreatedHandler extends AbstractClaimChangeHandler<List<Co
 
         log.debug("ContractorCreatedHandler result contractor: {}", currentContractor);
 
-        return currentContractor;
+        contractorDao.saveContractor(currentContractor);
     }
 }

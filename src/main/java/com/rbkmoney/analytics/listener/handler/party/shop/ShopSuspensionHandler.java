@@ -1,8 +1,10 @@
-package com.rbkmoney.analytics.listener.mapper.party.shop;
+package com.rbkmoney.analytics.listener.handler.party.shop;
 
 import com.rbkmoney.analytics.constant.EventType;
+import com.rbkmoney.analytics.dao.repository.postgres.party.management.ShopDao;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
-import com.rbkmoney.analytics.listener.mapper.ChangeHandler;
+import com.rbkmoney.analytics.listener.handler.ChangeHandler;
+import com.rbkmoney.analytics.listener.handler.merger.ShopEventMerger;
 import com.rbkmoney.damsel.domain.Suspension;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
 import com.rbkmoney.geck.common.util.TypeUtil;
@@ -10,13 +12,14 @@ import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Component
 @RequiredArgsConstructor
-public class ShopSuspensionHandler implements ChangeHandler<PartyChange, MachineEvent, List<Shop>> {
+public class ShopSuspensionHandler implements ChangeHandler<PartyChange, MachineEvent> {
 
-    public List<Shop> handleChange(PartyChange change, MachineEvent event) {
+    private final ShopEventMerger shopEventMerger;
+    private final ShopDao shopDao;
+
+    public void handleChange(PartyChange change, MachineEvent event) {
         Suspension suspension = change.getShopSuspension().getSuspension();
         String shopId = change.getShopSuspension().getShopId();
         String partyId = event.getSourceId();
@@ -34,7 +37,8 @@ public class ShopSuspensionHandler implements ChangeHandler<PartyChange, Machine
             shop.setSuspensionSuspendedSince(TypeUtil.stringToLocalDateTime(suspension.getSuspended().getSince()));
         }
 
-        return List.of(shop);
+        final Shop mergedShop = shopEventMerger.mergeShop(partyId, shopId, shop);
+        shopDao.saveShop(mergedShop);
     }
 
     @Override

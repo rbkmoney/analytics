@@ -1,13 +1,15 @@
-package com.rbkmoney.analytics.listener.mapper.party.shop;
+package com.rbkmoney.analytics.listener.handler.party.shop;
 
 import com.rbkmoney.analytics.converter.ContractorToShopConverter;
+import com.rbkmoney.analytics.dao.repository.postgres.party.management.ContractDao;
+import com.rbkmoney.analytics.dao.repository.postgres.party.management.ContractorDao;
+import com.rbkmoney.analytics.dao.repository.postgres.party.management.ShopDao;
 import com.rbkmoney.analytics.domain.db.enums.Blocking;
 import com.rbkmoney.analytics.domain.db.enums.Suspension;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Contract;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Contractor;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
-import com.rbkmoney.analytics.listener.mapper.party.AbstractClaimChangeHandler;
-import com.rbkmoney.analytics.service.PartyManagementService;
+import com.rbkmoney.analytics.listener.handler.party.AbstractClaimChangeHandler;
 import com.rbkmoney.damsel.payment_processing.ClaimEffect;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
 import com.rbkmoney.damsel.payment_processing.ShopEffectUnit;
@@ -17,14 +19,15 @@ import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class ShopCreatedHandler extends AbstractClaimChangeHandler<List<Shop>> {
+public class ShopCreatedHandler extends AbstractClaimChangeHandler {
 
-    private final PartyManagementService partyManagementService;
+    private final ShopDao shopDao;
+    private final ContractDao contractDao;
+    private final ContractorDao contractorDao;
     private final ContractorToShopConverter contractorToShopConverter;
 
     @Override
@@ -34,26 +37,22 @@ public class ShopCreatedHandler extends AbstractClaimChangeHandler<List<Shop>> {
     }
 
     @Override
-    public List<Shop> handleChange(PartyChange change, MachineEvent event) {
+    public void handleChange(PartyChange change, MachineEvent event) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
-        List<Shop> shopList = new ArrayList<>();
-        for (ClaimEffect claimEffect : claimEffects) {
-            if (claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetCreated()) {
-                shopList.add(handleEvent(event, claimEffect));
-            }
-        }
-        return shopList;
+        claimEffects.stream()
+                .filter(claimEffect -> claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetCreated())
+                .forEach(claimEffect -> handleEvent(event, claimEffect));
     }
 
-    private Shop handleEvent(MachineEvent event, ClaimEffect effect) {
+    private void handleEvent(MachineEvent event, ClaimEffect effect) {
         ShopEffectUnit shopEffect = effect.getShopEffect();
         com.rbkmoney.damsel.domain.Shop shopCreated = shopEffect.getEffect().getCreated();
         String shopId = shopEffect.getShopId();
         String partyId = event.getSourceId();
 
         final String contractId = shopCreated.getContractId();
-        final Contract contract = partyManagementService.getContract(contractId);
-        final Contractor currentContractor = partyManagementService.getContractorById(contract.getContractorId());
+        final Contract contract = contractDao.getContractById(contractId);
+        final Contractor currentContractor = contractorDao.getContractorById(contract.getContractorId());
 
         Shop shop = contractorToShopConverter.convert(currentContractor);
         shop.setEventId(event.getEventId());
@@ -93,7 +92,7 @@ public class ShopCreatedHandler extends AbstractClaimChangeHandler<List<Shop>> {
            shop.setPayoutScheduleId(shopCreated.getPayoutSchedule().getId());
        }
 
-       return shop;
+        shopDao.saveShop(shop);
     }
 
 
