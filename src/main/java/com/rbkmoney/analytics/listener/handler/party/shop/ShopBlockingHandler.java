@@ -12,6 +12,8 @@ import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -21,6 +23,7 @@ public class ShopBlockingHandler implements ChangeHandler<PartyChange, MachineEv
     private final ShopDao shopDao;
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public void handleChange(PartyChange change, MachineEvent event) {
         Blocking blocking = change.getShopBlocking().getBlocking();
         String shopId = change.getShopBlocking().getShopId();

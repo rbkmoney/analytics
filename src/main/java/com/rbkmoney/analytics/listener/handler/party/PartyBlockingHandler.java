@@ -13,6 +13,8 @@ import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
@@ -23,6 +25,7 @@ public class PartyBlockingHandler implements ChangeHandler<PartyChange, MachineE
     private final PartyEventMerger partyEventMerger;
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public void handleChange(PartyChange change, MachineEvent event) {
         Blocking partyBlocking = change.getPartyBlocking();
         String partyId = event.getSourceId();

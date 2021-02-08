@@ -11,6 +11,8 @@ import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -19,6 +21,8 @@ public class ShopSuspensionHandler implements ChangeHandler<PartyChange, Machine
     private final ShopEventMerger shopEventMerger;
     private final ShopDao shopDao;
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public void handleChange(PartyChange change, MachineEvent event) {
         Suspension suspension = change.getShopSuspension().getSuspension();
         String shopId = change.getShopSuspension().getShopId();
