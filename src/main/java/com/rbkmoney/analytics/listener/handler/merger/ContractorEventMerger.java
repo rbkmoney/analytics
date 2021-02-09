@@ -14,7 +14,7 @@ public class ContractorEventMerger {
     private final ContractorDao contractorDao;
 
     public Contractor merge(String contractorId, Contractor currentContractor) {
-        Contractor targetContractor = contractorDao.getContractorById(currentContractor.getPartyId(), contractorId);
+        Contractor targetContractor = contractorDao.getContractorByPartyIdAndContractorId(currentContractor.getPartyId(), contractorId);
         if (targetContractor == null) {
             targetContractor = new Contractor();
         }

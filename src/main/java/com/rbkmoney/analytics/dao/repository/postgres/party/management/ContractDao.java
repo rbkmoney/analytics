@@ -32,7 +32,7 @@ public class ContractDao extends AbstractGenericDao {
         execute(queries);
     }
 
-    public Contract getContractById(String partyId, String contractId) {
+    public Contract getContractByPartyIdAndContractId(String partyId, String contractId) {
         Query query = getDslContext().selectFrom(CONTRACT)
                 .where(CONTRACT.CONTRACT_ID.eq(contractId)
                         .and(CONTRACT.PARTY_ID.eq(partyId)));

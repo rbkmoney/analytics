@@ -35,7 +35,7 @@ public class ContractorDao extends AbstractGenericDao {
         execute(query);
     }
 
-    public Contractor getContractorById(String partyId, String contractorId) {
+    public Contractor getContractorByPartyIdAndContractorId(String partyId, String contractorId) {
         Query query = getDslContext().selectFrom(CONTRACTOR)
                 .where(CONTRACTOR.CONTRACTOR_ID.eq(contractorId)
                         .and(CONTRACTOR.PARTY_ID.eq(partyId)));

@@ -32,7 +32,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -226,7 +225,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
     }
 
     private void checkContractorFields(String partyId, RussianLegalEntity russianLegalEntity) {
-        Contractor contractorForUpdate = contractorDao.getContractorById(partyId, CONTRACTOR_ID);
+        Contractor contractorForUpdate = contractorDao.getContractorByPartyIdAndContractorId(partyId, CONTRACTOR_ID);
         assertEquals(russianLegalEntity.getInn(), contractorForUpdate.getRussianLegalEntityInn());
         assertEquals(russianLegalEntity.getActualAddress(), contractorForUpdate.getRussianLegalEntityActualAddress());
         assertEquals(russianLegalEntity.getRussianBankAccount().getAccount(), contractorForUpdate.getRussianLegalEntityBankAccount());

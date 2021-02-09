@@ -12,7 +12,7 @@ public class ContractMerger {
     private final ContractDao contractDao;
 
     public Contract merge(String contractId, Contract contract) {
-        Contract targetContract = contractDao.getContractById(contract.getPartyId(), contractId);
+        Contract targetContract = contractDao.getContractByPartyIdAndContractId(contract.getPartyId(), contractId);
         if (targetContract == null) {
             targetContract = new Contract();
         }
