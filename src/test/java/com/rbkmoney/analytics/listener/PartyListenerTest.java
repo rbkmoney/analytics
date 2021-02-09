@@ -213,7 +213,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
             return true;
         });
 
-        checkContractorFields(russianLegalEntity);
+        checkContractorFields(lastPartyId, russianLegalEntity);
 
         checkShopFields(russianLegalEntity, lastPartyId, lastShopId);
     }
@@ -225,8 +225,8 @@ public class PartyListenerTest extends KafkaAbstractTest {
         postgresJdbcTemplate.execute("TRUNCATE TABLE analytics.contract;");
     }
 
-    private void checkContractorFields(RussianLegalEntity russianLegalEntity) {
-        Contractor contractorForUpdate = contractorDao.getContractorById(CONTRACTOR_ID);
+    private void checkContractorFields(String partyId, RussianLegalEntity russianLegalEntity) {
+        Contractor contractorForUpdate = contractorDao.getContractorById(partyId, CONTRACTOR_ID);
         assertEquals(russianLegalEntity.getInn(), contractorForUpdate.getRussianLegalEntityInn());
         assertEquals(russianLegalEntity.getActualAddress(), contractorForUpdate.getRussianLegalEntityActualAddress());
         assertEquals(russianLegalEntity.getRussianBankAccount().getAccount(), contractorForUpdate.getRussianLegalEntityBankAccount());

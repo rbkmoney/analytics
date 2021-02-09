@@ -26,15 +26,16 @@ public class ContractDao extends AbstractGenericDao {
         final ContractRecord record = getDslContext().newRecord(CONTRACT, contract);
         Query queries = getDslContext()
                 .insertInto(CONTRACT).set(record)
-                .onConflict(CONTRACT.CONTRACT_ID)
+                .onConflict(CONTRACT.PARTY_ID, CONTRACT.CONTRACT_ID)
                 .doUpdate()
                 .set(record);
         execute(queries);
     }
 
-    public Contract getContractById(String contractId) {
+    public Contract getContractById(String partyId, String contractId) {
         Query query = getDslContext().selectFrom(CONTRACT)
-                .where(CONTRACT.CONTRACT_ID.eq(contractId));
+                .where(CONTRACT.CONTRACT_ID.eq(contractId)
+                        .and(CONTRACT.PARTY_ID.eq(partyId)));
         return fetchOne(query, contractRefRowMapper);
     }
 

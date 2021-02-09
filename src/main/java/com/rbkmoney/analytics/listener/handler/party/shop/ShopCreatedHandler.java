@@ -60,8 +60,8 @@ public class ShopCreatedHandler extends AbstractClaimChangeHandler {
         String partyId = event.getSourceId();
 
         final String contractId = shopCreated.getContractId();
-        final Contract contract = contractDao.getContractById(contractId);
-        final Contractor currentContractor = contractorDao.getContractorById(contract.getContractorId());
+        final Contract contract = contractDao.getContractById(partyId, contractId);
+        final Contractor currentContractor = contractorDao.getContractorById(partyId, contract.getContractorId());
 
         Shop shop = initShop(event, shopCreated, shopId, partyId, contractId, currentContractor);
 

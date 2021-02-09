@@ -11,8 +11,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.rbkmoney.analytics.domain.db.Tables.CONTRACTOR;
 
@@ -31,27 +29,16 @@ public class ContractorDao extends AbstractGenericDao {
         final ContractorRecord contractorRecord = getDslContext().newRecord(CONTRACTOR, currentContractor);
         final InsertOnDuplicateSetMoreStep<ContractorRecord> query = getDslContext().insertInto(CONTRACTOR)
                 .set(contractorRecord)
-                .onConflict(CONTRACTOR.CONTRACTOR_ID)
+                .onConflict(CONTRACTOR.PARTY_ID, CONTRACTOR.CONTRACTOR_ID)
                 .doUpdate()
                 .set(contractorRecord);
         execute(query);
     }
 
-    public void saveContractors(List<Contractor> currentContractors) {
-        List<Query> queries = currentContractors.stream()
-                .map(contractor -> getDslContext().newRecord(CONTRACTOR, contractor))
-                .map(currentContractorRecord -> getDslContext()
-                        .insertInto(CONTRACTOR).set(currentContractorRecord)
-                        .onConflict(CONTRACTOR.CONTRACTOR_ID)
-                        .doUpdate()
-                        .set(currentContractorRecord))
-                .collect(Collectors.toList());
-        batchExecute(queries);
-    }
-
-    public Contractor getContractorById(String contractorId) {
+    public Contractor getContractorById(String partyId, String contractorId) {
         Query query = getDslContext().selectFrom(CONTRACTOR)
-                .where(CONTRACTOR.CONTRACTOR_ID.eq(contractorId));
+                .where(CONTRACTOR.CONTRACTOR_ID.eq(contractorId)
+                        .and(CONTRACTOR.PARTY_ID.eq(partyId)));
         final Contractor contractor = fetchOne(query, currentContractorRowMapper);
         log.debug("getContractorById: {} contractor: {}", contractorId, contractor);
         return contractor;
