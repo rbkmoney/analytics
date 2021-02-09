@@ -38,6 +38,7 @@ public class ContractCreatedHandler extends AbstractClaimChangeHandler {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void handleChange(PartyChange change, MachineEvent event) {
+        log.debug("ContractCreatedHandler handleChange change: {}", change);
         getClaimStatus(change).getAccepted().getEffects().stream()
                 .filter(claimEffect -> claimEffect.isSetContractEffect()
                         && claimEffect.getContractEffect().getEffect().isSetCreated()

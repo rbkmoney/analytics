@@ -32,11 +32,11 @@ import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.rbkmoney.analytics.utils.PartyFlowGenerator.CONTRACTOR_ID;
-import static com.rbkmoney.analytics.utils.PartyFlowGenerator.SETTLEMENT_ID;
+import static com.rbkmoney.analytics.utils.PartyFlowGenerator.*;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.*;

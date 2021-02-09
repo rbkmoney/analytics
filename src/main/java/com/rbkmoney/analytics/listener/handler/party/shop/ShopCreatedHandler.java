@@ -17,6 +17,7 @@ import com.rbkmoney.geck.common.util.TBaseUtil;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -24,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ShopCreatedHandler extends AbstractClaimChangeHandler {
@@ -42,6 +44,7 @@ public class ShopCreatedHandler extends AbstractClaimChangeHandler {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void handleChange(PartyChange change, MachineEvent event) {
+        log.debug("ShopCreatedHandler handleChange change: {}", change);
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
         claimEffects.stream()
                 .filter(claimEffect -> claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetCreated())

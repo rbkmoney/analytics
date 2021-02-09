@@ -389,6 +389,11 @@ public class PartyFlowGenerator {
         return buildMachineEvent(partyId, sequenceId, partyChange);
     }
 
+    public static MachineEvent buildContractCreatedWithShop(Long sequenceId, Contract contract, Shop shop, String partyId) throws IOException {
+        PartyChange partyChange = buildContractCreatedWithShopCreatedPartyChange(contract, shop);
+        return buildMachineEvent(partyId, sequenceId, partyChange);
+    }
+
     public static MachineEvent buildContractorIdChange(Long sequenceId, Contract contract, String partyId, String contractorId) throws IOException {
         PartyChange partyChange = buildContractorChangeIdPartyChange(contract, contractorId);
         return buildMachineEvent(partyId, sequenceId, partyChange);
@@ -417,6 +422,27 @@ public class PartyFlowGenerator {
         ClaimEffect claimEffect = new ClaimEffect();
         claimEffect.setContractEffect(contractEffectUnit);
         Claim claim = buildClaimCreated(claimEffect);
+        PartyChange partyChange = new PartyChange();
+        partyChange.setClaimCreated(claim);
+        return partyChange;
+    }
+
+    public static PartyChange buildContractCreatedWithShopCreatedPartyChange(Contract contract, Shop shop) {
+        ContractEffectUnit contractEffectUnit = new ContractEffectUnit();
+        contractEffectUnit.setContractId(contract.getId());
+        ContractEffect contractEffect = new ContractEffect();
+        contractEffect.setCreated(contract);
+        contractEffectUnit.setEffect(contractEffect);
+        ClaimEffect claimEffect = new ClaimEffect();
+        claimEffect.setContractEffect(contractEffectUnit);
+        final ShopEffectUnit shopEffectUnit = new ShopEffectUnit();
+        shopEffectUnit.setShopId(shop.getId());
+        final ShopEffect effect = new ShopEffect();
+        effect.setCreated(shop);
+        shopEffectUnit.setEffect(effect);
+        ClaimEffect claimEffectShop = new ClaimEffect();
+        claimEffectShop.setShopEffect(shopEffectUnit);
+        Claim claim = buildClaimChanged(List.of(claimEffect, claimEffectShop));
         PartyChange partyChange = new PartyChange();
         partyChange.setClaimCreated(claim);
         return partyChange;
@@ -519,6 +545,13 @@ public class PartyFlowGenerator {
         return new Claim(CLAIM_ID, claimStatus, Collections.emptyList(), REVISION_ID, TypeUtil.temporalToString(LocalDateTime.now()));
     }
 
+    public static Claim buildClaimChanged(List<ClaimEffect> claimEffects) {
+        ClaimAccepted claimAccepted = new ClaimAccepted();
+        claimAccepted.setEffects(claimEffects);
+        ClaimStatus claimStatus = ClaimStatus.accepted(claimAccepted);
+        return new Claim(CLAIM_ID, claimStatus, Collections.emptyList(), REVISION_ID, TypeUtil.temporalToString(LocalDateTime.now()));
+    }
+
     public static Shop buildShopCreated(String contractId) throws IOException {
         Shop shop = new Shop();
         shop = new MockTBaseProcessor(MockMode.ALL).process(shop, new TBaseHandler<>(Shop.class));
@@ -586,7 +619,7 @@ public class PartyFlowGenerator {
         return message;
     }
 
-    private static SinkEvent buildSinkEvent(MachineEvent machineEvent) {
+    public static SinkEvent buildSinkEvent(MachineEvent machineEvent) {
         SinkEvent sinkEvent = new SinkEvent();
         sinkEvent.setEvent(machineEvent);
         return sinkEvent;
