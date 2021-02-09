@@ -52,9 +52,10 @@ public class ShopDao extends AbstractGenericDao {
         return fetchOne(query, shopRowMapper);
     }
 
-    public Shop getShopByContractId(String contractId) {
+    public Shop getShopByPartyContractId(String partyId, String contractId) {
         Query query = getDslContext().selectFrom(SHOP)
-                .where(SHOP.CONTRACT_ID.eq(contractId));
+                .where(SHOP.PARTY_ID.eq(partyId)
+                        .and(SHOP.CONTRACT_ID.eq(contractId)));
         return fetchOne(query, shopRowMapper);
     }
 
