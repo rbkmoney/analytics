@@ -63,12 +63,12 @@ public class ContractContractorIDChangedHandler extends AbstractClaimChangeHandl
 
         final Contract mergedContract = contractMerger.merge(contractEffectUnit.getContractId(), contract);
         contractDao.saveContract(mergedContract);
-        final List<Shop> shopByContractId = updateShop(event, partyId, contract, mergedContract);
-        log.debug("ContractorChangeIdHandler save shops: {} and contractor: {}", shopByContractId, mergedContract);
+        final List<Shop> updatedShops = updateShops(event, partyId, contract, mergedContract);
+        log.debug("ContractorChangeIdHandler save shops: {} and contractor: {}", updatedShops, mergedContract);
     }
 
     @Nullable
-    private List<Shop> updateShop(MachineEvent event, String partyId, Contract contract, Contract mergedContract) {
+    private List<Shop> updateShops(MachineEvent event, String partyId, Contract contract, Contract mergedContract) {
         final List<Shop> currentShopStates = shopDao.getShopsByPartyIdAndContractId(partyId, mergedContract.getContractId());
         if (currentShopStates != null) {
             final Contractor currentContractorState = contractorDao.getContractorByPartyIdAndContractorId(partyId,
