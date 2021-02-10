@@ -22,7 +22,7 @@ import java.util.UUID;
 
 @Slf4j
 @Component
-@Order(2)
+@Order(3)
 @RequiredArgsConstructor
 public class ContractCreatedHandler extends AbstractClaimChangeHandler {
 
@@ -60,17 +60,23 @@ public class ContractCreatedHandler extends AbstractClaimChangeHandler {
         contract.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
 
         String contractorId = initContractorId(contractCreated);
-        com.rbkmoney.analytics.domain.db.tables.pojos.Contractor currentContractor = contractorToCurrentContractorConverter.convert(contractor);
-        currentContractor.setContractorId(contractorId);
-        currentContractor.setEventId(event.getEventId());
-        currentContractor.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
-        currentContractor.setPartyId(partyId);
+        com.rbkmoney.analytics.domain.db.tables.pojos.Contractor currentContractor = null;
+
+        if (contractor != null) {
+            currentContractor = contractorToCurrentContractorConverter.convert(contractor);
+            currentContractor.setContractorId(contractorId);
+            currentContractor.setEventId(event.getEventId());
+            currentContractor.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
+            currentContractor.setPartyId(partyId);
+            contractorDao.saveContractor(currentContractor);
+        } else {
+            currentContractor = contractorDao.getContractorByPartyIdAndContractorId(partyId, contractorId);
+        }
 
         contract.setContractorId(contractorId);
         contract.setContractId(contractEffectUnit.getContractId());
-
         contractDao.saveContract(contract);
-        contractorDao.saveContractor(currentContractor);
+
         log.debug("ContractCreatedHandler result contract: {} currentContractor: {}", contract, currentContractor);
     }
 

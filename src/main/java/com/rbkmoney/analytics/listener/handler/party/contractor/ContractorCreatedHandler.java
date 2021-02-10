@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
-@Order(3)
+@Order(2)
 @Component
 @RequiredArgsConstructor
 public class ContractorCreatedHandler extends AbstractClaimChangeHandler {
