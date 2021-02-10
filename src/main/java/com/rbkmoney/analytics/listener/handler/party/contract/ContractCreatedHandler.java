@@ -50,16 +50,13 @@ public class ContractCreatedHandler extends AbstractClaimChangeHandler {
         String partyId = event.getSourceId();
         ContractEffectUnit contractEffectUnit = effect.getContractEffect();
         com.rbkmoney.damsel.domain.Contract contractCreated = contractEffectUnit.getEffect().getCreated();
-        Contractor contractor = contractCreated.getContractor();
-
-        log.debug("ContractCreatedHandler contractor: {}", contractor);
 
         Contract contract = new Contract();
         contract.setPartyId(partyId);
         contract.setEventId(event.getEventId());
         contract.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
 
-        String contractorId = checkAndCreateContractor(event, partyId, contractCreated, contractor);
+        String contractorId = checkAndCreateContractor(event, partyId, contractCreated);
         contract.setContractorId(contractorId);
         contract.setContractId(contractEffectUnit.getContractId());
         contractDao.saveContract(contract);
@@ -67,7 +64,10 @@ public class ContractCreatedHandler extends AbstractClaimChangeHandler {
         log.debug("ContractCreatedHandler result contract: {}", contract);
     }
 
-    private String checkAndCreateContractor(MachineEvent event, String partyId, com.rbkmoney.damsel.domain.Contract contractCreated, Contractor contractor) {
+    private String checkAndCreateContractor(MachineEvent event, String partyId,
+                                            com.rbkmoney.damsel.domain.Contract contractCreated) {
+        Contractor contractor = contractCreated.getContractor();
+        log.debug("ContractCreatedHandler contractor: {}", contractor);
         String contractorId = initContractorId(contractCreated);
         if (contractor != null) {
             com.rbkmoney.analytics.domain.db.tables.pojos.Contractor currentContractor =
