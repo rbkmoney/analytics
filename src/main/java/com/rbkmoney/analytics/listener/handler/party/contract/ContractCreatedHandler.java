@@ -33,8 +33,7 @@ public class ContractCreatedHandler extends AbstractClaimChangeHandler {
     @Override
     public boolean accept(PartyChange change) {
         return isClaimEffect(change, claimEffect -> claimEffect.isSetContractEffect()
-                && claimEffect.getContractEffect().getEffect().isSetCreated()
-                && claimEffect.getContractEffect().getEffect().getCreated().isSetContractor());
+                && claimEffect.getContractEffect().getEffect().isSetCreated());
     }
 
     @Override
@@ -43,8 +42,7 @@ public class ContractCreatedHandler extends AbstractClaimChangeHandler {
         log.debug("ContractCreatedHandler handleChange change: {}", change);
         getClaimStatus(change).getAccepted().getEffects().stream()
                 .filter(claimEffect -> claimEffect.isSetContractEffect()
-                        && claimEffect.getContractEffect().getEffect().isSetCreated()
-                        && claimEffect.getContractEffect().getEffect().getCreated().isSetContractor())
+                        && claimEffect.getContractEffect().getEffect().isSetCreated())
                 .forEach(claimEffect -> handleEvent(event, claimEffect));
     }
 
