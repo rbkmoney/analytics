@@ -69,7 +69,7 @@ public class ContractContractorIDChangedHandler extends AbstractClaimChangeHandl
 
     @Nullable
     private List<Shop> updateShop(MachineEvent event, String partyId, Contract contract, Contract mergedContract) {
-        final List<Shop> currentShopStates = shopDao.getShopByPartyIdAndContractId(partyId, mergedContract.getContractId());
+        final List<Shop> currentShopStates = shopDao.getShopsByPartyIdAndContractId(partyId, mergedContract.getContractId());
         if (currentShopStates != null) {
             final Contractor currentContractorState = contractorDao.getContractorByPartyIdAndContractorId(partyId,
                     contract.getContractorId());
