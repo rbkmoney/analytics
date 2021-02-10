@@ -55,6 +55,7 @@ kafka:
       initial: mg-events-party
     rate:
       initial: mg-events-rates
+      groupId: analytics-rate-group
 
   consumer:
     prefix: analytics

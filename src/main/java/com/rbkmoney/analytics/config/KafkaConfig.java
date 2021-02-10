@@ -47,6 +47,8 @@ public class KafkaConfig {
     private String bootstrapServers;
     @Value("${kafka.consumer.concurrency}")
     private int concurrencyListeners;
+    @Value("${kafka.topic.rate.groupId}")
+    private String rateGroupId;
 
     private final ConsumerGroupIdService consumerGroupIdService;
     private final KafkaSslProperties kafkaSslProperties;
@@ -92,8 +94,7 @@ public class KafkaConfig {
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, MachineEvent> rateContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, MachineEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        String consumerGroup = consumerGroupIdService.generateGroupId(ANALYTICS_RATE);
-        initDefaultListenerProperties(factory, consumerGroup, new MachineEventDeserializer());
+        initDefaultListenerProperties(factory, rateGroupId, new MachineEventDeserializer());
         return factory;
     }
 
