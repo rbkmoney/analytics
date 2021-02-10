@@ -59,25 +59,27 @@ public class ContractCreatedHandler extends AbstractClaimChangeHandler {
         contract.setEventId(event.getEventId());
         contract.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
 
-        String contractorId = initContractorId(contractCreated);
-        com.rbkmoney.analytics.domain.db.tables.pojos.Contractor currentContractor = null;
+        String contractorId = checkAndCreateContractor(event, partyId, contractCreated, contractor);
+        contract.setContractorId(contractorId);
+        contract.setContractId(contractEffectUnit.getContractId());
+        contractDao.saveContract(contract);
 
+        log.debug("ContractCreatedHandler result contract: {}", contract);
+    }
+
+    private String checkAndCreateContractor(MachineEvent event, String partyId, com.rbkmoney.damsel.domain.Contract contractCreated, Contractor contractor) {
+        String contractorId = initContractorId(contractCreated);
         if (contractor != null) {
-            currentContractor = contractorToCurrentContractorConverter.convert(contractor);
+            com.rbkmoney.analytics.domain.db.tables.pojos.Contractor currentContractor =
+                    contractorToCurrentContractorConverter.convert(contractor);
             currentContractor.setContractorId(contractorId);
             currentContractor.setEventId(event.getEventId());
             currentContractor.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
             currentContractor.setPartyId(partyId);
             contractorDao.saveContractor(currentContractor);
-        } else {
-            currentContractor = contractorDao.getContractorByPartyIdAndContractorId(partyId, contractorId);
+            log.debug("ContractCreatedHandler save currentContractor: {}", currentContractor);
         }
-
-        contract.setContractorId(contractorId);
-        contract.setContractId(contractEffectUnit.getContractId());
-        contractDao.saveContract(contract);
-
-        log.debug("ContractCreatedHandler result contract: {} currentContractor: {}", contract, currentContractor);
+        return contractorId;
     }
 
     private String initContractorId(com.rbkmoney.damsel.domain.Contract contractCreated) {
