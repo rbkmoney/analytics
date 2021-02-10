@@ -22,6 +22,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Slf4j
 @RequiredArgsConstructor
 @Component
@@ -61,22 +63,27 @@ public class ContractContractorIDChangedHandler extends AbstractClaimChangeHandl
 
         final Contract mergedContract = contractMerger.merge(contractEffectUnit.getContractId(), contract);
         contractDao.saveContract(mergedContract);
-        final Shop shopByContractId = updateShop(event, partyId, contract, mergedContract);
-        log.debug("ContractorChangeIdHandler save shop: {} and contractor: {}", shopByContractId, mergedContract);
+        final List<Shop> shopByContractId = updateShop(event, partyId, contract, mergedContract);
+        log.debug("ContractorChangeIdHandler save shops: {} and contractor: {}", shopByContractId, mergedContract);
     }
 
     @Nullable
-    private Shop updateShop(MachineEvent event, String partyId, Contract contract, Contract mergedContract) {
-        final Shop currentShopState = shopDao.getShopByPartyIdAndContractId(partyId, mergedContract.getContractId());
-        if (currentShopState != null) {
-            final Contractor currentContractorState = contractorDao.getContractorByPartyIdAndContractorId(partyId, contract.getContractorId());
-            final Shop shop = contractorToShopConverter.convert(currentContractorState);
-            final Shop mergedShop = shopEventMerger.mergeShop(partyId, currentShopState.getShopId(), shop);
-            mergedShop.setEventId(event.getEventId());
-            mergedShop.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
-            shopDao.saveShop(mergedShop);
+    private List<Shop> updateShop(MachineEvent event, String partyId, Contract contract, Contract mergedContract) {
+        final List<Shop> currentShopStates = shopDao.getShopByPartyIdAndContractId(partyId, mergedContract.getContractId());
+        if (currentShopStates != null) {
+            final Contractor currentContractorState = contractorDao.getContractorByPartyIdAndContractorId(partyId,
+                    contract.getContractorId());
+            currentShopStates.forEach(shop -> mergeAndUpdateShop(shop, event, partyId, currentContractorState));
         }
-        return currentShopState;
+        return currentShopStates;
+    }
+
+    private void mergeAndUpdateShop(Shop currentShopState, MachineEvent event, String partyId, Contractor currentContractorState) {
+        final Shop shop = contractorToShopConverter.convert(currentContractorState);
+        final Shop mergedShop = shopEventMerger.mergeShop(partyId, currentShopState.getShopId(), shop);
+        mergedShop.setEventId(event.getEventId());
+        mergedShop.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
+        shopDao.saveShop(mergedShop);
     }
 
 }
