@@ -37,7 +37,7 @@ public class PartyMachineEventHandler {
             ack.acknowledge();
         } catch (Exception e) {
             log.error("Exception during PartyListener process", e);
-            Thread.sleep(throttlingTimeout);
+            ack.nack(throttlingTimeout);
             throw e;
         }
     }

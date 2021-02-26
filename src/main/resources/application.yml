@@ -66,9 +66,11 @@ kafka:
       initial: payout
     party:
       initial: mg-events-party
+      max.poll.records: 50
     rate:
       initial: mg-events-rates
       groupId: analytics-rate-group
+      max.poll.records: 50
 
   consumer:
     prefix: analytics
