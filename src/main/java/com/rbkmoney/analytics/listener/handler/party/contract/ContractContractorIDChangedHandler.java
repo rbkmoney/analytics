@@ -46,9 +46,15 @@ public class ContractContractorIDChangedHandler extends AbstractClaimChangeHandl
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void handleChange(PartyChange change, MachineEvent event) {
-        getClaimStatus(change).getAccepted().getEffects().stream()
-                .filter(claimEffect -> claimEffect.isSetContractEffect() && claimEffect.getContractEffect().getEffect().isSetContractorChanged())
-                .forEach(claimEffect -> handleEvent(event, claimEffect));
+        log.debug("Contractor id change handle: {}", change);
+        List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects().stream()
+                .filter(claimEffect -> claimEffect.isSetContractEffect()
+                        && claimEffect.getContractEffect().getEffect().isSetContractorChanged())
+                .collect(Collectors.toList());
+        for (ClaimEffect claimEffect : claimEffects) {
+            handleEvent(event, claimEffect);
+        }
+        log.debug("Contractor id change finished");
     }
 
     private void handleEvent(MachineEvent event, ClaimEffect effect) {

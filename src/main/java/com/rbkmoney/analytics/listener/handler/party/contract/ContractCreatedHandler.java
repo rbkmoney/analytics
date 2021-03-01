@@ -18,7 +18,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -39,14 +41,20 @@ public class ContractCreatedHandler extends AbstractClaimChangeHandler {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void handleChange(PartyChange change, MachineEvent event) {
-        log.debug("ContractCreatedHandler handleChange change: {}", change);
-        getClaimStatus(change).getAccepted().getEffects().stream()
+        log.debug("Contract create change: {}", change);
+        List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects().stream()
                 .filter(claimEffect -> claimEffect.isSetContractEffect()
                         && claimEffect.getContractEffect().getEffect().isSetCreated())
-                .forEach(claimEffect -> handleEvent(event, claimEffect));
+                .collect(Collectors.toList());
+        for (ClaimEffect claimEffect : claimEffects) {
+            handleEvent(event, claimEffect);
+        }
+        log.debug("Contract create finished");
     }
 
     private void handleEvent(MachineEvent event, ClaimEffect effect) {
+        log.debug("Contract create handle: {}", effect);
+
         String partyId = event.getSourceId();
         ContractEffectUnit contractEffectUnit = effect.getContractEffect();
         com.rbkmoney.damsel.domain.Contract contractCreated = contractEffectUnit.getEffect().getCreated();
@@ -61,7 +69,7 @@ public class ContractCreatedHandler extends AbstractClaimChangeHandler {
         contract.setContractId(contractEffectUnit.getContractId());
         contractDao.saveContract(contract);
 
-        log.debug("ContractCreatedHandler result contract: {}", contract);
+        log.debug("Contract create result: {}", contract);
     }
 
     private String checkAndCreateContractor(MachineEvent event, String partyId,
