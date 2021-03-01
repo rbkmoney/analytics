@@ -15,16 +15,16 @@ public class ShopEventMerger {
     private final ShopDao shopDao;
 
     public Shop mergeShop(String partyId, String shopId, Shop shop, Shop targetShop) {
-        return mergeSHops(partyId, shopId, shop, targetShop);
+        return mergeShops(partyId, shopId, shop, targetShop);
     }
 
     public Shop mergeShop(String partyId, String shopId, Shop shop) {
         Shop targetShop = shopDao.getShopByPartyIdAndShopId(partyId, shopId);
-        return mergeSHops(partyId, shopId, shop, targetShop);
+        return mergeShops(partyId, shopId, shop, targetShop);
     }
 
     @NotNull
-    private Shop mergeSHops(String partyId, String shopId, Shop shop, Shop targetShop) {
+    private Shop mergeShops(String partyId, String shopId, Shop shop, Shop targetShop) {
         if (targetShop == null) {
             targetShop = new Shop();
         }
