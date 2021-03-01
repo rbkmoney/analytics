@@ -10,8 +10,6 @@ import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 
-import java.util.List;
-
 import static com.rbkmoney.analytics.domain.db.tables.Contract.CONTRACT;
 
 @Component

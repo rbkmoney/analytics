@@ -46,7 +46,6 @@ public class ContractContractorIDChangedHandler extends AbstractClaimChangeHandl
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void handleChange(PartyChange change, MachineEvent event) {
-        log.debug("Contractor id change handle: {}", change);
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects().stream()
                 .filter(claimEffect -> claimEffect.isSetContractEffect()
                         && claimEffect.getContractEffect().getEffect().isSetContractorChanged())
@@ -54,11 +53,9 @@ public class ContractContractorIDChangedHandler extends AbstractClaimChangeHandl
         for (ClaimEffect claimEffect : claimEffects) {
             handleEvent(event, claimEffect);
         }
-        log.debug("Contractor id change finished");
     }
 
     private void handleEvent(MachineEvent event, ClaimEffect effect) {
-        log.debug("Handle contractor id change: {}", event);
         ContractEffectUnit contractEffectUnit = effect.getContractEffect();
         String partyId = event.getSourceId();
 
@@ -70,27 +67,29 @@ public class ContractContractorIDChangedHandler extends AbstractClaimChangeHandl
 
         final Contract mergedContract = contractMerger.merge(contractEffectUnit.getContractId(), contract);
         contractDao.saveContract(mergedContract);
-        final List<Shop> updatedShops = updateShops(event, partyId, contract, mergedContract);
-        log.debug("Handle contractor id change save shops: {} and contractor: {}", updatedShops, mergedContract);
+        updateShops(event, partyId, contract, mergedContract);
     }
 
     @Nullable
     private List<Shop> updateShops(MachineEvent event, String partyId, Contract contract, Contract mergedContract) {
+        log.debug("Update shops with partyId: {} and contract: {}", partyId, contract);
         List<Shop> currentShopStates = shopDao.getShopsByPartyIdAndContractId(partyId, mergedContract.getContractId());
+        log.debug("Update shops: {}", currentShopStates);
         if (currentShopStates != null) {
             Contractor currentContractorState = contractorDao.getContractorByPartyIdAndContractorId(partyId,
                     contract.getContractorId());
+            Shop newShop = contractorToShopConverter.convert(currentContractorState);
             List<Shop> batch = currentShopStates.stream()
-                    .map(shop -> map(shop, event, partyId, currentContractorState))
+                    .map(shop -> map(shop, event, partyId, newShop))
                     .collect(Collectors.toList());
             shopDao.saveShop(batch);
+            log.debug("Shops saved: {}", currentShopStates);
         }
         return currentShopStates;
     }
 
-    private Shop map(Shop currentShopState, MachineEvent event, String partyId, Contractor currentContractorState) {
-        Shop shop = contractorToShopConverter.convert(currentContractorState);
-        Shop mergedShop = shopEventMerger.mergeShop(partyId, currentShopState.getShopId(), shop, currentShopState);
+    private Shop map(Shop currentShopState, MachineEvent event, String partyId, Shop newShop) {
+        Shop mergedShop = shopEventMerger.mergeShop(partyId, currentShopState.getShopId(), newShop, currentShopState);
         mergedShop.setEventId(event.getEventId());
         mergedShop.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         return mergedShop;
