@@ -4,6 +4,7 @@ import com.rbkmoney.analytics.dao.repository.postgres.party.management.ShopDao;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -13,8 +14,17 @@ public class ShopEventMerger {
 
     private final ShopDao shopDao;
 
+    public Shop mergeShop(String partyId, String shopId, Shop shop, Shop targetShop) {
+        return mergeSHops(partyId, shopId, shop, targetShop);
+    }
+
     public Shop mergeShop(String partyId, String shopId, Shop shop) {
         Shop targetShop = shopDao.getShopByPartyIdAndShopId(partyId, shopId);
+        return mergeSHops(partyId, shopId, shop, targetShop);
+    }
+
+    @NotNull
+    private Shop mergeSHops(String partyId, String shopId, Shop shop, Shop targetShop) {
         if (targetShop == null) {
             targetShop = new Shop();
         }

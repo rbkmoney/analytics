@@ -51,7 +51,7 @@ public class ContractContractorIDChangedHandler extends AbstractClaimChangeHandl
     }
 
     private void handleEvent(MachineEvent event, ClaimEffect effect) {
-        log.debug("ContractorChangeIdHandler contractor: {}", event);
+        log.debug("Handle contractor id change: {}", event);
         ContractEffectUnit contractEffectUnit = effect.getContractEffect();
         String partyId = event.getSourceId();
 
@@ -64,7 +64,7 @@ public class ContractContractorIDChangedHandler extends AbstractClaimChangeHandl
         final Contract mergedContract = contractMerger.merge(contractEffectUnit.getContractId(), contract);
         contractDao.saveContract(mergedContract);
         final List<Shop> updatedShops = updateShops(event, partyId, contract, mergedContract);
-        log.debug("ContractorChangeIdHandler save shops: {} and contractor: {}", updatedShops, mergedContract);
+        log.debug("Handle contractor id change save shops: {} and contractor: {}", updatedShops, mergedContract);
     }
 
     @Nullable
@@ -80,7 +80,7 @@ public class ContractContractorIDChangedHandler extends AbstractClaimChangeHandl
 
     private void mergeAndUpdateShop(Shop currentShopState, MachineEvent event, String partyId, Contractor currentContractorState) {
         final Shop shop = contractorToShopConverter.convert(currentContractorState);
-        final Shop mergedShop = shopEventMerger.mergeShop(partyId, currentShopState.getShopId(), shop);
+        final Shop mergedShop = shopEventMerger.mergeShop(partyId, currentShopState.getShopId(), shop, currentShopState);
         mergedShop.setEventId(event.getEventId());
         mergedShop.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         shopDao.saveShop(mergedShop);
