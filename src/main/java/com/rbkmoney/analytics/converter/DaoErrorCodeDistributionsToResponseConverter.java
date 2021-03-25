@@ -12,7 +12,8 @@ import static java.util.stream.Collectors.toList;
 @Service
 public class DaoErrorCodeDistributionsToResponseConverter {
 
-    public SubErrorDistributionsResponse convert(List<com.rbkmoney.analytics.dao.model.NamingDistribution> namingDistributions) {
+    public SubErrorDistributionsResponse convert(
+            List<com.rbkmoney.analytics.dao.model.NamingDistribution> namingDistributions) {
         List<ErrorDistribution> collect = namingDistributions.stream()
                 .map(paymentToolDistribution -> new ErrorDistribution()
                         .setError(SubErrorGenerator.generateError(paymentToolDistribution.getName()))

@@ -34,26 +34,29 @@ public class HgClientService {
     @Value("${hg.invoice.cache.max.size:2000}")
     private long maxSize;
 
-    private Cache<String, InvoicePaymentWrapper> cache = Caffeine.newBuilder()
+    private final Cache<String, InvoicePaymentWrapper> cache = Caffeine.newBuilder()
             .expireAfterWrite(expireTime, TimeUnit.MINUTES)
             .maximumSize(maxSize)
             .build();
 
     public InvoicePaymentWrapper getInvoiceInfo(String invoiceId,
-                                                BiFunction<String, com.rbkmoney.damsel.payment_processing.Invoice, Optional<InvoicePayment>> findPaymentPredicate,
+                                                BiFunction<String, com.rbkmoney.damsel.payment_processing.Invoice,
+                                                        Optional<InvoicePayment>> findPaymentPredicate,
                                                 String paymentId, String eventId, long sequenceId) {
         return cache.get(generateKey(invoiceId, paymentId, sequenceId),
                 generateKey -> getInvoiceFromHg(invoiceId, findPaymentPredicate, eventId, sequenceId));
     }
 
     public InvoicePaymentWrapper getInvoiceInfo(String invoiceId,
-                                                BiFunction<String, com.rbkmoney.damsel.payment_processing.Invoice, Optional<InvoicePayment>> findPaymentPredicate,
+                                                BiFunction<String, com.rbkmoney.damsel.payment_processing.Invoice,
+                                                        Optional<InvoicePayment>> findPaymentPredicate,
                                                 String paymentId, long sequenceId) {
         return cache.get(generateKey(invoiceId, paymentId, sequenceId),
                 generateKey -> getInvoiceFromHg(invoiceId, findPaymentPredicate, paymentId, sequenceId));
     }
 
-    private InvoicePaymentWrapper getInvoiceFromHg(String invoiceId, BiFunction<String, Invoice, Optional<InvoicePayment>> findPaymentPredicate,
+    private InvoicePaymentWrapper getInvoiceFromHg(String invoiceId, BiFunction<String, Invoice,
+            Optional<InvoicePayment>> findPaymentPredicate,
                                                    String eventId, long sequenceId) {
         InvoicePaymentWrapper invoicePaymentWrapper = new InvoicePaymentWrapper();
         try {

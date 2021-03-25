@@ -26,7 +26,8 @@ public class RateListener {
                        @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition,
                        @Header(KafkaHeaders.OFFSET) int offsets,
                        Acknowledgment ack) throws InterruptedException {
-        log.info("Got RateListener listen offsets: {}, partition: {}, batch.size: {}", offsets, partition, batch.size());
+        log.info("Got RateListener listen offsets: {}, partition: {}, batch.size: {}",
+                offsets, partition, batch.size());
         rateMachineEventHandler.handle(batch, ack);
         log.info("Batch RateListener has been committed, size={}", batch.size());
     }

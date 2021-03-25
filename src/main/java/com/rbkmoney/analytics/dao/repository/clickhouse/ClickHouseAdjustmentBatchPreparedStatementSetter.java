@@ -19,10 +19,11 @@ public class ClickHouseAdjustmentBatchPreparedStatementSetter implements BatchPr
             "(timestamp, eventTime, eventTimeHour, partyId, shopId, email, " +
             "amount, guaranteeDeposit, systemFee, providerFee, externalFee, " +
             "oldAmount, oldGuaranteeDeposit, oldSystemFee, oldProviderFee, oldExternalFee, " +
-            "currency, providerName, status, errorCode, errorReason,  invoiceId, paymentId, adjustmentId, sequenceId, ip, " +
-            "fingerprint, cardToken, paymentSystem, digitalWalletProvider, digitalWalletToken, cryptoCurrency, mobileOperator," +
-            "paymentCountry, bankCountry, paymentTime, providerId, terminal)" +
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "currency, providerName, status, errorCode, errorReason,  invoiceId, paymentId, adjustmentId, sequenceId," +
+            "ip, fingerprint, cardToken, paymentSystem, digitalWalletProvider, digitalWalletToken, cryptoCurrency, " +
+            "mobileOperator, paymentCountry, bankCountry, paymentTime, providerId, terminal)" +
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " +
+            "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private final List<AdjustmentRow> batch;
 

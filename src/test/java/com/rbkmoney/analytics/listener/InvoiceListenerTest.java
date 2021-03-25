@@ -60,32 +60,14 @@ public class InvoiceListenerTest extends KafkaAbstractTest {
 
     @ClassRule
     public static ClickHouseContainer clickHouseContainer = new ClickHouseContainer();
-
-    public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        @Override
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-            log.info("clickhouse.db.url={}", clickHouseContainer.getJdbcUrl());
-            TestPropertyValues.of(
-                    "clickhouse.db.url=" + clickHouseContainer.getJdbcUrl(),
-                    "clickhouse.db.user=" + clickHouseContainer.getUsername(),
-                    "clickhouse.db.password=" + clickHouseContainer.getPassword(),
-                    "spring.flyway.enabled=false")
-                    .applyTo(configurableApplicationContext.getEnvironment());
-        }
-    }
-
     @MockBean
     private GeoIpServiceSrv.Iface iface;
-
     @MockBean
     private InvoicingSrv.Iface invoicingClient;
-
     @MockBean
     private PostgresBalanceChangesRepository postgresBalanceChangesRepository;
-
     @Autowired
     private JdbcTemplate clickHouseJdbcTemplate;
-
     @Autowired
     private EventRangeFactory eventRangeFactory;
 
@@ -123,8 +105,9 @@ public class InvoiceListenerTest extends KafkaAbstractTest {
 
             try {
                 count.set(clickHouseJdbcTemplate.queryForObject(
-                        String.format(SELECT_SUM, "analytic.events_sink") + InvoiceFlowGenerator.SHOP_ID
-                                + "' and status = 'captured' and currency = 'RUB'", (resultSet, i) -> resultSet.getLong("sum")));
+                        String.format(SELECT_SUM, "analytic.events_sink") + InvoiceFlowGenerator.SHOP_ID +
+                                "' and status = 'captured' and currency = 'RUB'",
+                        (resultSet, i) -> resultSet.getLong("sum")));
             } catch (Exception e) {
                 return false;
             }
@@ -137,7 +120,8 @@ public class InvoiceListenerTest extends KafkaAbstractTest {
                 "SELECT shopId, paymentTool," +
                         "( SELECT count() from analytic.events_sink " +
                         "group by shopId, currency " +
-                        "having shopId = '" + InvoiceFlowGenerator.SHOP_ID + "' and currency = 'RUB') as total_count, " +
+                        "having shopId = '" + InvoiceFlowGenerator.SHOP_ID +
+                        "' and currency = 'RUB') as total_count, " +
                         "count() * 100 / total_count as sum " +
                         "from analytic.events_sink " +
                         "group by shopId, currency, paymentTool " +
@@ -150,13 +134,13 @@ public class InvoiceListenerTest extends KafkaAbstractTest {
                 }
         );
 
-        String sourceID_refund_1 = "sourceID_refund_1";
-        mockPayment(sourceID_refund_1);
-        mockRefund(sourceID_refund_1, 8, "1");
-        mockRefund(sourceID_refund_1, 10, "2");
+        String sourceIDRefundFirst = "sourceID_refund_1";
+        mockPayment(sourceIDRefundFirst);
+        mockRefund(sourceIDRefundFirst, 8, "1");
+        mockRefund(sourceIDRefundFirst, 10, "2");
 
         // test refund flow
-        sinkEvents = InvoiceFlowGenerator.generateRefundedFlow(sourceID_refund_1);
+        sinkEvents = InvoiceFlowGenerator.generateRefundedFlow(sourceIDRefundFirst);
         sinkEvents.forEach(event -> produceMessageToTopic(this.eventSinkTopic, event));
 
         //check sum for succeeded refund
@@ -164,8 +148,9 @@ public class InvoiceListenerTest extends KafkaAbstractTest {
             Thread.sleep(MESSAGE_TIMEOUT);
             try {
                 count.set(clickHouseJdbcTemplate.queryForObject(
-                        String.format(SELECT_SUM, "analytic.events_sink_refund") + InvoiceFlowGenerator.SHOP_ID
-                                + "' and status = 'succeeded' and currency = 'RUB'", (resultSet, i) -> resultSet.getLong("sum")));
+                        String.format(SELECT_SUM, "analytic.events_sink_refund") + InvoiceFlowGenerator.SHOP_ID +
+                                "' and status = 'succeeded' and currency = 'RUB'",
+                        (resultSet, i) -> resultSet.getLong("sum")));
             } catch (Exception e) {
                 return false;
             }
@@ -175,16 +160,16 @@ public class InvoiceListenerTest extends KafkaAbstractTest {
 
         //check collapsing sum for pending refund
         List<Map<String, Object>> resultList = clickHouseJdbcTemplate.queryForList(
-                String.format(SELECT_SUM, "analytic.events_sink_refund") + InvoiceFlowGenerator.SHOP_ID
-                        + "' and status = 'pending' and currency = 'RUB'");
+                String.format(SELECT_SUM, "analytic.events_sink_refund") + InvoiceFlowGenerator.SHOP_ID +
+                        "' and status = 'pending' and currency = 'RUB'");
 
         assertTrue(resultList.isEmpty());
 
-        String source_adjustment = "source_adjustment";
-        mockPayment(source_adjustment);
-        mockAdjustment(source_adjustment, 7, FIRST);
+        String sourceAdjustment = "source_adjustment";
+        mockPayment(sourceAdjustment);
+        mockAdjustment(sourceAdjustment, 7, FIRST);
 
-        sinkEvents = InvoiceFlowGenerator.generateSuccessAdjustment(source_adjustment);
+        sinkEvents = InvoiceFlowGenerator.generateSuccessAdjustment(sourceAdjustment);
         sinkEvents.forEach(event -> produceMessageToTopic(this.eventSinkTopic, event));
 
         //check sum for succeeded refund
@@ -192,8 +177,9 @@ public class InvoiceListenerTest extends KafkaAbstractTest {
             Thread.sleep(MESSAGE_TIMEOUT);
             try {
                 count.set(clickHouseJdbcTemplate.queryForObject(
-                        String.format(SELECT_SUM, "analytic.events_sink_adjustment") + InvoiceFlowGenerator.SHOP_ID
-                                + "' and status = 'captured' and currency = 'RUB'", (resultSet, i) -> resultSet.getLong("sum")));
+                        String.format(SELECT_SUM, "analytic.events_sink_adjustment") +
+                                InvoiceFlowGenerator.SHOP_ID + "' and status = 'captured' and currency = 'RUB'",
+                        (resultSet, i) -> resultSet.getLong("sum")));
             } catch (Exception e) {
                 return false;
             }
@@ -213,8 +199,9 @@ public class InvoiceListenerTest extends KafkaAbstractTest {
             Thread.sleep(20000L);
             try {
                 count.set(clickHouseJdbcTemplate.queryForObject(
-                        String.format(SELECT_SUM, "analytic.events_sink_chargeback") + InvoiceFlowGenerator.SHOP_ID
-                                + "' and status = 'accepted' and currency = 'RUB'", (resultSet, i) -> resultSet.getLong("sum")));
+                        String.format(SELECT_SUM, "analytic.events_sink_chargeback") +
+                                InvoiceFlowGenerator.SHOP_ID + "' and status = 'accepted' and currency = 'RUB'",
+                        (resultSet, i) -> resultSet.getLong("sum")));
             } catch (Exception e) {
                 return false;
             }
@@ -228,27 +215,44 @@ public class InvoiceListenerTest extends KafkaAbstractTest {
         Mockito.when(invoicingClient.get(HgClientService.USER_INFO, sourceId, eventRangeFactory.create(6)))
                 .thenReturn(BuildUtils.buildInvoice(InvoiceFlowGenerator.PARTY_ID, InvoiceFlowGenerator.SHOP_ID,
                         sourceId, "1", "1", FIRST, FIRST,
-                        InvoiceStatus.paid(new InvoicePaid()), InvoicePaymentStatus.pending(new InvoicePaymentPending())));
+                        InvoiceStatus.paid(new InvoicePaid()),
+                        InvoicePaymentStatus.pending(new InvoicePaymentPending())));
     }
 
     private void mockRefund(String sourceId, int sequenceId, String refundId) throws TException, IOException {
         Mockito.when(invoicingClient.get(HgClientService.USER_INFO, sourceId, eventRangeFactory.create(sequenceId)))
                 .thenReturn(BuildUtils.buildInvoice(InvoiceFlowGenerator.PARTY_ID, InvoiceFlowGenerator.SHOP_ID,
                         sourceId, "1", refundId, "1", "1",
-                        InvoiceStatus.paid(new InvoicePaid()), InvoicePaymentStatus.refunded(new InvoicePaymentRefunded())));
+                        InvoiceStatus.paid(new InvoicePaid()),
+                        InvoicePaymentStatus.refunded(new InvoicePaymentRefunded())));
     }
 
     private void mockAdjustment(String sourceId, int sequenceId, String adjustmentId) throws TException, IOException {
         Mockito.when(invoicingClient.get(HgClientService.USER_INFO, sourceId, eventRangeFactory.create(sequenceId)))
                 .thenReturn(BuildUtils.buildInvoice(InvoiceFlowGenerator.PARTY_ID, InvoiceFlowGenerator.SHOP_ID,
                         sourceId, "1", "1", "1", adjustmentId,
-                        InvoiceStatus.paid(new InvoicePaid()), InvoicePaymentStatus.captured(new InvoicePaymentCaptured())));
+                        InvoiceStatus.paid(new InvoicePaid()),
+                        InvoicePaymentStatus.captured(new InvoicePaymentCaptured())));
     }
 
     private void mockChargeback(String sourceId, int sequenceId, String chargebackId) throws TException, IOException {
         Mockito.when(invoicingClient.get(HgClientService.USER_INFO, sourceId, eventRangeFactory.create(sequenceId)))
                 .thenReturn(BuildUtils.buildInvoice(InvoiceFlowGenerator.PARTY_ID, InvoiceFlowGenerator.SHOP_ID,
                         sourceId, "1", "1", chargebackId, "1",
-                        InvoiceStatus.paid(new InvoicePaid()), InvoicePaymentStatus.charged_back(new InvoicePaymentChargedBack())));
+                        InvoiceStatus.paid(new InvoicePaid()),
+                        InvoicePaymentStatus.charged_back(new InvoicePaymentChargedBack())));
+    }
+
+    public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+        @Override
+        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+            log.info("clickhouse.db.url={}", clickHouseContainer.getJdbcUrl());
+            TestPropertyValues.of(
+                    "clickhouse.db.url=" + clickHouseContainer.getJdbcUrl(),
+                    "clickhouse.db.user=" + clickHouseContainer.getUsername(),
+                    "clickhouse.db.password=" + clickHouseContainer.getPassword(),
+                    "spring.flyway.enabled=false")
+                    .applyTo(configurableApplicationContext.getEnvironment());
+        }
     }
 }

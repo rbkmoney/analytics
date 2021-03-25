@@ -25,10 +25,9 @@ import static java.util.stream.Collectors.toList;
 @RequiredArgsConstructor
 public class PayoutListener {
 
+    private final List<PayoutBatchHandler> payoutBatchHandlers;
     @Value("${kafka.consumer.throttling-timeout-ms}")
     private int throttlingTimeout;
-
-    private final List<PayoutBatchHandler> payoutBatchHandlers;
 
     @KafkaListener(
             autoStartup = "${kafka.listener.payout.enabled}",
@@ -46,7 +45,9 @@ public class PayoutListener {
 
     private void handleMessages(List<Event> batch) throws InterruptedException {
         try {
-            if (CollectionUtils.isEmpty(batch)) return;
+            if (CollectionUtils.isEmpty(batch)) {
+                return;
+            }
 
             batch.stream()
                     .map(payoutEvent -> Map.entry(payoutEvent, payoutEvent.getPayload()))

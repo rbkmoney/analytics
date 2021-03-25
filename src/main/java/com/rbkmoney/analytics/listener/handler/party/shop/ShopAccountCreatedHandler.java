@@ -36,7 +36,8 @@ public class ShopAccountCreatedHandler extends AbstractClaimChangeHandler {
     public void handleChange(PartyChange change, MachineEvent event) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
         claimEffects.stream()
-                .filter(claimEffect -> claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetAccountCreated())
+                .filter(claimEffect -> claimEffect.isSetShopEffect()
+                        && claimEffect.getShopEffect().getEffect().isSetAccountCreated())
                 .forEach(claimEffect -> handleEvent(event, claimEffect));
     }
 

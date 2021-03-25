@@ -30,32 +30,38 @@ public class ChargebackRowFactory extends InvoiceBaseRowFactory<ChargebackRow> {
     }
 
     @Override
-    public ChargebackRow create(MachineEvent machineEvent, InvoicePaymentWrapper invoicePaymentWrapper, String chargebackId) {
-        ChargebackRow chargebackRow = new ChargebackRow();
+    public ChargebackRow create(MachineEvent machineEvent,
+                                InvoicePaymentWrapper invoicePaymentWrapper,
+                                String chargebackId) {
         InvoicePayment payment = invoicePaymentWrapper.getInvoicePayment();
         Invoice invoice = invoicePaymentWrapper.getInvoice();
-        payment.getChargebacks().stream()
+        return payment.getChargebacks().stream()
                 .filter(chargeback -> chargeback.getChargeback().getId().equals(chargebackId))
                 .findFirst()
-                .ifPresentOrElse(chargeback -> {
-                            mapRow(machineEvent, chargebackRow, payment, invoice, chargebackId, chargeback);
-                        }, () -> {
-                            throw new ChargebackInfoNotFoundException();
-                        }
-                );
-        return chargebackRow;
+                .map(chargeback -> mapRow(machineEvent, payment, invoice, chargebackId, chargeback))
+                .orElseThrow(ChargebackInfoNotFoundException::new);
     }
 
-    private void mapRow(MachineEvent machineEvent, ChargebackRow row, InvoicePayment payment, Invoice invoice, String chargebackId, InvoicePaymentChargeback chargeback) {
-        List<FinalCashFlowPosting> cashFlow = chargeback.isSetCashFlow() ? chargeback.getCashFlow() : payment.getCashFlow();
+    private ChargebackRow mapRow(MachineEvent machineEvent,
+                                 InvoicePayment payment,
+                                 Invoice invoice,
+                                 String chargebackId,
+                                 InvoicePaymentChargeback chargeback) {
+        ChargebackRow row = new ChargebackRow();
+        List<FinalCashFlowPosting> cashFlow = chargeback.isSetCashFlow()
+                ? chargeback.getCashFlow() : payment.getCashFlow();
         row.setChargebackId(chargebackId);
         row.setPaymentId(payment.getPayment().getId());
         row.setCashFlowResult(cashFlowComputer.compute(cashFlow));
         var invoicePaymentChargeback = chargeback.getChargeback();
         row.setChargebackCode(invoicePaymentChargeback.getReason().getCode());
-        row.setCategory(TBaseUtil.unionFieldToEnum(invoicePaymentChargeback.getReason().getCategory(), ChargebackCategory.class));
+        row.setCategory(TBaseUtil.unionFieldToEnum(invoicePaymentChargeback.getReason().getCategory(),
+                ChargebackCategory.class)
+        );
         row.setStage(TBaseUtil.unionFieldToEnum(invoicePaymentChargeback.getStage(), ChargebackStage.class));
         initBaseRow(machineEvent, row, payment, invoice);
+
+        return row;
     }
 
 }

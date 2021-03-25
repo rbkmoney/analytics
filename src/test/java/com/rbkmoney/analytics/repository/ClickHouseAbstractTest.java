@@ -22,7 +22,18 @@ import java.util.List;
 public class ClickHouseAbstractTest {
 
     @ClassRule
-    public static ClickHouseContainer clickHouseContainer = new ClickHouseContainer("yandex/clickhouse-server:19.17.6.36");
+    public static ClickHouseContainer clickHouseContainer =
+            new ClickHouseContainer("yandex/clickhouse-server:19.17.6.36");
+
+    @Before
+    public void init() throws SQLException {
+        ChInitializer.initAllScripts(clickHouseContainer, List.of(
+                "sql/V1__db_init.sql",
+                "sql/V2__add_fields.sql",
+                "sql/V3__add_provider_field.sql",
+                "sql/test.data/inserts_event_sink.sql")
+        );
+    }
 
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         @Override
@@ -33,16 +44,6 @@ public class ClickHouseAbstractTest {
                     "clickhouse.db.password=" + clickHouseContainer.getPassword())
                     .applyTo(configurableApplicationContext.getEnvironment());
         }
-    }
-
-    @Before
-    public void init() throws SQLException {
-        ChInitializer.initAllScripts(clickHouseContainer, List.of(
-                "sql/V1__db_init.sql",
-                "sql/V2__add_fields.sql",
-                "sql/V3__add_provider_field.sql",
-                "sql/test.data/inserts_event_sink.sql")
-        );
     }
 
 }

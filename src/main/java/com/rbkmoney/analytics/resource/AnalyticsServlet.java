@@ -6,15 +6,15 @@ import lombok.RequiredArgsConstructor;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebServlet;
+
 import java.io.IOException;
 
 @WebServlet("/analytics/v1")
 @RequiredArgsConstructor
 public class AnalyticsServlet extends GenericServlet {
 
-    private Servlet thriftServlet;
-
     private final AnalyticsServiceSrv.Iface analyticsHandler;
+    private Servlet thriftServlet;
 
     @Override
     public void init(ServletConfig config) throws ServletException {

@@ -29,7 +29,9 @@ public class PayoutRowFactory {
         payoutRow.setShopId(payoutCreated.getShopId());
         payoutRow.setContractId(payoutCreated.getContractId());
         payoutRow.setPayoutTime(TypeUtil.stringToLocalDateTime(payoutCreated.getCreatedAt()));
-        payoutRow.setStatus(TBaseUtil.unionFieldToEnum(payoutStatus, com.rbkmoney.analytics.constant.PayoutStatus.class));
+        payoutRow.setStatus(TBaseUtil.unionFieldToEnum(payoutStatus,
+                com.rbkmoney.analytics.constant.PayoutStatus.class)
+        );
         payoutRow.setAmount(payoutCreated.getAmount());
         payoutRow.setFee(payoutCreated.getFee());
         payoutRow.setCurrency(payoutCreated.getCurrency().getSymbolicCode());
@@ -124,9 +126,15 @@ public class PayoutRowFactory {
 
         payoutRow.setInternationalLegalEntityLegalName(internationalPayoutAccount.getLegalEntity().getLegalName());
         payoutRow.setInternationalLegalEntityTradingName(internationalPayoutAccount.getLegalEntity().getTradingName());
-        payoutRow.setInternationalLegalEntityRegisteredAddress(internationalPayoutAccount.getLegalEntity().getRegisteredAddress());
-        payoutRow.setInternationalLegalEntityActualAddress(internationalPayoutAccount.getLegalEntity().getActualAddress());
-        payoutRow.setInternationalLegalEntityRegisteredNumber(internationalPayoutAccount.getLegalEntity().getRegisteredNumber());
+        payoutRow.setInternationalLegalEntityRegisteredAddress(
+                internationalPayoutAccount.getLegalEntity().getRegisteredAddress()
+        );
+        payoutRow.setInternationalLegalEntityActualAddress(
+                internationalPayoutAccount.getLegalEntity().getActualAddress()
+        );
+        payoutRow.setInternationalLegalEntityRegisteredNumber(
+                internationalPayoutAccount.getLegalEntity().getRegisteredNumber()
+        );
         payoutRow.setPurpose(internationalPayoutAccount.getPurpose());
         payoutRow.setLegalAgreementSignedAt(
                 TypeUtil.stringToLocalDateTime(internationalPayoutAccount.getLegalAgreement().getSignedAt()));

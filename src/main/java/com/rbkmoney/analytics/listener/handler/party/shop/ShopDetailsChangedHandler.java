@@ -15,8 +15,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Component
 @RequiredArgsConstructor
 public class ShopDetailsChangedHandler extends AbstractClaimChangeHandler {
@@ -34,7 +32,8 @@ public class ShopDetailsChangedHandler extends AbstractClaimChangeHandler {
     @Transactional(propagation = Propagation.REQUIRED)
     public void handleChange(PartyChange change, MachineEvent event) {
         getClaimStatus(change).getAccepted().getEffects().stream()
-                .filter(claimEffect -> claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetDetailsChanged())
+                .filter(claimEffect -> claimEffect.isSetShopEffect()
+                        && claimEffect.getShopEffect().getEffect().isSetDetailsChanged())
                 .forEach(claimEffect -> handleEvent(event, claimEffect));
     }
 

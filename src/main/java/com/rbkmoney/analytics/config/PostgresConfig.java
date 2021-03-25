@@ -31,7 +31,8 @@ public class PostgresConfig {
     }
 
     @Bean
-    public DataSourceConnectionProvider dataSourceConnectionProvider(TransactionAwareDataSourceProxy transactionAwareDataSourceProxy) {
+    public DataSourceConnectionProvider dataSourceConnectionProvider(
+            TransactionAwareDataSourceProxy transactionAwareDataSourceProxy) {
         return new DataSourceConnectionProvider(transactionAwareDataSourceProxy);
     }
 
@@ -41,7 +42,8 @@ public class PostgresConfig {
     }
 
     @Bean
-    public DataSourceConnectionProvider connectionProvider(TransactionAwareDataSourceProxy transactionAwareDataSourceProxy) {
+    public DataSourceConnectionProvider connectionProvider(
+            TransactionAwareDataSourceProxy transactionAwareDataSourceProxy) {
         return new DataSourceConnectionProvider(transactionAwareDataSourceProxy);
     }
 

@@ -66,7 +66,7 @@ public class CashFlowComputer {
 
     private boolean isPayment(FinalCashFlowPosting posting) {
         log.debug("CashFlowComputer isPayment posting: {}", posting);
-            return posting.getSource().getAccountType().isSetProvider() && isSettlement(posting.getSource())
+        return posting.getSource().getAccountType().isSetProvider() && isSettlement(posting.getSource())
                 && posting.getDestination().getAccountType().isSetMerchant() && isSettlement(posting.getDestination());
     }
 
@@ -97,9 +97,12 @@ public class CashFlowComputer {
     }
 
     private boolean isSettlement(FinalCashFlowAccount account) {
-        return (account.getAccountType().isSetMerchant() && account.getAccountType().getMerchant() == MerchantCashFlowAccount.settlement)
-                || (account.getAccountType().isSetProvider() && account.getAccountType().getProvider() == ProviderCashFlowAccount.settlement)
-                || (account.getAccountType().isSetSystem() && account.getAccountType().getSystem() == SystemCashFlowAccount.settlement);
+        return (account.getAccountType().isSetMerchant()
+                && account.getAccountType().getMerchant() == MerchantCashFlowAccount.settlement)
+                || (account.getAccountType().isSetProvider()
+                && account.getAccountType().getProvider() == ProviderCashFlowAccount.settlement)
+                || (account.getAccountType().isSetSystem()
+                && account.getAccountType().getSystem() == SystemCashFlowAccount.settlement);
     }
 
     private boolean isExternal(FinalCashFlowAccount account) {

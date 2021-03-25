@@ -33,9 +33,11 @@ public class RefundMapper implements Mapper<InvoiceChange, MachineEvent, RefundR
     public RefundRow map(InvoiceChange change, MachineEvent event) {
         InvoicePaymentChange invoicePaymentChange = change.getInvoicePaymentChange();
         String paymentId = invoicePaymentChange.getId();
-        InvoicePaymentRefundChange invoicePaymentRefundChange = invoicePaymentChange.getPayload().getInvoicePaymentRefundChange();
+        InvoicePaymentRefundChange invoicePaymentRefundChange = invoicePaymentChange.getPayload()
+                .getInvoicePaymentRefundChange();
         InvoicePaymentRefundChangePayload payload = invoicePaymentRefundChange.getPayload();
-        InvoicePaymentRefundStatusChanged invoicePaymentRefundStatusChanged = payload.getInvoicePaymentRefundStatusChanged();
+        InvoicePaymentRefundStatusChanged invoicePaymentRefundStatusChanged =
+                payload.getInvoicePaymentRefundStatusChanged();
         String refundId = invoicePaymentRefundChange.getId();
 
         InvoicePaymentWrapper invoicePaymentWrapper = hgClientService.getInvoiceInfo(

@@ -24,7 +24,6 @@ public class ShopSuspensionHandler implements ChangeHandler<PartyChange, Machine
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void handleChange(PartyChange change, MachineEvent event) {
-        Suspension suspension = change.getShopSuspension().getSuspension();
         String shopId = change.getShopSuspension().getShopId();
         String partyId = event.getSourceId();
 
@@ -33,6 +32,8 @@ public class ShopSuspensionHandler implements ChangeHandler<PartyChange, Machine
         shop.setShopId(shopId);
         shop.setEventId(event.getEventId());
         shop.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
+
+        Suspension suspension = change.getShopSuspension().getSuspension();
         if (suspension.isSetActive()) {
             shop.setSuspension(com.rbkmoney.analytics.domain.db.enums.Suspension.active);
             shop.setSuspensionActiveSince(TypeUtil.stringToLocalDateTime(suspension.getActive().getSince()));

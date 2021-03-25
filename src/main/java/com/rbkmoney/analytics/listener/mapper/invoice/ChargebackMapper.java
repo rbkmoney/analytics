@@ -28,18 +28,24 @@ public class ChargebackMapper implements Mapper<InvoiceChange, MachineEvent, Cha
     @Override
     public boolean accept(InvoiceChange change) {
         return getChangeType().getFilter().match(change)
-                && (change.getInvoicePaymentChange().getPayload().getInvoicePaymentChargebackChange().getPayload().getInvoicePaymentChargebackStatusChanged().getStatus().isSetAccepted()
-                || change.getInvoicePaymentChange().getPayload().getInvoicePaymentChargebackChange().getPayload().getInvoicePaymentChargebackStatusChanged().getStatus().isSetCancelled()
-                || change.getInvoicePaymentChange().getPayload().getInvoicePaymentChargebackChange().getPayload().getInvoicePaymentChargebackStatusChanged().getStatus().isSetRejected());
+                && (change.getInvoicePaymentChange()
+                .getPayload().getInvoicePaymentChargebackChange().getPayload()
+                .getInvoicePaymentChargebackStatusChanged().getStatus().isSetAccepted()
+                || change.getInvoicePaymentChange().getPayload().getInvoicePaymentChargebackChange()
+                .getPayload().getInvoicePaymentChargebackStatusChanged().getStatus().isSetCancelled()
+                || change.getInvoicePaymentChange().getPayload().getInvoicePaymentChargebackChange()
+                .getPayload().getInvoicePaymentChargebackStatusChanged().getStatus().isSetRejected());
     }
-    
+
     @Override
     public ChargebackRow map(InvoiceChange change, MachineEvent event) {
         InvoicePaymentChange invoicePaymentChange = change.getInvoicePaymentChange();
         String paymentId = invoicePaymentChange.getId();
-        InvoicePaymentChargebackChange invoicePaymentChargebackChange = invoicePaymentChange.getPayload().getInvoicePaymentChargebackChange();
+        InvoicePaymentChargebackChange invoicePaymentChargebackChange =
+                invoicePaymentChange.getPayload().getInvoicePaymentChargebackChange();
         InvoicePaymentChargebackChangePayload payload = invoicePaymentChargebackChange.getPayload();
-        InvoicePaymentChargebackStatusChanged invoicePaymentChargebackStatusChanged = payload.getInvoicePaymentChargebackStatusChanged();
+        InvoicePaymentChargebackStatusChanged invoicePaymentChargebackStatusChanged =
+                payload.getInvoicePaymentChargebackStatusChanged();
 
         String chargebackId = invoicePaymentChargebackChange.getId();
         InvoicePaymentWrapper invoicePaymentWrapper = hgClientService.getInvoiceInfo(event.getSourceId(), findPayment(),

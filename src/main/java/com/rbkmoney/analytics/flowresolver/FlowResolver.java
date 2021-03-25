@@ -16,16 +16,15 @@ public class FlowResolver {
 
     //Предположение, что состояния ивойсов находятся в event-sink достаточно близко друг к другу
     //будут умещаться в размерности 10к инвойсов
-    private LRUMap<String, String> statesMap = new LRUMap<>(1000, 10000);
+    private final LRUMap<String, String> statesMap = new LRUMap<>(1000, 10000);
 
-    //Сумма n членов арифметической прогрессии Sn = ( a1 + an ) * n / 2 => (1 + 10) * 10 / 2 = 55 - для флоу из 10 состояний
+    //Сумма n членов арифметической прогрессии
+    //Sn = ( a1 + an ) * n / 2 => (1 + 10) * 10 / 2 = 55 - для флоу из 10 состояний
     //Предположение, что флоу ~ 15 => 15*55 > 1000, в случае если больше будут удаляться на LRUMap
-    private PrintableLruMap<String, String> flows = new PrintableLruMap<>(1000, 1000);
-
+    private final PrintableLruMap<String, String> flows = new PrintableLruMap<>(1000, 1000);
+    private final AtomicInteger counter = new AtomicInteger();
     @Value("${kafka.event-flow.resolver.count-between-print:1000000}")
     public int countBetweenPrint;
-
-    private AtomicInteger counter = new AtomicInteger();
 
     public void checkFlow(InvoiceChange invoiceChange, String invoiceId) {
         if (invoiceChange.isSetInvoicePaymentChange()) {
@@ -68,31 +67,39 @@ public class FlowResolver {
         String key = "";
         if (payload.isSetInvoicePaymentRefundChange()) {
             key += "InvoicePaymentRefundChange:";
-            InvoicePaymentRefundChangePayload invoicePaymentRefundChangePayload = payload.getInvoicePaymentRefundChange().getPayload();
+            InvoicePaymentRefundChangePayload invoicePaymentRefundChangePayload =
+                    payload.getInvoicePaymentRefundChange().getPayload();
             if (invoicePaymentRefundChangePayload.isSetInvoicePaymentRefundCreated()) {
                 key += ":InvoicePaymentRefundCreated";
             } else if (invoicePaymentRefundChangePayload.isSetInvoicePaymentRefundStatusChanged()) {
-                key += ":InvoicePaymentRefundStatusChanged:" + invoicePaymentRefundChangePayload.getInvoicePaymentRefundStatusChanged().getStatus().getFieldValue();
+                key += ":InvoicePaymentRefundStatusChanged:" +
+                        invoicePaymentRefundChangePayload.getInvoicePaymentRefundStatusChanged().getStatus()
+                                .getFieldValue();
             }
         } else if (payload.isSetInvoicePaymentStarted()) {
             key += "InvoicePaymentStarted";
         } else if (payload.isSetInvoicePaymentStatusChanged()) {
-            key += "InvoicePaymentStatusChanged:" + payload.getInvoicePaymentStatusChanged().getStatus().getFieldValue();
+            key += "InvoicePaymentStatusChanged:" +
+                    payload.getInvoicePaymentStatusChanged().getStatus().getFieldValue();
         } else if (payload.isSetInvoicePaymentCaptureStarted()) {
             key += "InvoicePaymentCaptureStarted";
         } else if (payload.isSetInvoicePaymentAdjustmentChange()) {
             key += "InvoicePaymentAdjustmentChange:";
-            InvoicePaymentAdjustmentChangePayload invoicePaymentAdjustmentChangePayload = payload.getInvoicePaymentAdjustmentChange().getPayload();
+            InvoicePaymentAdjustmentChangePayload invoicePaymentAdjustmentChangePayload =
+                    payload.getInvoicePaymentAdjustmentChange().getPayload();
             if (invoicePaymentAdjustmentChangePayload.isSetInvoicePaymentAdjustmentCreated()) {
                 key += "InvoicePaymentAdjustmentCreated";
             } else if (invoicePaymentAdjustmentChangePayload.isSetInvoicePaymentAdjustmentStatusChanged()) {
-                key += "InvoicePaymentAdjustmentStatusChanged:" + invoicePaymentAdjustmentChangePayload.getInvoicePaymentAdjustmentStatusChanged().getStatus().getFieldValue();
+                key += "InvoicePaymentAdjustmentStatusChanged:" +
+                        invoicePaymentAdjustmentChangePayload.getInvoicePaymentAdjustmentStatusChanged().getStatus()
+                                .getFieldValue();
             }
         } else if (payload.isSetInvoicePaymentCashFlowChanged()) {
             key += "InvoicePaymentCashFlowChanged";
         } else if (payload.isSetInvoicePaymentChargebackChange()) {
             key += "InvoicePaymentChargebackChange:";
-            InvoicePaymentChargebackChangePayload changePayload = payload.getInvoicePaymentChargebackChange().getPayload();
+            InvoicePaymentChargebackChangePayload changePayload =
+                    payload.getInvoicePaymentChargebackChange().getPayload();
             if (changePayload.isSetInvoicePaymentChargebackBodyChanged()) {
                 key += "InvoicePaymentChargebackBodyChanged";
             } else if (changePayload.isSetInvoicePaymentChargebackCashFlowChanged()) {
@@ -104,9 +111,11 @@ public class FlowResolver {
             } else if (changePayload.isSetInvoicePaymentChargebackStageChanged()) {
                 key += "InvoicePaymentChargebackStageChanged";
             } else if (changePayload.isSetInvoicePaymentChargebackStatusChanged()) {
-                key += "InvoicePaymentChargebackStatusChanged:" + changePayload.getInvoicePaymentChargebackStatusChanged().getStatus().getFieldValue();
+                key += "InvoicePaymentChargebackStatusChanged:" +
+                        changePayload.getInvoicePaymentChargebackStatusChanged().getStatus().getFieldValue();
             } else if (changePayload.isSetInvoicePaymentChargebackTargetStatusChanged()) {
-                key += "InvoicePaymentChargebackTargetStatusChanged:" + changePayload.getInvoicePaymentChargebackTargetStatusChanged().getStatus().getFieldValue();
+                key += "InvoicePaymentChargebackTargetStatusChanged:" +
+                        changePayload.getInvoicePaymentChargebackTargetStatusChanged().getStatus().getFieldValue();
             }
         } else if (payload.isSetInvoicePaymentRecTokenAcquired()) {
             key += "InvoicePaymentRecTokenAcquired";

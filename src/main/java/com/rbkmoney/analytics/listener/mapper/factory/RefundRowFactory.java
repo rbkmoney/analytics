@@ -28,28 +28,24 @@ public class RefundRowFactory extends InvoiceBaseRowFactory<RefundRow> {
 
     @Override
     public RefundRow create(MachineEvent machineEvent, InvoicePaymentWrapper invoicePaymentWrapper, String refundId) {
-        RefundRow refundRow = new RefundRow();
-        initInfo(machineEvent, refundRow, invoicePaymentWrapper.getInvoicePayment(), invoicePaymentWrapper.getInvoice(), refundId);
-        return refundRow;
-    }
-
-    private void initInfo(MachineEvent machineEvent, RefundRow row, InvoicePayment payment, Invoice invoice, String refundId) {
-        payment.getRefunds().stream()
+        InvoicePayment invoicePayment = invoicePaymentWrapper.getInvoicePayment();
+        return invoicePayment.getRefunds().stream()
                 .filter(refund -> refund.getRefund().getId().equals(refundId))
                 .findFirst()
-                .ifPresentOrElse(refund -> mapRow(machineEvent, row, payment, invoice, refundId, refund), () -> {
-                            throw new AdjustmentInfoNotFoundException();
-                        }
-                );
+                .map(refund -> mapRow(machineEvent, invoicePayment, invoicePaymentWrapper.getInvoice(), refundId,
+                        refund))
+                .orElseThrow(AdjustmentInfoNotFoundException::new);
     }
 
-    private void mapRow(MachineEvent machineEvent, RefundRow row, InvoicePayment payment, Invoice invoice,
-                        String refundId, InvoicePaymentRefund refund) {
+    private RefundRow mapRow(MachineEvent machineEvent, InvoicePayment payment, Invoice invoice,
+                             String refundId, InvoicePaymentRefund refund) {
+        RefundRow row = new RefundRow();
         List<FinalCashFlowPosting> cashFlow = refund.isSetCashFlow() ? refund.getCashFlow() : payment.getCashFlow();
         row.setRefundId(refundId);
         row.setPaymentId(payment.getPayment().getId());
         row.setCashFlowResult(cashFlowComputer.compute(cashFlow));
         initBaseRow(machineEvent, row, payment, invoice);
+        return row;
     }
 
 }

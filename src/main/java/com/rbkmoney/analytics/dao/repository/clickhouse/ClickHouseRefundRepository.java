@@ -23,15 +23,17 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ClickHouseRefundRepository {
 
+    public static final String SELECT_REFUND_PAYMENT_AMOUNT =
+            FileUtil.getFile("scripts/select_refund_payment_amount.sql");
     private final JdbcTemplate clickHouseJdbcTemplate;
     private final CommonRowsMapper<NumberModel> costCommonRowsMapper;
-
-    public static final String SELECT_REFUND_PAYMENT_AMOUNT = FileUtil.getFile("scripts/select_refund_payment_amount.sql");
 
     @Retryable(value = ClickHouseException.class, backoff = @Backoff(delay = 5000))
     public void insertBatch(List<RefundRow> refundRows) {
         if (refundRows != null && !refundRows.isEmpty()) {
-            clickHouseJdbcTemplate.batchUpdate(ClickHouseRefundBatchPreparedStatementSetter.INSERT, new ClickHouseRefundBatchPreparedStatementSetter(refundRows));
+            clickHouseJdbcTemplate.batchUpdate(ClickHouseRefundBatchPreparedStatementSetter.INSERT,
+                    new ClickHouseRefundBatchPreparedStatementSetter(refundRows)
+            );
             log.info("Batch inserted refundRows: {} firstElement: {}", refundRows.size(),
                     refundRows.get(0).getInvoiceId());
         }
@@ -43,7 +45,8 @@ public class ClickHouseRefundRepository {
                                                LocalDateTime from,
                                                LocalDateTime to) {
         List<Object> params = TimeParamUtils.generateTimeParams(from, to);
-        String sql = String.format(SELECT_REFUND_PAYMENT_AMOUNT, QueryUtils.generateIdsSql(shopIds, params, QueryUtils::generateInList),
+        String sql = String.format(SELECT_REFUND_PAYMENT_AMOUNT,
+                QueryUtils.generateIdsSql(shopIds, params, QueryUtils::generateInList),
                 QueryUtils.generateIdsSql(excludeShopIds, params, QueryUtils::generateNotInList));
         params.add(partyId);
 

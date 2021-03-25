@@ -4,19 +4,16 @@ import com.rbkmoney.analytics.constant.EventType;
 import com.rbkmoney.analytics.dao.model.PaymentRow;
 import com.rbkmoney.analytics.domain.InvoicePaymentWrapper;
 import com.rbkmoney.analytics.listener.mapper.AbstractMapper;
-import com.rbkmoney.analytics.listener.mapper.Mapper;
 import com.rbkmoney.analytics.listener.mapper.factory.RowFactory;
 import com.rbkmoney.analytics.service.HgClientService;
 import com.rbkmoney.damsel.domain.RiskScore;
-import com.rbkmoney.damsel.payment_processing.*;
-import com.rbkmoney.geck.common.util.TypeUtil;
+import com.rbkmoney.damsel.payment_processing.InvoiceChange;
+import com.rbkmoney.damsel.payment_processing.InvoicePaymentChange;
+import com.rbkmoney.damsel.payment_processing.InvoicePaymentRiskScoreChanged;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
-import java.util.function.BiFunction;
 
 @Slf4j
 @Component
@@ -30,7 +27,8 @@ public class PaymentRiskScoreMapper extends AbstractMapper<InvoiceChange, Machin
     public PaymentRow map(InvoiceChange change, MachineEvent event) {
         String paymentId = change.getInvoicePaymentChange().getId();
         InvoicePaymentChange invoicePaymentChange = change.getInvoicePaymentChange();
-        InvoicePaymentRiskScoreChanged invoicePaymentRiskScoreChanged = invoicePaymentChange.getPayload().getInvoicePaymentRiskScoreChanged();
+        InvoicePaymentRiskScoreChanged invoicePaymentRiskScoreChanged = invoicePaymentChange.getPayload()
+                .getInvoicePaymentRiskScoreChanged();
         RiskScore riskScore = invoicePaymentRiskScoreChanged.getRiskScore();
 
         InvoicePaymentWrapper invoicePaymentWrapper = hgClientService.getInvoiceInfo(

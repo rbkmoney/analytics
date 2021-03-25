@@ -39,7 +39,8 @@ public class DominantService {
                 List<Operation> operations = entry.getValue().getOps();
                 operations.forEach(op -> dominantHandlers.forEach(handler -> {
                     if (handler.isHandle(op)) {
-                        log.info("Process commit with versionId={} operation={} ", entry.getKey(), JsonUtil.tBaseToJsonString(op));
+                        log.info("Process commit with versionId={} operation={} ", entry.getKey(),
+                                JsonUtil.thriftBaseToJsonString(op));
                         handler.handle(op, entry.getKey());
                     }
                 }));

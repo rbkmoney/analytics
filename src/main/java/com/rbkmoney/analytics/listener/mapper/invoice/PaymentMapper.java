@@ -34,9 +34,12 @@ public class PaymentMapper extends AbstractMapper<InvoiceChange, MachineEvent, P
     @Override
     public boolean accept(InvoiceChange change) {
         return getChangeType().getFilter().match(change)
-                && (change.getInvoicePaymentChange().getPayload().getInvoicePaymentStatusChanged().getStatus().isSetFailed()
-                || change.getInvoicePaymentChange().getPayload().getInvoicePaymentStatusChanged().getStatus().isSetCancelled()
-                || change.getInvoicePaymentChange().getPayload().getInvoicePaymentStatusChanged().getStatus().isSetCaptured());
+                && (change
+                .getInvoicePaymentChange().getPayload().getInvoicePaymentStatusChanged().getStatus().isSetFailed()
+                || change
+                .getInvoicePaymentChange().getPayload().getInvoicePaymentStatusChanged().getStatus().isSetCancelled()
+                || change
+                .getInvoicePaymentChange().getPayload().getInvoicePaymentStatusChanged().getStatus().isSetCaptured());
     }
 
     @Override
@@ -46,7 +49,8 @@ public class PaymentMapper extends AbstractMapper<InvoiceChange, MachineEvent, P
         InvoicePaymentChangePayload payload = invoicePaymentChange.getPayload();
         InvoicePaymentStatusChanged invoicePaymentStatusChanged = payload.getInvoicePaymentStatusChanged();
 
-        InvoicePaymentWrapper invoicePaymentWrapper = hgClientService.getInvoiceInfo(event.getSourceId(), findPayment(), paymentId, event.getEventId());
+        InvoicePaymentWrapper invoicePaymentWrapper = hgClientService.getInvoiceInfo(event.getSourceId(), findPayment(),
+                paymentId, event.getEventId());
 
         PaymentRow paymentRow = paymentSinkRowFactory.create(event, invoicePaymentWrapper, paymentId);
 

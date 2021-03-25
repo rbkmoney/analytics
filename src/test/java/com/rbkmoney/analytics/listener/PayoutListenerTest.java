@@ -54,29 +54,12 @@ public class PayoutListenerTest extends KafkaAbstractTest {
 
     @ClassRule
     public static ClickHouseContainer clickHouseContainer = new ClickHouseContainer();
-
-    public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        @Override
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-            log.info("clickhouse.db.url={}", clickHouseContainer.getJdbcUrl());
-            TestPropertyValues.of(
-                    "clickhouse.db.url=" + clickHouseContainer.getJdbcUrl(),
-                    "clickhouse.db.user=" + clickHouseContainer.getUsername(),
-                    "clickhouse.db.password=" + clickHouseContainer.getPassword(),
-                    "spring.flyway.enabled=false")
-                    .applyTo(configurableApplicationContext.getEnvironment());
-        }
-    }
-
     @MockBean
     private GeoIpServiceSrv.Iface iface;
-
     @MockBean
     private PayoutManagementSrv.Iface payouterClient;
-
     @MockBean
     private PostgresBalanceChangesRepository postgresBalanceChangesRepository;
-
     @Autowired
     private JdbcTemplate clickHouseJdbcTemplate;
 
@@ -116,8 +99,8 @@ public class PayoutListenerTest extends KafkaAbstractTest {
 
         // Then
         long sum = clickHouseJdbcTemplate.queryForObject(
-                String.format(SELECT_SUM, "analytic.events_sink_payout") + SHOP_ID
-                        + "' and status = 'paid' and currency = 'RUB'",
+                String.format(SELECT_SUM, "analytic.events_sink_payout") + SHOP_ID +
+                        "' and status = 'paid' and currency = 'RUB'",
                 (resultSet, i) -> resultSet.getLong("sum"));
 
         assertEquals(10L, sum);
@@ -144,5 +127,18 @@ public class PayoutListenerTest extends KafkaAbstractTest {
                                 .setPayload(EventPayload.payout_changes(List.of(
                                         PayoutChange.payout_status_changed(new PayoutStatusChanged()
                                                 .setStatus(PayoutStatus.paid(new PayoutPaid()))))))));
+    }
+
+    public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+        @Override
+        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+            log.info("clickhouse.db.url={}", clickHouseContainer.getJdbcUrl());
+            TestPropertyValues.of(
+                    "clickhouse.db.url=" + clickHouseContainer.getJdbcUrl(),
+                    "clickhouse.db.user=" + clickHouseContainer.getUsername(),
+                    "clickhouse.db.password=" + clickHouseContainer.getPassword(),
+                    "spring.flyway.enabled=false")
+                    .applyTo(configurableApplicationContext.getEnvironment());
+        }
     }
 }

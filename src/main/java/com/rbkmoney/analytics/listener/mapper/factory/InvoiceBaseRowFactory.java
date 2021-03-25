@@ -75,10 +75,12 @@ public abstract class InvoiceBaseRowFactory<T extends InvoiceBaseRow> implements
         row.setPaymentTool(TBaseUtil.unionFieldToEnum(paymentTool, PaymentToolType.class));
         if (paymentTool.isSetBankCard()) {
             BankCard bankCard = paymentTool.getBankCard();
-            row.setBankCountry(bankCard.isSetIssuerCountry() ? bankCard.getIssuerCountry().name() : ClickHouseUtilsValue.UNKNOWN);
+            row.setBankCountry(bankCard.isSetIssuerCountry()
+                    ? bankCard.getIssuerCountry().name() : ClickHouseUtilsValue.UNKNOWN);
             row.setProvider(bankCard.getBankName());
             row.setCardToken(bankCard.getToken());
-            row.setCardHolderName(StringUtils.isEmpty(bankCard.getCardholderName()) ? ClickHouseUtilsValue.UNKNOWN : bankCard.getCardholderName());
+            row.setCardHolderName(StringUtils.isEmpty(bankCard.getCardholderName())
+                    ? ClickHouseUtilsValue.UNKNOWN : bankCard.getCardholderName());
             row.setBin(bankCard.getBin());
             row.setMaskedPan(bankCard.getLastDigits());
             row.setPaymentSystem(bankCard.getPaymentSystem().name());

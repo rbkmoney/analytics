@@ -5,8 +5,10 @@ import com.rbkmoney.analytics.dao.repository.postgres.party.management.CategoryD
 import com.rbkmoney.analytics.service.DominantService;
 import com.rbkmoney.analytics.utils.KafkaAbstractTest;
 import com.rbkmoney.analytics.utils.TestData;
-import com.rbkmoney.damsel.domain.*;
-import com.rbkmoney.damsel.domain_config.*;
+import com.rbkmoney.damsel.domain.CategoryType;
+import com.rbkmoney.damsel.domain.DomainObject;
+import com.rbkmoney.damsel.domain_config.Commit;
+import com.rbkmoney.damsel.domain_config.RepositorySrv;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
 import org.junit.Assert;
@@ -44,33 +46,12 @@ public class DominantListenerTest extends KafkaAbstractTest {
     @SuppressWarnings("rawtypes")
     public static PostgreSQLContainer postgres = (PostgreSQLContainer) new PostgreSQLContainer("postgres:9.6")
             .withStartupTimeout(Duration.ofMinutes(5));
-
-    public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        @Override
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-            TestPropertyValues.of(
-                    "postgres.db.url=" + postgres.getJdbcUrl(),
-                    "postgres.db.user=" + postgres.getUsername(),
-                    "postgres.db.password=" + postgres.getPassword(),
-                    "spring.flyway.url=" + postgres.getJdbcUrl(),
-                    "spring.flyway.user=" + postgres.getUsername(),
-                    "spring.flyway.password=" + postgres.getPassword(),
-                    "spring.flyway.enabled=true",
-                    "service.dominant.scheduler.enabled=false")
-                    .applyTo(configurableApplicationContext.getEnvironment());
-            postgres.start();
-        }
-    }
-
     @Autowired
     private DominantService dominantService;
-
     @Autowired
     private CategoryDao categoryDao;
-
     @Autowired
     private JdbcTemplate postgresJdbcTemplate;
-
     @MockBean
     private RepositorySrv.Iface dominantClient;
 
@@ -87,8 +68,9 @@ public class DominantListenerTest extends KafkaAbstractTest {
         CategoryType categoryType = CategoryType.test;
 
         Map<Long, Commit> commits = new HashMap<>();
-        commits.put(1L, TestData.buildInsertCategoryCommit(categoryId, categoryName, categoryDescription, categoryType));
-        when(dominantClient.pullRange(anyLong(),anyInt())).thenReturn(commits);
+        commits.put(1L,
+                TestData.buildInsertCategoryCommit(categoryId, categoryName, categoryDescription, categoryType));
+        when(dominantClient.pullRange(anyLong(), anyInt())).thenReturn(commits);
 
         dominantService.pullDominantRange(10);
 
@@ -110,12 +92,15 @@ public class DominantListenerTest extends KafkaAbstractTest {
         String updatedCategoryDescription = "testDescriptionNew";
 
         Map<Long, Commit> commits = new HashMap<>();
-        Commit firstCommit = TestData.buildInsertCategoryCommit(categoryId, categoryName, categoryDescription, categoryType);
+        Commit firstCommit =
+                TestData.buildInsertCategoryCommit(categoryId, categoryName, categoryDescription, categoryType);
         DomainObject oldObject = firstCommit.getOps().get(0).getInsert().getObject();
-        Commit secondCommit = TestData.buildUpdateCategoryCommit(categoryId, updatedCategoryName, updatedCategoryDescription, categoryType, oldObject);
+        Commit secondCommit =
+                TestData.buildUpdateCategoryCommit(categoryId, updatedCategoryName, updatedCategoryDescription,
+                        categoryType, oldObject);
         commits.put(1L, firstCommit);
         commits.put(2L, secondCommit);
-        when(dominantClient.pullRange(anyLong(),anyInt())).thenReturn(commits);
+        when(dominantClient.pullRange(anyLong(), anyInt())).thenReturn(commits);
 
         dominantService.pullDominantRange(10);
 
@@ -133,12 +118,14 @@ public class DominantListenerTest extends KafkaAbstractTest {
         String categoryDescription = "testDescription";
         CategoryType categoryType = CategoryType.test;
         Map<Long, Commit> commits = new HashMap<>();
-        Commit firstCommit = TestData.buildInsertCategoryCommit(categoryId, categoryName, categoryDescription, categoryType);
-        Commit secondCommit = TestData.buildRemoveCategoryCommit(categoryId, categoryName, categoryDescription, categoryType);
+        Commit firstCommit =
+                TestData.buildInsertCategoryCommit(categoryId, categoryName, categoryDescription, categoryType);
+        Commit secondCommit =
+                TestData.buildRemoveCategoryCommit(categoryId, categoryName, categoryDescription, categoryType);
         commits.put(1L, firstCommit);
         commits.put(2L, secondCommit);
 
-        when(dominantClient.pullRange(anyLong(),anyInt())).thenReturn(commits);
+        when(dominantClient.pullRange(anyLong(), anyInt())).thenReturn(commits);
 
         dominantService.pullDominantRange(10);
 
@@ -149,6 +136,23 @@ public class DominantListenerTest extends KafkaAbstractTest {
         Assert.assertEquals(categoryDescription, category.getDescription());
         Assert.assertEquals(categoryType.name(), category.getType());
         Assert.assertTrue(category.getDeleted());
+    }
+
+    public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+        @Override
+        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+            TestPropertyValues.of(
+                    "postgres.db.url=" + postgres.getJdbcUrl(),
+                    "postgres.db.user=" + postgres.getUsername(),
+                    "postgres.db.password=" + postgres.getPassword(),
+                    "spring.flyway.url=" + postgres.getJdbcUrl(),
+                    "spring.flyway.user=" + postgres.getUsername(),
+                    "spring.flyway.password=" + postgres.getPassword(),
+                    "spring.flyway.enabled=true",
+                    "service.dominant.scheduler.enabled=false")
+                    .applyTo(configurableApplicationContext.getEnvironment());
+            postgres.start();
+        }
     }
 
 }

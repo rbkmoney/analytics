@@ -25,7 +25,6 @@ public class ShopBlockingHandler implements ChangeHandler<PartyChange, MachineEv
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void handleChange(PartyChange change, MachineEvent event) {
-        Blocking blocking = change.getShopBlocking().getBlocking();
         String shopId = change.getShopBlocking().getShopId();
         String partyId = event.getSourceId();
 
@@ -34,7 +33,9 @@ public class ShopBlockingHandler implements ChangeHandler<PartyChange, MachineEv
         shop.setShopId(shopId);
         shop.setEventId(event.getEventId());
         shop.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
-        shop.setBlocking(TBaseUtil.unionFieldToEnum(change.getShopBlocking().getBlocking(), com.rbkmoney.analytics.domain.db.enums.Blocking.class));
+        shop.setBlocking(TBaseUtil.unionFieldToEnum(change.getShopBlocking().getBlocking(),
+                com.rbkmoney.analytics.domain.db.enums.Blocking.class));
+        Blocking blocking = change.getShopBlocking().getBlocking();
         if (blocking.isSetUnblocked()) {
             shop.setUnblockedReason(blocking.getUnblocked().getReason());
             shop.setUnblockedSince(TypeUtil.stringToLocalDateTime(blocking.getUnblocked().getSince()));

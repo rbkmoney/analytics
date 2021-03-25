@@ -40,6 +40,30 @@ public class DominantServiceTest extends KafkaAbstractTest {
     @SuppressWarnings("rawtypes")
     public static PostgreSQLContainer postgres = (PostgreSQLContainer) new PostgreSQLContainer("postgres:9.6")
             .withStartupTimeout(Duration.ofMinutes(5));
+    @MockBean
+    private RepositorySrv.Iface dominantClient;
+    @Autowired
+    private DominantService dominantService;
+    @Autowired
+    private DominantDao dominantDao;
+
+    @Before
+    public void setUp() throws Exception {
+        Commit firstCommit = TestData.buildInsertCategoryCommit(64, "testName", "testDescription", CategoryType.test);
+        Commit secondCommit =
+                TestData.buildUpdateCategoryCommit(64, "testNameNew", "testDescriptionNew", CategoryType.live,
+                        firstCommit.getOps().get(0).getInsert().getObject());
+        Map<Long, Commit> commitMap = new HashMap<>();
+        commitMap.put(1L, firstCommit);
+        commitMap.put(2L, secondCommit);
+        when(dominantClient.pullRange(anyLong(), anyInt())).thenReturn(commitMap);
+    }
+
+    @Test
+    public void testDominantVersion() {
+        dominantService.pullDominantRange(10);
+        Assert.assertEquals(2, (long) dominantDao.getLastVersion());
+    }
 
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         @Override
@@ -55,31 +79,6 @@ public class DominantServiceTest extends KafkaAbstractTest {
                     .applyTo(configurableApplicationContext.getEnvironment());
             postgres.start();
         }
-    }
-
-    @MockBean
-    private RepositorySrv.Iface dominantClient;
-
-    @Autowired
-    private DominantService dominantService;
-
-    @Autowired
-    private DominantDao dominantDao;
-
-    @Before
-    public void setUp() throws Exception {
-        Commit firstCommit = TestData.buildInsertCategoryCommit(64, "testName", "testDescription", CategoryType.test);
-        Commit secondCommit = TestData.buildUpdateCategoryCommit(64, "testNameNew", "testDescriptionNew", CategoryType.live, firstCommit.getOps().get(0).getInsert().getObject());
-        Map<Long, Commit> commitMap = new HashMap<>();
-        commitMap.put(1L, firstCommit);
-        commitMap.put(2L, secondCommit);
-        when(dominantClient.pullRange(anyLong(),anyInt())).thenReturn(commitMap);
-    }
-
-    @Test
-    public void testDominantVersion() {
-        dominantService.pullDominantRange(10);
-        Assert.assertEquals(2, (long) dominantDao.getLastVersion());
     }
 
 }

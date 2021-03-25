@@ -32,7 +32,8 @@ public class ShopLocationChangedHandler extends AbstractClaimChangeHandler {
     @Transactional(propagation = Propagation.REQUIRED)
     public void handleChange(PartyChange change, MachineEvent event) {
         getClaimStatus(change).getAccepted().getEffects().stream()
-                .filter(claimEffect -> claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetLocationChanged())
+                .filter(claimEffect -> claimEffect.isSetShopEffect()
+                        && claimEffect.getShopEffect().getEffect().isSetLocationChanged())
                 .forEach(claimEffect -> handleEvent(event, claimEffect));
     }
 

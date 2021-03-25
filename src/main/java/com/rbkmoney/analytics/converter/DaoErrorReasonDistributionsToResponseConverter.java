@@ -11,7 +11,8 @@ import static java.util.stream.Collectors.toList;
 @Service
 public class DaoErrorReasonDistributionsToResponseConverter {
 
-    public ErrorDistributionsResponse convert(List<com.rbkmoney.analytics.dao.model.NamingDistribution> namingDistributions) {
+    public ErrorDistributionsResponse convert(
+            List<com.rbkmoney.analytics.dao.model.NamingDistribution> namingDistributions) {
         List<NamingDistribution> collect = namingDistributions.stream()
                 .map(paymentToolDistribution -> new NamingDistribution()
                         .setName(paymentToolDistribution.getName())

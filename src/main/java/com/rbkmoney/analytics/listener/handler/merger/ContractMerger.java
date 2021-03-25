@@ -18,8 +18,10 @@ public class ContractMerger {
         }
         targetContract.setEventId(contract.getEventId());
         targetContract.setEventTime(contract.getEventTime());
-        targetContract.setContractId(contract.getContractId() != null ? contract.getContractId() : targetContract.getContractId());
-        targetContract.setContractorId(contract.getContractorId() != null ? contract.getContractorId() : targetContract.getContractorId());
+        targetContract.setContractId(contract.getContractId() != null
+                ? contract.getContractId() : targetContract.getContractId());
+        targetContract.setContractorId(contract.getContractorId() != null
+                ? contract.getContractorId() : targetContract.getContractorId());
         return targetContract;
     }
 }

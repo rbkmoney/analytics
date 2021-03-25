@@ -33,11 +33,11 @@ import static org.apache.kafka.clients.consumer.OffsetResetStrategy.EARLIEST;
 @EnableConfigurationProperties(KafkaSslProperties.class)
 public class KafkaConfig {
 
-    private static final String RESULT_ANALYTICS = "result-analytics";
     public static final String ANALYTICS_RATE = "rate";
-
+    private static final String RESULT_ANALYTICS = "result-analytics";
     private static final String PARTY_RESULT_ANALYTICS = "party-result-analytics";
-
+    private final ConsumerGroupIdService consumerGroupIdService;
+    private final KafkaSslProperties kafkaSslProperties;
     @Value("${kafka.max.poll.records}")
     private String maxPollRecords;
     @Value("${kafka.topic.party.max.poll.records}")
@@ -55,9 +55,6 @@ public class KafkaConfig {
     @Value("${kafka.topic.rate.groupId}")
     private String rateGroupId;
 
-    private final ConsumerGroupIdService consumerGroupIdService;
-    private final KafkaSslProperties kafkaSslProperties;
-
     private Map<String, Object> createSslConfig() {
         log.info("Kafka ssl isEnabled: {}", kafkaSslProperties.isEnabled());
         return SslKafkaUtils.sslConfigure(
@@ -71,7 +68,8 @@ public class KafkaConfig {
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, MachineEvent> invoiceListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, MachineEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        ConcurrentKafkaListenerContainerFactory<String, MachineEvent> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
         String consumerGroup = consumerGroupIdService.generateGroupId(RESULT_ANALYTICS);
         initDefaultListenerProperties(factory, consumerGroup, new MachineEventDeserializer(), maxPollRecords);
         return factory;
@@ -79,7 +77,8 @@ public class KafkaConfig {
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, Event> payoutListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, Event> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        ConcurrentKafkaListenerContainerFactory<String, Event> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
         String consumerGroup = consumerGroupIdService.generateGroupId(RESULT_ANALYTICS);
         initDefaultListenerProperties(factory, consumerGroup, new PayoutEventDeserializer(), maxPollRecords);
 
@@ -88,23 +87,29 @@ public class KafkaConfig {
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, MachineEvent> partyListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, MachineEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        ConcurrentKafkaListenerContainerFactory<String, MachineEvent> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
         String consumerGroup = consumerGroupIdService.generateGroupId(PARTY_RESULT_ANALYTICS);
-        initDefaultListenerProperties(factory, consumerGroup, new MachineEventDeserializer(), maxPollRecordsPartyListener);
+        initDefaultListenerProperties(factory, consumerGroup,
+                new MachineEventDeserializer(), maxPollRecordsPartyListener);
 
         return factory;
     }
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, MachineEvent> rateContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, MachineEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        initDefaultListenerProperties(factory, rateGroupId, new MachineEventDeserializer(), maxPollRecordsRatesListener);
+        ConcurrentKafkaListenerContainerFactory<String, MachineEvent> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
+        initDefaultListenerProperties(factory, rateGroupId, new MachineEventDeserializer(),
+                maxPollRecordsRatesListener);
         return factory;
     }
 
     private <T> void initDefaultListenerProperties(ConcurrentKafkaListenerContainerFactory<String, T> factory,
-                                                   String consumerGroup, Deserializer<T> deserializer, String maxPollRecords) {
-        DefaultKafkaConsumerFactory<String, T> consumerFactory = createKafkaConsumerFactory(consumerGroup, deserializer, maxPollRecords);
+                                                   String consumerGroup,
+                                                   Deserializer<T> deserializer, String maxPollRecords) {
+        DefaultKafkaConsumerFactory<String, T> consumerFactory = createKafkaConsumerFactory(
+                consumerGroup, deserializer, maxPollRecords);
         factory.setConsumerFactory(consumerFactory);
         factory.setConcurrency(concurrencyListeners);
         factory.setBatchErrorHandler(new SeekToCurrentBatchErrorHandler());
@@ -114,7 +119,9 @@ public class KafkaConfig {
     }
 
     @NotNull
-    private <T> DefaultKafkaConsumerFactory<String, T> createKafkaConsumerFactory(String consumerGroup, Deserializer<T> deserializer, String maxPollRecords) {
+    private <T> DefaultKafkaConsumerFactory<String, T> createKafkaConsumerFactory(String consumerGroup,
+                                                                                  Deserializer<T> deserializer,
+                                                                                  String maxPollRecords) {
         final Map<String, Object> props = createDefaultProperties(consumerGroup);
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, maxPollRecords);
         return new DefaultKafkaConsumerFactory<>(

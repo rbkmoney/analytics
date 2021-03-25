@@ -47,7 +47,8 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
                 TypeUtil.stringToLocalDateTime(timeFilter.getToTime())
         );
 
-        PaymentToolDistributionResponse paymentToolDistributionResponse = convertPaymentToolsToResponse.convert(paymentsToolDistribution);
+        PaymentToolDistributionResponse paymentToolDistributionResponse =
+                convertPaymentToolsToResponse.convert(paymentsToolDistribution);
         log.info("<- getPaymentsToolDistribution paymentToolDistributionResponse: {}", paymentToolDistributionResponse);
         return paymentToolDistributionResponse;
     }
@@ -126,13 +127,14 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
                 TypeUtil.stringToLocalDateTime(timeFilter.getToTime())
         );
 
-        ErrorDistributionsResponse errorDistributionsResponse = daoErrorDistributionsToResponse.convert(namingDistributions);
+        ErrorDistributionsResponse errorDistributionsResponse =
+                daoErrorDistributionsToResponse.convert(namingDistributions);
         log.info("<- getPaymentsErrorDistribution errorDistributionsResponse: {}", errorDistributionsResponse);
         return errorDistributionsResponse;
     }
 
     @Override
-    public SubErrorDistributionsResponse getPaymentsSubErrorDistribution(FilterRequest filterRequest) throws TException {
+    public SubErrorDistributionsResponse getPaymentsSubErrorDistribution(FilterRequest filterRequest) {
         log.info("-> getPaymentsSubErrorDistribution filterRequest: {}", filterRequest);
 
         MerchantFilter merchantFilter = filterRequest.getMerchantFilter();
@@ -146,7 +148,8 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
                 TypeUtil.stringToLocalDateTime(timeFilter.getToTime())
         );
 
-        SubErrorDistributionsResponse subErrorDistributionsResponse = daoErrorCodeDistributionsToResponseConverter.convert(namingDistributions);
+        SubErrorDistributionsResponse subErrorDistributionsResponse =
+                daoErrorCodeDistributionsToResponseConverter.convert(namingDistributions);
         log.info("<- getPaymentsSubErrorDistribution subErrorDistributionsResponse: {}", subErrorDistributionsResponse);
         return subErrorDistributionsResponse;
     }

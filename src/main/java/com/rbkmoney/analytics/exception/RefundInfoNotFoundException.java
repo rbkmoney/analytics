@@ -16,7 +16,8 @@ public class RefundInfoNotFoundException extends RuntimeException {
         super(cause);
     }
 
-    public RefundInfoNotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public RefundInfoNotFoundException(String message, Throwable cause, boolean enableSuppression,
+                                       boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

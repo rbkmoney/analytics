@@ -28,12 +28,16 @@ import static org.junit.Assert.assertEquals;
 @RunWith(SpringRunner.class)
 @ContextConfiguration(initializers = ClickHousePayoutRepositoryTest.Initializer.class,
         classes = {RawToNumModelConverter.class, RawToSplitNumberConverter.class, RawToSplitStatusConverter.class,
-                SplitRowsMapper.class, SplitStatusRowsMapper.class, RawToNamingDistributionConverter.class, RawToShopAmountModelConverter.class,
-                RawMapperConfig.class, ClickHousePaymentRepositoryImpl.class, ClickHouseRefundRepository.class, AnalyticsHandler.class,
-                DaoErrorReasonDistributionsToResponseConverter.class, DaoErrorCodeDistributionsToResponseConverter.class,
+                SplitRowsMapper.class, SplitStatusRowsMapper.class, RawToNamingDistributionConverter.class,
+                RawToShopAmountModelConverter.class,
+                RawMapperConfig.class, ClickHousePaymentRepositoryImpl.class, ClickHouseRefundRepository.class,
+                AnalyticsHandler.class,
+                DaoErrorReasonDistributionsToResponseConverter.class,
+                DaoErrorCodeDistributionsToResponseConverter.class,
                 DaoNamingDistributionsToResponseConverter.class,
                 CostToAmountResponseConverter.class, CountModelCountResponseConverter.class,
-                GroupedCurAmountToResponseConverter.class, GroupedCurCountToResponseConverter.class, ShopAmountToResponseConverter.class})
+                GroupedCurAmountToResponseConverter.class, GroupedCurCountToResponseConverter.class,
+                ShopAmountToResponseConverter.class})
 public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
 
     public static final String RUB = "RUB";
@@ -41,16 +45,17 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
     @Autowired
     private AnalyticsHandler analyticsHandler;
 
-    private TimeFilter timeFilterDefault = new TimeFilter()
+    private final TimeFilter timeFilterDefault = new TimeFilter()
             .setFromTime("2016-08-10T16:07:18Z")
             .setToTime("2020-01-31T20:59:59.999000Z");
 
     @Test
     public void getPaymentsToolDistribution() throws TException {
-        PaymentToolDistributionResponse paymentsToolDistribution = analyticsHandler.getPaymentsToolDistribution(new FilterRequest()
-                .setMerchantFilter(new MerchantFilter()
-                        .setPartyId("ca2e9162-eda2-4d17-bbfa-dc5e39b1772a"))
-                .setTimeFilter(timeFilterDefault));
+        PaymentToolDistributionResponse paymentsToolDistribution =
+                analyticsHandler.getPaymentsToolDistribution(new FilterRequest()
+                        .setMerchantFilter(new MerchantFilter()
+                                .setPartyId("ca2e9162-eda2-4d17-bbfa-dc5e39b1772a"))
+                        .setTimeFilter(timeFilterDefault));
         String bankCard = "bank_card";
 
         NamingDistribution namingDistr = findByNameNamingDistribution(paymentsToolDistribution, bankCard);
@@ -71,7 +76,8 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
     }
 
     @NotNull
-    private NamingDistribution findByNameNamingDistribution(PaymentToolDistributionResponse paymentsToolDistribution, String bankCard) {
+    private NamingDistribution findByNameNamingDistribution(PaymentToolDistributionResponse paymentsToolDistribution,
+                                                            String bankCard) {
         return paymentsToolDistribution.getPaymentToolsDistributions().stream()
                 .filter(namingDistribution -> bankCard.equals(namingDistribution.getName()))
                 .findFirst()
@@ -139,11 +145,12 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
 
     @Test
     public void getPaymentsErrorDistribution() throws TException {
-        ErrorDistributionsResponse paymentsErrorDistribution = analyticsHandler.getPaymentsErrorDistribution(new FilterRequest()
-                .setMerchantFilter(new MerchantFilter()
-                        .setPartyId("ca2e9162-eda2-4d17-bbfa-dc5e39b1772a")
-                )
-                .setTimeFilter(timeFilterDefault));
+        ErrorDistributionsResponse paymentsErrorDistribution =
+                analyticsHandler.getPaymentsErrorDistribution(new FilterRequest()
+                        .setMerchantFilter(new MerchantFilter()
+                                .setPartyId("ca2e9162-eda2-4d17-bbfa-dc5e39b1772a")
+                        )
+                        .setTimeFilter(timeFilterDefault));
         List<NamingDistribution> errorDistributions = paymentsErrorDistribution.getErrorDistributions();
 
         NamingDistribution namingDistribution = errorDistributions.stream()
@@ -158,11 +165,12 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
 
     @Test
     public void getPaymentsErrorCodeDistribution() throws TException {
-        SubErrorDistributionsResponse paymentsErrorDistribution = analyticsHandler.getPaymentsSubErrorDistribution(new FilterRequest()
-                .setMerchantFilter(new MerchantFilter()
-                        .setPartyId("ca2e9162-eda2-4d17-bbfa-dc5e39b1772a")
-                )
-                .setTimeFilter(timeFilterDefault));
+        SubErrorDistributionsResponse paymentsErrorDistribution =
+                analyticsHandler.getPaymentsSubErrorDistribution(new FilterRequest()
+                        .setMerchantFilter(new MerchantFilter()
+                                .setPartyId("ca2e9162-eda2-4d17-bbfa-dc5e39b1772a")
+                        )
+                        .setTimeFilter(timeFilterDefault));
         List<ErrorDistribution> errorDistributions = paymentsErrorDistribution.getErrorDistributions();
 
         ErrorDistribution namingDistribution = errorDistributions.stream()
@@ -191,10 +199,10 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
         paymentsSplitAmount.validate();
     }
 
-    private List<OffsetAmount> findOffsetAmounts(SplitAmountResponse paymentsSplitAmount, String RUB) {
+    private List<OffsetAmount> findOffsetAmounts(SplitAmountResponse paymentsSplitAmount, String rubCurrency) {
         return paymentsSplitAmount.getGroupedCurrencyAmounts()
                 .stream()
-                .filter(groupedCurrencyOffsetAmount -> RUB.equals(groupedCurrencyOffsetAmount.getCurrency()))
+                .filter(groupedCurrencyOffsetAmount -> rubCurrency.equals(groupedCurrencyOffsetAmount.getCurrency()))
                 .findFirst().get()
                 .getOffsetAmounts();
     }
@@ -214,10 +222,10 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
         paymentsSplitCount.validate();
     }
 
-    private List<GroupedStatusOffsetCount> findOffsetCount(SplitCountResponse paymentsSplitCount, String RUB) {
+    private List<GroupedStatusOffsetCount> findOffsetCount(SplitCountResponse paymentsSplitCount, String rubCurrency) {
         return paymentsSplitCount.getPaymentToolsDestrobutions()
                 .stream()
-                .filter(groupedCurrencyOffsetCount -> RUB.equals(groupedCurrencyOffsetCount.getCurrency()))
+                .filter(groupedCurrencyOffsetCount -> rubCurrency.equals(groupedCurrencyOffsetCount.getCurrency()))
                 .findFirst().get()
                 .getOffsetAmounts();
     }
@@ -282,7 +290,8 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
         List<ShopGroupedAmount> groupsAmount = paymentsAmount.getGroupsAmount();
 
         ShopGroupedAmount shopGroupedAmount = groupsAmount.stream()
-                .filter(currencyGroupedAmount -> currencyGroupedAmount.getShopId().equals("ad8b7bfd-0760-4781-a400-51903ee8e509"))
+                .filter(currencyGroupedAmount -> currencyGroupedAmount.getShopId()
+                        .equals("ad8b7bfd-0760-4781-a400-51903ee8e509"))
                 .findFirst()
                 .get();
 

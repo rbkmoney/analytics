@@ -16,7 +16,8 @@ public class AdjustmentInfoNotFoundException extends RuntimeException {
         super(cause);
     }
 
-    public AdjustmentInfoNotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public AdjustmentInfoNotFoundException(String message, Throwable cause, boolean enableSuppression,
+                                           boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

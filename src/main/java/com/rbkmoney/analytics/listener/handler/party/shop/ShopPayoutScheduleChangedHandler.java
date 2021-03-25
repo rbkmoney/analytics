@@ -32,13 +32,13 @@ public class ShopPayoutScheduleChangedHandler extends AbstractClaimChangeHandler
     @Transactional(propagation = Propagation.REQUIRED)
     public void handleChange(PartyChange change, MachineEvent event) {
         getClaimStatus(change).getAccepted().getEffects().stream()
-                .filter(claimEffect -> claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetPayoutScheduleChanged())
+                .filter(claimEffect -> claimEffect.isSetShopEffect()
+                        && claimEffect.getShopEffect().getEffect().isSetPayoutScheduleChanged())
                 .forEach(claimEffect -> handleEvent(event, claimEffect));
     }
 
     private void handleEvent(MachineEvent event, ClaimEffect effect) {
         ShopEffectUnit shopEffect = effect.getShopEffect();
-        ScheduleChanged payoutScheduleChanged = shopEffect.getEffect().getPayoutScheduleChanged();
         String shopId = shopEffect.getShopId();
         String partyId = event.getSourceId();
 
@@ -47,6 +47,8 @@ public class ShopPayoutScheduleChangedHandler extends AbstractClaimChangeHandler
         shop.setShopId(shopId);
         shop.setEventId(event.getEventId());
         shop.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
+
+        ScheduleChanged payoutScheduleChanged = shopEffect.getEffect().getPayoutScheduleChanged();
         if (payoutScheduleChanged.isSetSchedule()) {
             shop.setPayoutScheduleId(payoutScheduleChanged.getSchedule().getId());
         }

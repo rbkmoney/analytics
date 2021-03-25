@@ -1,12 +1,10 @@
 package com.rbkmoney.analytics.listener;
 
 import com.rbkmoney.analytics.AnalyticsApplication;
-import com.rbkmoney.analytics.dao.repository.postgres.RateDao;
 import com.rbkmoney.analytics.utils.KafkaAbstractTest;
 import com.rbkmoney.analytics.utils.RateSinkEventTestUtils;
 import com.rbkmoney.machinegun.eventsink.SinkEvent;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +25,7 @@ import java.util.Map;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 @Slf4j
 @RunWith(SpringRunner.class)
@@ -39,26 +37,8 @@ public class RateListenerTest extends KafkaAbstractTest {
     @SuppressWarnings("rawtypes")
     public static PostgreSQLContainer postgres = (PostgreSQLContainer) new PostgreSQLContainer("postgres:9.6")
             .withStartupTimeout(Duration.ofMinutes(5));
-
-    public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        @Override
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-            TestPropertyValues.of(
-                    "postgres.db.url=" + postgres.getJdbcUrl(),
-                    "postgres.db.user=" + postgres.getUsername(),
-                    "postgres.db.password=" + postgres.getPassword(),
-                    "spring.flyway.url=" + postgres.getJdbcUrl(),
-                    "spring.flyway.user=" + postgres.getUsername(),
-                    "spring.flyway.password=" + postgres.getPassword(),
-                    "spring.flyway.enabled=true")
-                    .applyTo(configurableApplicationContext.getEnvironment());
-            postgres.start();
-        }
-    }
-
     @Value("${kafka.topic.rate.initial}")
     public String rateTopic;
-
     @Autowired
     private JdbcTemplate postgresJdbcTemplate;
 
@@ -80,6 +60,22 @@ public class RateListenerTest extends KafkaAbstractTest {
         final List<Map<String, Object>> maps = postgresJdbcTemplate.queryForList("SELECT * FROM analytics.rate");
 
         assertEquals(4, maps.size());
+    }
+
+    public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+        @Override
+        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+            TestPropertyValues.of(
+                    "postgres.db.url=" + postgres.getJdbcUrl(),
+                    "postgres.db.user=" + postgres.getUsername(),
+                    "postgres.db.password=" + postgres.getPassword(),
+                    "spring.flyway.url=" + postgres.getJdbcUrl(),
+                    "spring.flyway.user=" + postgres.getUsername(),
+                    "spring.flyway.password=" + postgres.getPassword(),
+                    "spring.flyway.enabled=true")
+                    .applyTo(configurableApplicationContext.getEnvironment());
+            postgres.start();
+        }
     }
 
 }

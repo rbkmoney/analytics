@@ -5,8 +5,8 @@
 
     <parent>
         <groupId>com.rbkmoney</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.3.8</version>
+        <artifactId>service-parent-pom</artifactId>
+        <version>1.0.9</version>
     </parent>
 
     <artifactId>analytics</artifactId>
@@ -22,13 +22,9 @@
         <exposed.ports>${server.port} ${management.port}</exposed.ports>
         <dockerfile.base.service.tag>c0612d6052ac049496b72a23a04acb142035f249</dockerfile.base.service.tag>
         <dockerfile.registry>${env.REGISTRY}</dockerfile.registry>
-        <shared.resources.version>0.3.8</shared.resources.version>
         <clickhouse-jdbc.version>0.2.4</clickhouse-jdbc.version>
-        <damsel.version>1.485-78ccbad</damsel.version>
-        <kafka.common.lib.version>0.0.9</kafka.common.lib.version>
         <damsel-utils.version>2.1.3</damsel-utils.version>
         <machinegun-proto.version>1.12-ebae56f</machinegun-proto.version>
-        <geck.version>0.6.11</geck.version>
         <woody.thrift.version>1.1.22</woody.thrift.version>
         <analytics-proto.version>1.25-2ec5116</analytics-proto.version>
         <mg-event-sink-listener-spring-boot-starter.version>0.0.5-SNAPSHOT</mg-event-sink-listener-spring-boot-starter.version>
@@ -64,22 +60,18 @@
         <dependency>
             <groupId>com.rbkmoney</groupId>
             <artifactId>shared-resources</artifactId>
-            <version>${shared.resources.version}</version>
         </dependency>
         <dependency>
             <groupId>com.rbkmoney.geck</groupId>
             <artifactId>serializer</artifactId>
-            <version>${geck.version}</version>
         </dependency>
         <dependency>
             <groupId>com.rbkmoney</groupId>
             <artifactId>damsel</artifactId>
-            <version>${damsel.version}</version>
         </dependency>
         <dependency>
             <groupId>com.rbkmoney.woody</groupId>
             <artifactId>woody-thrift</artifactId>
-            <version>${woody.thrift.version}</version>
         </dependency>
         <dependency>
             <groupId>com.rbkmoney</groupId>
@@ -94,7 +86,6 @@
         <dependency>
             <groupId>com.rbkmoney.geck</groupId>
             <artifactId>filter</artifactId>
-            <version>${geck.version}</version>
         </dependency>
         <dependency>
             <groupId>com.rbkmoney</groupId>
@@ -185,7 +176,6 @@
         <dependency>
             <groupId>com.rbkmoney</groupId>
             <artifactId>kafka-common-lib</artifactId>
-            <version>${kafka.common.lib.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.kafka</groupId>
@@ -304,9 +294,34 @@
         </resources>
         <plugins>
             <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>2.1.1.RELEASE</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.1.2</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.puppycrawl.tools</groupId>
+                        <artifactId>checkstyle</artifactId>
+                        <version>8.41</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>validate</id>
+                        <phase>validate</phase>
+                        <configuration>
+                            <configLocation>${checkstyle.config.path}</configLocation>
+                            <encoding>UTF-8</encoding>
+                            <failsOnError>true</failsOnError>
+                            <consoleOutput>true</consoleOutput>
+                            <violationSeverity>warning</violationSeverity>
+                            <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                            <suppressionsLocation>${checkstyle.config.suppressions.path}</suppressionsLocation>
+                        </configuration>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -321,7 +336,7 @@
                 </dependencies>
                 <configuration>
                     <resourceBundles>
-                        <resourceBundle>com.rbkmoney:shared-resources:${shared.resources.version}</resourceBundle>
+                        <resourceBundle>com.rbkmoney:shared-resources:${shared-resources.version}</resourceBundle>
                     </resourceBundles>
                     <attachToMain>false</attachToMain>
                     <attachToTest>false</attachToTest>

@@ -19,9 +19,10 @@ public class ClickHouseRefundBatchPreparedStatementSetter implements BatchPrepar
             "(timestamp, eventTime, eventTimeHour, partyId, shopId, email, " +
             "amount, guaranteeDeposit, systemFee, providerFee, externalFee, currency, providerName, " +
             "status, errorCode, errorReason,  invoiceId, paymentId, refundId, sequenceId, ip, " +
-            "fingerprint,cardToken, paymentSystem, digitalWalletProvider, digitalWalletToken, cryptoCurrency, mobileOperator," +
-            "paymentCountry, bankCountry, paymentTime, providerId, terminal)" +
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "fingerprint,cardToken, paymentSystem, digitalWalletProvider, digitalWalletToken, cryptoCurrency," +
+            "mobileOperator, paymentCountry, bankCountry, paymentTime, providerId, terminal)" +
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " +
+            "?, ?, ?, ?, ?, ?, ?, ?)";
 
     private final List<RefundRow> batch;
 

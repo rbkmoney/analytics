@@ -28,7 +28,8 @@ public class GroupedCurCountToResponseConverter {
                 .setPaymentToolsDestrobutions(groupedCurrencyOffsetAmounts);
     }
 
-    private GroupedCurrencyOffsetCount initGroupedCurrencyOffsetCount(Map.Entry<String, Map<String, List<SplitStatusNumberModel>>> entry) {
+    private GroupedCurrencyOffsetCount initGroupedCurrencyOffsetCount(Map.Entry<String,
+            Map<String, List<SplitStatusNumberModel>>> entry) {
         return new GroupedCurrencyOffsetCount()
                 .setCurrency(entry.getKey())
                 .setOffsetAmounts(entry.getValue().entrySet()
@@ -38,7 +39,9 @@ public class GroupedCurCountToResponseConverter {
                 );
     }
 
-    private GroupedStatusOffsetCount initGroupedStatusOffsetCount(Map.Entry<String, List<SplitStatusNumberModel>> entry) {
+    private GroupedStatusOffsetCount initGroupedStatusOffsetCount(
+            Map.Entry<String,
+                    List<SplitStatusNumberModel>> entry) {
         return new GroupedStatusOffsetCount()
                 .setStatus(mapStatus(entry))
                 .setOffsetCounts(entry.getValue().stream()

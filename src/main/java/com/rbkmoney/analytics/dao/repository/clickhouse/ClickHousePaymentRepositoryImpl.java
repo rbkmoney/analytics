@@ -31,14 +31,19 @@ public class ClickHousePaymentRepositoryImpl implements ClickHousePaymentReposit
     public static final String PAYMENT_TOOL = "paymentTool";
     public static final String ERROR_REASON = "errorReason";
     public static final String ERROR_CODE = "errorCode";
-    public static final String WHERE_TIME_PARAMS = "where timestamp >= ? and timestamp <= ? AND eventTimeHour >= ? AND eventTimeHour <= ? AND eventTime >= ? AND eventTime <= ?";
+    public static final String WHERE_TIME_PARAMS = "where timestamp >= ? and timestamp <= ? " +
+            "AND eventTimeHour >= ? " +
+            "AND eventTimeHour <= ? " +
+            "AND eventTime >= ? " +
+            "AND eventTime <= ?";
     public static final String AND_STATUS_CAPTURED = " and status='captured'";
     public static final String ADDITIONAL_PARAMETERS = " %1s %2s";
 
     public static final String SELECT_BALANCES_SQL = FileUtil.getFile("scripts/select_current_balance.sql");
     public static final String SELECT_SHOP_BANALCES_SQL = FileUtil.getFile("scripts/select_current_shop_balance.sql");
     public static final String SELECT_ERROR_DESCRIPTION = FileUtil.getFile("scripts/select_error_description.sql");
-    public static final String SELECT_PAYMENT_TOOL_DESCRIPTION = FileUtil.getFile("scripts/select_payment_tool_description.sql");
+    public static final String SELECT_PAYMENT_TOOL_DESCRIPTION =
+            FileUtil.getFile("scripts/select_payment_tool_description.sql");
 
     private final JdbcTemplate clickHouseJdbcTemplate;
 
@@ -148,10 +153,12 @@ public class ClickHousePaymentRepositoryImpl implements ClickHousePaymentReposit
                                                               SplitUnit splitUnit) {
         String groupBy = SplitUtils.initGroupByFunction(splitUnit);
 
-        String selectSql = "SELECT " + groupBy + " , status, currency, count(concat(invoiceId, paymentId)) as num from analytic.events_sink ";
+        String selectSql = "SELECT " + groupBy +
+                " , status, currency, count(concat(invoiceId, paymentId)) as num from analytic.events_sink ";
         String groupedSql = " group by partyId, currency, status, " + groupBy + " having partyId = ? ";
 
-        List<Map<String, Object>> rows = splitQuery(partyId, shopIds, excludeShopIds, from, to, WHERE_TIME_PARAMS + ADDITIONAL_PARAMETERS, groupedSql, selectSql);
+        List<Map<String, Object>> rows = splitQuery(partyId, shopIds, excludeShopIds, from, to,
+                WHERE_TIME_PARAMS + ADDITIONAL_PARAMETERS, groupedSql, selectSql);
         return splitStatusRowsMapper.map(rows, splitUnit);
     }
 
@@ -161,7 +168,8 @@ public class ClickHousePaymentRepositoryImpl implements ClickHousePaymentReposit
                                                                 List<String> excludeShopIds,
                                                                 LocalDateTime from,
                                                                 LocalDateTime to) {
-        return queryNamingDistributions(SELECT_PAYMENT_TOOL_DESCRIPTION, partyId, shopIds, excludeShopIds, from, to, PAYMENT_TOOL);
+        return queryNamingDistributions(SELECT_PAYMENT_TOOL_DESCRIPTION, partyId, shopIds, excludeShopIds, from, to,
+                PAYMENT_TOOL);
     }
 
     @Override
@@ -188,7 +196,8 @@ public class ClickHousePaymentRepositoryImpl implements ClickHousePaymentReposit
                                                             LocalDateTime from,
                                                             LocalDateTime to,
                                                             String groupField) {
-        return queryNamingDistributions(SELECT_ERROR_DESCRIPTION, partyId, shopIds, excludeShopIds, from, to, groupField);
+        return queryNamingDistributions(SELECT_ERROR_DESCRIPTION, partyId, shopIds, excludeShopIds, from, to,
+                groupField);
     }
 
     private List<NamingDistribution> queryNamingDistributions(String sql,
@@ -222,7 +231,8 @@ public class ClickHousePaymentRepositoryImpl implements ClickHousePaymentReposit
         List<Object> params = new ArrayList<>();
         params.add(to);
         params.add(partyId);
-        String sql = String.format(SELECT_BALANCES_SQL, QueryUtils.generateIdsSql(shopIds, params, QueryUtils::generateInList),
+        String sql = String.format(SELECT_BALANCES_SQL,
+                QueryUtils.generateIdsSql(shopIds, params, QueryUtils::generateInList),
                 QueryUtils.generateIdsSql(excludeShopIds, params, QueryUtils::generateNotInList));
         params = Collections.nCopies(4, params).stream()
                 .flatMap(Collection::stream)

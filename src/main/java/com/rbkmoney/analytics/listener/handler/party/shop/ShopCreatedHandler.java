@@ -49,7 +49,8 @@ public class ShopCreatedHandler extends AbstractClaimChangeHandler {
         log.debug("ShopCreatedHandler handleChange change: {}", change);
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
         claimEffects.stream()
-                .filter(claimEffect -> claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetCreated())
+                .filter(claimEffect -> claimEffect.isSetShopEffect()
+                        && claimEffect.getShopEffect().getEffect().isSetCreated())
                 .forEach(claimEffect -> handleEvent(event, claimEffect));
     }
 
@@ -61,7 +62,9 @@ public class ShopCreatedHandler extends AbstractClaimChangeHandler {
 
         final String contractId = shopCreated.getContractId();
         final Contract contract = contractDao.getContractByPartyIdAndContractId(partyId, contractId);
-        final Contractor currentContractor = contractorDao.getContractorByPartyIdAndContractorId(partyId, contract.getContractorId());
+        final Contractor currentContractor = contractorDao.getContractorByPartyIdAndContractorId(partyId,
+                contract.getContractorId()
+        );
 
         Shop shop = initShop(event, shopCreated, shopId, partyId, contractId, currentContractor);
 
@@ -69,7 +72,12 @@ public class ShopCreatedHandler extends AbstractClaimChangeHandler {
     }
 
     @NotNull
-    private Shop initShop(MachineEvent event, com.rbkmoney.damsel.domain.Shop shopCreated, String shopId, String partyId, String contractId, Contractor currentContractor) {
+    private Shop initShop(MachineEvent event,
+                          com.rbkmoney.damsel.domain.Shop shopCreated,
+                          String shopId,
+                          String partyId,
+                          String contractId,
+                          Contractor currentContractor) {
         Shop shop = contractorToShopConverter.convert(currentContractor);
         shop.setEventId(event.getEventId());
         shop.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
@@ -86,9 +94,13 @@ public class ShopCreatedHandler extends AbstractClaimChangeHandler {
         }
         shop.setSuspension(TBaseUtil.unionFieldToEnum(shopCreated.getSuspension(), Suspension.class));
         if (shopCreated.getSuspension().isSetActive()) {
-            shop.setSuspensionActiveSince(TypeUtil.stringToLocalDateTime(shopCreated.getSuspension().getActive().getSince()));
+            shop.setSuspensionActiveSince(TypeUtil.stringToLocalDateTime(
+                    shopCreated.getSuspension().getActive().getSince())
+            );
         } else if (shopCreated.getSuspension().isSetSuspended()) {
-            shop.setSuspensionSuspendedSince(TypeUtil.stringToLocalDateTime(shopCreated.getSuspension().getSuspended().getSince()));
+            shop.setSuspensionSuspendedSince(TypeUtil.stringToLocalDateTime(
+                    shopCreated.getSuspension().getSuspended().getSince())
+            );
         }
         shop.setDetailsName(shopCreated.getDetails().getName());
         shop.setDetailsDescription(shopCreated.getDetails().getDescription());

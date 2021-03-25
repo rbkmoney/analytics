@@ -2,7 +2,10 @@ package com.rbkmoney.analytics.dao.repository;
 
 import com.rbkmoney.analytics.constant.*;
 import com.rbkmoney.analytics.dao.model.*;
-import com.rbkmoney.analytics.dao.repository.clickhouse.*;
+import com.rbkmoney.analytics.dao.repository.clickhouse.ClickHouseAdjustmentRepository;
+import com.rbkmoney.analytics.dao.repository.clickhouse.ClickHouseChargebackRepository;
+import com.rbkmoney.analytics.dao.repository.clickhouse.ClickHousePayoutRepository;
+import com.rbkmoney.analytics.dao.repository.clickhouse.ClickHouseRefundRepository;
 import com.rbkmoney.analytics.dao.repository.clickhouse.iface.ClickHousePaymentRepository;
 import com.rbkmoney.analytics.dao.repository.postgres.PostgresBalanceChangesRepository;
 import lombok.RequiredArgsConstructor;

@@ -19,12 +19,14 @@ public class RawMapperConfig {
     }
 
     @Bean
-    public CommonRowsMapper<NamingDistribution> namingDistributionCommonRowsMapper(RawToNamingDistributionConverter rawToNamingDistributionConverter) {
+    public CommonRowsMapper<NamingDistribution> namingDistributionCommonRowsMapper(
+            RawToNamingDistributionConverter rawToNamingDistributionConverter) {
         return new CommonRowsMapper<>(rawToNamingDistributionConverter);
     }
 
     @Bean
-    public CommonRowsMapper<ShopAmountModel> shopAmountModelCommonRowsMapper(RawToShopAmountModelConverter rawToShopAmountModelConverter) {
+    public CommonRowsMapper<ShopAmountModel> shopAmountModelCommonRowsMapper(
+            RawToShopAmountModelConverter rawToShopAmountModelConverter) {
         return new CommonRowsMapper<>(rawToShopAmountModelConverter);
     }
 

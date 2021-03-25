@@ -28,7 +28,9 @@ public class PostgresBalanceChangesRepository {
 
     @Retryable(value = SQLException.class, backoff = @Backoff(delay = 5000))
     public void insertPayments(List<PaymentRow> paymentRows) {
-        if (CollectionUtils.isEmpty(paymentRows)) return;
+        if (CollectionUtils.isEmpty(paymentRows)) {
+            return;
+        }
 
         log.info("Batch start insert paymentRows: {} firstElement: {}",
                 paymentRows.size(),
@@ -45,7 +47,9 @@ public class PostgresBalanceChangesRepository {
 
     @Retryable(value = SQLException.class, backoff = @Backoff(delay = 5000))
     public void insertAdjustments(List<AdjustmentRow> adjustmentRows) {
-        if (CollectionUtils.isEmpty(adjustmentRows)) return;
+        if (CollectionUtils.isEmpty(adjustmentRows)) {
+            return;
+        }
 
         log.info("Batch start insert adjustmentRows: {} firstElement: {}",
                 adjustmentRows.size(),
@@ -62,7 +66,9 @@ public class PostgresBalanceChangesRepository {
 
     @Retryable(value = SQLException.class, backoff = @Backoff(delay = 5000))
     public void insertChargebacks(List<ChargebackRow> chargebackRows) {
-        if (CollectionUtils.isEmpty(chargebackRows)) return;
+        if (CollectionUtils.isEmpty(chargebackRows)) {
+            return;
+        }
 
         log.info("Batch start insert chargebackRows: {} firstElement: {}",
                 chargebackRows.size(),
@@ -79,7 +85,9 @@ public class PostgresBalanceChangesRepository {
 
     @Retryable(value = SQLException.class, backoff = @Backoff(delay = 5000))
     public void insertRefunds(List<RefundRow> refundRows) {
-        if (CollectionUtils.isEmpty(refundRows)) return;
+        if (CollectionUtils.isEmpty(refundRows)) {
+            return;
+        }
 
         log.info("Batch start insert refundRows: {} firstElement: {}",
                 refundRows.size(),
@@ -96,7 +104,9 @@ public class PostgresBalanceChangesRepository {
 
     @Retryable(value = SQLException.class, backoff = @Backoff(delay = 5000))
     public void insertPayouts(List<PayoutRow> payoutRows) {
-        if (CollectionUtils.isEmpty(payoutRows)) return;
+        if (CollectionUtils.isEmpty(payoutRows)) {
+            return;
+        }
 
         log.info("Batch start insert payoutRows: {} firstElement: {}",
                 payoutRows.size(),

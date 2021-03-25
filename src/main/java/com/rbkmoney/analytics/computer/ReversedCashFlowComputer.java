@@ -88,9 +88,12 @@ public class ReversedCashFlowComputer {
     }
 
     private boolean isSettlement(FinalCashFlowAccount account) {
-        return (account.getAccountType().isSetMerchant() && account.getAccountType().getMerchant() == MerchantCashFlowAccount.settlement)
-                || (account.getAccountType().isSetProvider() && account.getAccountType().getProvider() == ProviderCashFlowAccount.settlement)
-                || (account.getAccountType().isSetSystem() && account.getAccountType().getSystem() == SystemCashFlowAccount.settlement);
+        return (account.getAccountType().isSetMerchant()
+                && account.getAccountType().getMerchant() == MerchantCashFlowAccount.settlement)
+                || (account.getAccountType().isSetProvider()
+                && account.getAccountType().getProvider() == ProviderCashFlowAccount.settlement)
+                || (account.getAccountType().isSetSystem()
+                && account.getAccountType().getSystem() == SystemCashFlowAccount.settlement);
     }
 
     private boolean isExternal(FinalCashFlowAccount account) {

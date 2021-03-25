@@ -21,7 +21,9 @@ public class ClickHousePayoutRepository {
 
     @Retryable(value = ClickHouseException.class, backoff = @Backoff(delay = 5000))
     public void insertBatch(List<PayoutRow> payoutRows) {
-        if (CollectionUtils.isEmpty(payoutRows)) return;
+        if (CollectionUtils.isEmpty(payoutRows)) {
+            return;
+        }
 
         clickHouseJdbcTemplate.batchUpdate(
                 ClickHousePayoutBatchPreparedStatementSetter.INSERT,

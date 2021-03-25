@@ -35,13 +35,11 @@ import java.util.Properties;
 @ContextConfiguration(initializers = KafkaAbstractTest.Initializer.class)
 public abstract class KafkaAbstractTest {
 
-    private static final String CONFLUENT_PLATFORM_VERSION = "5.0.1";
-    private static final String AGGR = "aggr";
-
     public static final String EVENT_SINK_TOPIC = "event_sink";
     public static final String PAYOUT_TOPIC = "payout";
     public static final String RATE_TOPIC = "mg-events-rates";
-
+    private static final String CONFLUENT_PLATFORM_VERSION = "5.0.1";
+    private static final String AGGR = "aggr";
     @ClassRule
     public static KafkaContainer kafka = new KafkaContainer(DockerImageName
             .parse("confluentinc/cp-kafka:" + CONFLUENT_PLATFORM_VERSION))
@@ -64,34 +62,6 @@ public abstract class KafkaAbstractTest {
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ThriftSerializer.class.getName());
 
         return new KafkaProducer<>(props);
-    }
-
-    public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-
-        @Override
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-            TestPropertyValues.of(
-                    "kafka.bootstrap.servers=" + kafka.getBootstrapServers())
-                    .applyTo(configurableApplicationContext.getEnvironment());
-            initTopic(EVENT_SINK_TOPIC, MachineEventDeserializer.class);
-            initTopic(PAYOUT_TOPIC, PayoutEventDeserializer.class);
-            initTopic(RATE_TOPIC, MachineEventDeserializer.class);
-            kafka.start();
-        }
-
-        @NotNull
-        private <T> Consumer<String, T> initTopic(String topicName, Class clazz) {
-            Consumer<String, T> consumer = createConsumer(clazz);
-            try {
-                consumer.subscribe(Collections.singletonList(topicName));
-                consumer.poll(Duration.ofMillis(500L));
-            } catch (Exception e) {
-                log.error("KafkaAbstractTest initialize e: ", e);
-            }
-
-            consumer.close();
-            return consumer;
-        }
     }
 
     static <T> Consumer<String, T> createConsumer(Class clazz) {
@@ -128,6 +98,34 @@ public abstract class KafkaAbstractTest {
             log.info("produceMessageToPayout() payoutEvent: {}", payoutEvent);
         } catch (Exception e) {
             log.error("Error when produceMessageToPayout e:", e);
+        }
+    }
+
+    public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+        @Override
+        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+            TestPropertyValues.of(
+                    "kafka.bootstrap.servers=" + kafka.getBootstrapServers())
+                    .applyTo(configurableApplicationContext.getEnvironment());
+            initTopic(EVENT_SINK_TOPIC, MachineEventDeserializer.class);
+            initTopic(PAYOUT_TOPIC, PayoutEventDeserializer.class);
+            initTopic(RATE_TOPIC, MachineEventDeserializer.class);
+            kafka.start();
+        }
+
+        @NotNull
+        private <T> Consumer<String, T> initTopic(String topicName, Class clazz) {
+            Consumer<String, T> consumer = createConsumer(clazz);
+            try {
+                consumer.subscribe(Collections.singletonList(topicName));
+                consumer.poll(Duration.ofMillis(500L));
+            } catch (Exception e) {
+                log.error("KafkaAbstractTest initialize e: ", e);
+            }
+
+            consumer.close();
+            return consumer;
         }
     }
 

@@ -26,11 +26,10 @@ import static java.util.stream.Collectors.toList;
 @RequiredArgsConstructor
 public class InvoiceListener {
 
-    @Value("${kafka.consumer.throttling-timeout-ms}")
-    private int throttlingTimeout;
-
     private final SourceEventParser eventParser;
     private final List<InvoiceBatchHandler> invoiceBatchHandlers;
+    @Value("${kafka.consumer.throttling-timeout-ms}")
+    private int throttlingTimeout;
 
     @KafkaListener(
             autoStartup = "${kafka.listener.event.sink.enabled}",
@@ -48,7 +47,9 @@ public class InvoiceListener {
 
     private void handleMessages(List<MachineEvent> batch) throws InterruptedException {
         try {
-            if (CollectionUtils.isEmpty(batch)) return;
+            if (CollectionUtils.isEmpty(batch)) {
+                return;
+            }
 
             batch.stream()
                     .map(machineEvent -> Map.entry(machineEvent, eventParser.parseEvent(machineEvent)))

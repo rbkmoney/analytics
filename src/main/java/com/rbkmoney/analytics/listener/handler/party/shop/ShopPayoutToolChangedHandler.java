@@ -31,7 +31,8 @@ public class ShopPayoutToolChangedHandler extends AbstractClaimChangeHandler {
     @Transactional(propagation = Propagation.REQUIRED)
     public void handleChange(PartyChange change, MachineEvent event) {
         getClaimStatus(change).getAccepted().getEffects().stream()
-                .filter(claimEffect -> claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetPayoutToolChanged())
+                .filter(claimEffect -> claimEffect.isSetShopEffect()
+                        && claimEffect.getShopEffect().getEffect().isSetPayoutToolChanged())
                 .forEach(claimEffect -> handleEvent(event, claimEffect));
     }
 

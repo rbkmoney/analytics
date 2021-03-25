@@ -23,28 +23,33 @@ public class AdjustmentRowFactory extends InvoiceBaseRowFactory<AdjustmentRow> {
     private final CashFlowComputer cashFlowComputer;
     private final ReversedCashFlowComputer reversedCashFlowComputer;
 
-    public AdjustmentRowFactory(GeoProvider geoProvider, CashFlowComputer cashFlowComputer, ReversedCashFlowComputer reversedCashFlowComputer) {
+    public AdjustmentRowFactory(GeoProvider geoProvider,
+                                CashFlowComputer cashFlowComputer,
+                                ReversedCashFlowComputer reversedCashFlowComputer) {
         super(geoProvider);
         this.cashFlowComputer = cashFlowComputer;
         this.reversedCashFlowComputer = reversedCashFlowComputer;
     }
 
     @Override
-    public AdjustmentRow create(MachineEvent machineEvent, InvoicePaymentWrapper invoicePaymentWrapper, String adjustmentId) {
-        AdjustmentRow adjustmentRow = new AdjustmentRow();
+    public AdjustmentRow create(MachineEvent machineEvent,
+                                InvoicePaymentWrapper invoicePaymentWrapper,
+                                String adjustmentId) {
         Invoice invoice = invoicePaymentWrapper.getInvoice();
         InvoicePayment payment = invoicePaymentWrapper.getInvoicePayment();
-        payment.getAdjustments().stream()
+        return payment.getAdjustments().stream()
                 .filter(adjustment -> adjustment.getId().equals(adjustmentId))
                 .findFirst()
-                .ifPresentOrElse(adjustment -> mapRow(machineEvent, adjustmentRow, payment, invoice, adjustmentId, adjustment), () -> {
-                            throw new AdjustmentInfoNotFoundException();
-                        }
-                );
-        return adjustmentRow;
+                .map(adjustment -> mapRow(machineEvent, payment, invoice, adjustmentId, adjustment))
+                .orElseThrow(AdjustmentInfoNotFoundException::new);
     }
 
-    private void mapRow(MachineEvent machineEvent, AdjustmentRow row, InvoicePayment payment, Invoice invoice, String id, InvoicePaymentAdjustment adjustment) {
+    private AdjustmentRow mapRow(MachineEvent machineEvent,
+                                 InvoicePayment payment,
+                                 Invoice invoice,
+                                 String id,
+                                 InvoicePaymentAdjustment adjustment) {
+        AdjustmentRow row = new AdjustmentRow();
         row.setAdjustmentId(id);
         row.setPaymentId(payment.getPayment().getId());
         initBaseRow(machineEvent, row, payment, invoice);
@@ -54,6 +59,7 @@ public class AdjustmentRowFactory extends InvoiceBaseRowFactory<AdjustmentRow> {
 
         List<FinalCashFlowPosting> oldCashFlow = adjustment.getOldCashFlowInverse();
         row.setOldCashFlowResult(reversedCashFlowComputer.compute(oldCashFlow));
+        return row;
     }
 
 }

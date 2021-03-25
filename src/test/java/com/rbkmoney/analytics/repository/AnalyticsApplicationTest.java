@@ -79,10 +79,11 @@ public class AnalyticsApplicationTest extends ClickHouseAbstractTest {
 
         list.forEach(stringObjectMap -> {
                     Object cnt = stringObjectMap.get("cnt");
-                    if (stringObjectMap.get("status").equals("captured"))
+                    if (stringObjectMap.get("status").equals("captured")) {
                         assertEquals(2L, ((BigInteger) cnt).longValue());
-                    else if (stringObjectMap.get("status").equals("failed"))
+                    } else if (stringObjectMap.get("status").equals("failed")) {
                         assertEquals(1L, ((BigInteger) cnt).longValue());
+                    }
                 }
         );
     }
@@ -93,7 +94,8 @@ public class AnalyticsApplicationTest extends ClickHouseAbstractTest {
                 "SELECT partyId, status, sum(amount) as sum " +
                         "from analytic.events_sink " +
                         "group by partyId, currency, status " +
-                        "having partyId = 'ca2e9162-eda2-4d17-bbfa-dc5e39b1772a' and currency = 'RUB' and status in('captured', 'processed')");
+                        "having partyId = 'ca2e9162-eda2-4d17-bbfa-dc5e39b1772a' " +
+                        "and currency = 'RUB' and status in('captured', 'processed')");
 
         list.forEach(stringObjectMap -> {
                     Object cnt = stringObjectMap.get("sum");
@@ -108,8 +110,9 @@ public class AnalyticsApplicationTest extends ClickHouseAbstractTest {
                 "SELECT partyId, paymentTool," +
                         "( SELECT count() from analytic.events_sink  where status='captured'" +
                         "group by partyId, currency " +
-                        "having partyId = 'ca2e9162-eda2-4d17-bbfa-dc5e39b1772a' and currency = 'RUB') as total_count, " +
-                        "count() * 100 / total_count as sum " +
+                        "having partyId = 'ca2e9162-eda2-4d17-bbfa-dc5e39b1772a' " +
+                        "and currency = 'RUB') " +
+                        "as total_count, count() * 100 / total_count as sum " +
                         "from analytic.events_sink where status='captured'" +
                         "group by partyId, currency, paymentTool " +
                         "having partyId = 'ca2e9162-eda2-4d17-bbfa-dc5e39b1772a' and currency = 'RUB'");
@@ -128,11 +131,13 @@ public class AnalyticsApplicationTest extends ClickHouseAbstractTest {
                 "SELECT partyId, errorReason," +
                         "( SELECT count() from analytic.events_sink " +
                         "group by partyId,status, currency " +
-                        "having partyId = 'ca2e9162-eda2-4d17-bbfa-dc5e39b1772a' and currency = 'RUB' and status = 'failed') as total_count, " +
+                        "having partyId = 'ca2e9162-eda2-4d17-bbfa-dc5e39b1772a' " +
+                        "and currency = 'RUB' and status = 'failed') as total_count, " +
                         "count() * 100 / total_count as sum " +
                         "from analytic.events_sink " +
                         "group by partyId, status, currency, errorReason " +
-                        "having partyId = 'ca2e9162-eda2-4d17-bbfa-dc5e39b1772a' and currency = 'RUB' and status = 'failed'");
+                        "having partyId = 'ca2e9162-eda2-4d17-bbfa-dc5e39b1772a' " +
+                        "and currency = 'RUB' and status = 'failed'");
 
         list.forEach(stringObjectMap -> {
                     Object cnt = stringObjectMap.get("sum");

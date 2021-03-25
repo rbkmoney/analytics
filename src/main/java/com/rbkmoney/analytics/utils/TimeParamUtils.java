@@ -15,7 +15,8 @@ public class TimeParamUtils {
         long fromSeconds = from.toEpochSecond(ZoneOffset.UTC);
         long toMillisHours = to.toInstant(ZoneOffset.UTC).truncatedTo(ChronoUnit.HOURS).toEpochMilli();
         long toSeconds = to.toEpochSecond(ZoneOffset.UTC);
-        return new ArrayList<>(Arrays.asList(from.toLocalDate(), to.toLocalDate(), fromMillisHours, toMillisHours, fromSeconds, toSeconds));
+        return new ArrayList<>(Arrays.asList(from.toLocalDate(), to.toLocalDate(), fromMillisHours, toMillisHours,
+                fromSeconds, toSeconds));
     }
 
 }

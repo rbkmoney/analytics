@@ -16,18 +16,21 @@ import java.util.Optional;
 public class ClickHousePayoutBatchPreparedStatementSetter implements BatchPreparedStatementSetter {
 
     public static final String INSERT = "INSERT INTO analytic.events_sink_payout " +
-            "(payoutId, status, payoutType, statusCancelledDetails, isCancelledAfterBeingPaid, timestamp, eventTime, eventTimeHour, " +
-            "payoutTime, shopId, partyId, contractId, amount, fee, currency, walletId, accountType, purpose, legalAgreementSignedAt, " +
-            "legalAgreementId, legalAgreementValidUntil, russianAccount, russianBankName, russianBankPostAccount, russianBankBik, " +
-            "russianInn, internationalAccountHolder, internationalBankName, internationalBankAddress, internationalIban, " +
-            "internationalBic, internationalLocalBankCode, internationalLegalEntityLegalName, internationalLegalEntityTradingName, " +
-            "internationalLegalEntityRegisteredAddress, internationalLegalEntityActualAddress, internationalLegalEntityRegisteredNumber, " +
-            "internationalBankNumber, internationalBankAbaRtn, internationalBankCountryCode, internationalCorrespondentBankNumber, " +
-            "internationalCorrespondentBankAccount, internationalCorrespondentBankName, internationalCorrespondentBankAddress, " +
-            "internationalCorrespondentBankBic, internationalCorrespondentBankIban, internationalCorrespondentBankAbaRtn, " +
-            "internationalCorrespondentBankCountryCode)" +
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " +
-            "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "(payoutId, status, payoutType, statusCancelledDetails, isCancelledAfterBeingPaid, timestamp, eventTime, " +
+            "eventTimeHour, payoutTime, shopId, partyId, contractId, amount, fee, currency, walletId, accountType, " +
+            "purpose, legalAgreementSignedAt, legalAgreementId, legalAgreementValidUntil, russianAccount, " +
+            "russianBankName, russianBankPostAccount, russianBankBik, russianInn, internationalAccountHolder, " +
+            "internationalBankName, internationalBankAddress, internationalIban, internationalBic, " +
+            "internationalLocalBankCode, internationalLegalEntityLegalName, internationalLegalEntityTradingName, " +
+            "internationalLegalEntityRegisteredAddress, internationalLegalEntityActualAddress, " +
+            "internationalLegalEntityRegisteredNumber, internationalBankNumber, internationalBankAbaRtn, " +
+            "internationalBankCountryCode, internationalCorrespondentBankNumber, " +
+            "internationalCorrespondentBankAccount, " +
+            "internationalCorrespondentBankName, internationalCorrespondentBankAddress, " +
+            "internationalCorrespondentBankBic, internationalCorrespondentBankIban, " +
+            "internationalCorrespondentBankAbaRtn, internationalCorrespondentBankCountryCode)" +
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " +
+            "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private final List<PayoutRow> batch;
 

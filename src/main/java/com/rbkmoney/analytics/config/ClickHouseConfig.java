@@ -10,6 +10,7 @@ import ru.yandex.clickhouse.ClickHouseDataSource;
 import ru.yandex.clickhouse.settings.ClickHouseQueryParam;
 
 import javax.sql.DataSource;
+
 import java.util.Properties;
 
 @Configuration
@@ -24,7 +25,9 @@ public class ClickHouseConfig {
         info.setProperty(ClickHouseQueryParam.USER.getKey(), clickHouseDbProperties.getUser());
         info.setProperty(ClickHouseQueryParam.PASSWORD.getKey(), clickHouseDbProperties.getPassword());
         info.setProperty(ClickHouseQueryParam.COMPRESS.getKey(), String.valueOf(clickHouseDbProperties.getCompress()));
-        info.setProperty(ClickHouseQueryParam.CONNECT_TIMEOUT.getKey(), String.valueOf(clickHouseDbProperties.getConnectionTimeout()));
+        info.setProperty(ClickHouseQueryParam.CONNECT_TIMEOUT.getKey(),
+                String.valueOf(clickHouseDbProperties.getConnectionTimeout())
+        );
 
         return new ClickHouseDataSource(clickHouseDbProperties.getUrl(), info);
     }

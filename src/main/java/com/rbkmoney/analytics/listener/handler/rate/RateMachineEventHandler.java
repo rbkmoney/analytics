@@ -24,17 +24,18 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RateMachineEventHandler {
 
-    @Value("${kafka.consumer.throttling-timeout-ms}")
-    private int throttlingTimeout;
-
     private final MachineEventParser<Change> eventParser;
     private final List<Mapper<Change, MachineEvent, List<Rate>>> mappers;
     private final RateDao rateDao;
+    @Value("${kafka.consumer.throttling-timeout-ms}")
+    private int throttlingTimeout;
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void handle(List<MachineEvent> batch, Acknowledgment ack) throws InterruptedException {
         try {
-            if (CollectionUtils.isEmpty(batch)) return;
+            if (CollectionUtils.isEmpty(batch)) {
+                return;
+            }
 
             for (MachineEvent machineEvent : batch) {
                 final Change change = eventParser.parse(machineEvent);

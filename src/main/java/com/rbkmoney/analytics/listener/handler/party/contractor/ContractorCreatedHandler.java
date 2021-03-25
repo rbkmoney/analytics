@@ -4,7 +4,6 @@ import com.rbkmoney.analytics.converter.ContractorToCurrentContractorConverter;
 import com.rbkmoney.analytics.dao.repository.postgres.party.management.ContractorDao;
 import com.rbkmoney.analytics.domain.db.enums.ContractorIdentificationLvl;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Contractor;
-import com.rbkmoney.analytics.listener.handler.merger.ContractorEventMerger;
 import com.rbkmoney.analytics.listener.handler.party.AbstractClaimChangeHandler;
 import com.rbkmoney.damsel.domain.PartyContractor;
 import com.rbkmoney.damsel.payment_processing.ClaimEffect;
@@ -38,7 +37,8 @@ public class ContractorCreatedHandler extends AbstractClaimChangeHandler {
     @Transactional(propagation = Propagation.REQUIRED)
     public void handleChange(PartyChange change, MachineEvent event) {
         getClaimStatus(change).getAccepted().getEffects().stream()
-                .filter(claimEffect -> claimEffect.isSetContractorEffect() && claimEffect.getContractorEffect().getEffect().isSetCreated())
+                .filter(claimEffect -> claimEffect.isSetContractorEffect()
+                        && claimEffect.getContractorEffect().getEffect().isSetCreated())
                 .forEach(claimEffect -> handleEvent(event, claimEffect));
     }
 
@@ -57,7 +57,8 @@ public class ContractorCreatedHandler extends AbstractClaimChangeHandler {
         currentContractor.setEventId(event.getEventId());
         currentContractor.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         currentContractor.setContractorId(contractorId);
-        currentContractor.setContractorIdentificationLevel(ContractorIdentificationLvl.valueOf(partyContractor.getStatus().name()));
+        currentContractor.setContractorIdentificationLevel(ContractorIdentificationLvl
+                .valueOf(partyContractor.getStatus().name()));
 
         log.debug("ContractorCreatedHandler result contractor: {}", currentContractor);
 

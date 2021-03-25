@@ -43,7 +43,8 @@ public class ShopContractChangedHandler extends AbstractClaimChangeHandler {
     public void handleChange(PartyChange change, MachineEvent event) {
         List<ClaimEffect> claimEffects = getClaimStatus(change).getAccepted().getEffects();
         claimEffects.stream()
-                .filter(claimEffect -> claimEffect.isSetShopEffect() && claimEffect.getShopEffect().getEffect().isSetContractChanged())
+                .filter(claimEffect -> claimEffect.isSetShopEffect()
+                        && claimEffect.getShopEffect().getEffect().isSetContractChanged())
                 .forEach(claimEffect -> handleEvent(event, claimEffect));
     }
 
@@ -54,7 +55,9 @@ public class ShopContractChangedHandler extends AbstractClaimChangeHandler {
         String partyId = event.getSourceId();
         final String contractId = contractChanged.getContractId();
         final Contract contract = contractDao.getContractByPartyIdAndContractId(partyId, contractId);
-        final Contractor contractor = contractorDao.getContractorByPartyIdAndContractorId(partyId, contract.getContractorId());
+        final Contractor contractor = contractorDao.getContractorByPartyIdAndContractorId(partyId,
+                contract.getContractorId()
+        );
 
         Shop shop = contractorToShopConverter.convert(contractor);
         shop.setPartyId(partyId);

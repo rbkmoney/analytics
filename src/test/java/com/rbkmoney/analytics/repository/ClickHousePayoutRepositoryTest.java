@@ -27,7 +27,8 @@ import static org.junit.Assert.assertEquals;
 @ContextConfiguration(
         initializers = ClickHousePayoutRepositoryTest.Initializer.class,
         classes = {RawToNumModelConverter.class, RawToSplitNumberConverter.class, RawToSplitStatusConverter.class,
-                SplitRowsMapper.class, SplitStatusRowsMapper.class, RawToNamingDistributionConverter.class, RawToShopAmountModelConverter.class,
+                SplitRowsMapper.class, SplitStatusRowsMapper.class, RawToNamingDistributionConverter.class,
+                RawToShopAmountModelConverter.class,
                 RawMapperConfig.class, ClickHousePayoutRepository.class})
 public class ClickHousePayoutRepositoryTest extends ClickHouseAbstractTest {
 

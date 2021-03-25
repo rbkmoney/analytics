@@ -35,13 +35,15 @@ public class ContractorIdentificationLevelChangedHandler extends AbstractClaimCh
     @Transactional(propagation = Propagation.REQUIRED)
     public void handleChange(PartyChange change, MachineEvent event) {
         getClaimStatus(change).getAccepted().getEffects().stream()
-                .filter(claimEffect -> claimEffect.isSetContractorEffect() && claimEffect.getContractorEffect().getEffect().isSetIdentificationLevelChanged())
+                .filter(claimEffect -> claimEffect.isSetContractorEffect()
+                        && claimEffect.getContractorEffect().getEffect().isSetIdentificationLevelChanged())
                 .forEach(claimEffect -> handleEvent(event, claimEffect));
     }
 
     private void handleEvent(MachineEvent event, ClaimEffect effect) {
         ContractorEffectUnit contractorEffect = effect.getContractorEffect();
-        ContractorIdentificationLevel identificationLevelChanged = contractorEffect.getEffect().getIdentificationLevelChanged();
+        ContractorIdentificationLevel identificationLevelChanged =
+                contractorEffect.getEffect().getIdentificationLevelChanged();
         String contractorId = contractorEffect.getId();
         String partyId = event.getSourceId();
 
@@ -50,7 +52,9 @@ public class ContractorIdentificationLevelChangedHandler extends AbstractClaimCh
         currentContractor.setEventId(event.getEventId());
         currentContractor.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         currentContractor.setContractorId(contractorId);
-        currentContractor.setContractorIdentificationLevel(ContractorIdentificationLvl.valueOf(identificationLevelChanged.name()));
+        currentContractor.setContractorIdentificationLevel(ContractorIdentificationLvl
+                .valueOf(identificationLevelChanged.name())
+        );
 
         log.debug("ContractorCreatedHandler result contractor: {}", currentContractor);
 

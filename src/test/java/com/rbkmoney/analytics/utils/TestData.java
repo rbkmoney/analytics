@@ -7,7 +7,8 @@ import java.util.List;
 
 public class TestData {
 
-    public static Commit buildInsertCategoryCommit(Integer id, String name, String description, CategoryType categoryType) {
+    public static Commit buildInsertCategoryCommit(Integer id, String name, String description,
+                                                   CategoryType categoryType) {
         Operation operation = new Operation();
         InsertOp insertOp = new InsertOp();
         DomainObject domainObject = new DomainObject();
@@ -19,22 +20,23 @@ public class TestData {
     }
 
     public static Commit buildUpdateCategoryCommit(Integer id,
-                                             String name,
-                                             String description,
-                                             CategoryType categoryType,
-                                             DomainObject oldObject) {
-        Operation operation = new Operation();
+                                                   String name,
+                                                   String description,
+                                                   CategoryType categoryType,
+                                                   DomainObject oldObject) {
         UpdateOp updateOp = new UpdateOp();
         DomainObject domainObject = new DomainObject();
         domainObject.setCategory(buildCategoryObject(id, name, description, categoryType));
         updateOp.setNewObject(domainObject);
         updateOp.setOldObject(oldObject);
+        Operation operation = new Operation();
         operation.setUpdate(updateOp);
 
         return new Commit(List.of(operation));
     }
 
-    public static Commit buildRemoveCategoryCommit(Integer id, String name, String description, CategoryType categoryType) {
+    public static Commit buildRemoveCategoryCommit(Integer id, String name, String description,
+                                                   CategoryType categoryType) {
         Operation operation = new Operation();
         RemoveOp removeOp = new RemoveOp();
         DomainObject domainObject = new DomainObject();
@@ -45,12 +47,14 @@ public class TestData {
         return new Commit(List.of(operation));
     }
 
-    public static CategoryObject buildCategoryObject(Integer id, String name, String description, CategoryType categoryType) {
-        CategoryObject categoryObject = new CategoryObject();
+    public static CategoryObject buildCategoryObject(Integer id, String name, String description,
+                                                     CategoryType categoryType) {
         Category category = new Category();
         category.setName(name);
         category.setDescription(description);
         category.setType(categoryType);
+
+        CategoryObject categoryObject = new CategoryObject();
         categoryObject.setData(category);
         CategoryRef categoryRef = new CategoryRef();
         categoryRef.setId(id);

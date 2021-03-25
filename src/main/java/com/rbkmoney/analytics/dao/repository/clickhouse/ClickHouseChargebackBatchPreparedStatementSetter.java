@@ -21,7 +21,8 @@ public class ClickHouseChargebackBatchPreparedStatementSetter implements BatchPr
             "status, chargebackCode, stage, category, invoiceId, paymentId, chargebackId, sequenceId, ip, " +
             "fingerprint, cardToken, paymentSystem, digitalWalletProvider, digitalWalletToken, cryptoCurrency, " +
             "mobileOperator, paymentCountry, bankCountry, paymentTime, providerId, terminal)" +
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " +
+            "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private final List<ChargebackRow> batch;
 

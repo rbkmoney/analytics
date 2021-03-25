@@ -21,16 +21,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PartyMachineEventHandler {
 
-    @Value("${kafka.consumer.throttling-timeout-ms}")
-    private int throttlingTimeout;
-
     private final MachineEventParser<PartyEventData> eventParser;
     private final List<ChangeHandler<PartyChange, MachineEvent>> partyHandlers;
+    @Value("${kafka.consumer.throttling-timeout-ms}")
+    private int throttlingTimeout;
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void handleMessages(List<MachineEvent> batch, Acknowledgment ack) throws InterruptedException {
         try {
-            if (CollectionUtils.isEmpty(batch)) return;
+            if (CollectionUtils.isEmpty(batch)) {
+                return;
+            }
             for (MachineEvent machineEvent : batch) {
                 handleEvent(machineEvent);
             }

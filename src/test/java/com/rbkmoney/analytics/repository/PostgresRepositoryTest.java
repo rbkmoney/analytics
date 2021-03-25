@@ -64,21 +64,6 @@ public class PostgresRepositoryTest {
     @Autowired
     private JdbcTemplate postgresJdbcTemplate;
 
-    public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        @Override
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-            TestPropertyValues.of(
-                    "postgres.db.url=" + postgres.getJdbcUrl(),
-                    "postgres.db.user=" + postgres.getUsername(),
-                    "postgres.db.password=" + postgres.getPassword(),
-                    "spring.flyway.url=" + postgres.getJdbcUrl(),
-                    "spring.flyway.user=" + postgres.getUsername(),
-                    "spring.flyway.password=" + postgres.getPassword())
-                    .and(configurableApplicationContext.getEnvironment().getActiveProfiles())
-                    .applyTo(configurableApplicationContext);
-        }
-    }
-
     @Test
     public void testCount() {
         postgresBalanceChangesRepository.insertPayments(List.of(payment()));
@@ -190,6 +175,21 @@ public class PostgresRepositoryTest {
         payoutRow.setAmount(10_000L);
         payoutRow.setFee(1000L);
         return payoutRow;
+    }
+
+    public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+        @Override
+        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+            TestPropertyValues.of(
+                    "postgres.db.url=" + postgres.getJdbcUrl(),
+                    "postgres.db.user=" + postgres.getUsername(),
+                    "postgres.db.password=" + postgres.getPassword(),
+                    "spring.flyway.url=" + postgres.getJdbcUrl(),
+                    "spring.flyway.user=" + postgres.getUsername(),
+                    "spring.flyway.password=" + postgres.getPassword())
+                    .and(configurableApplicationContext.getEnvironment().getActiveProfiles())
+                    .applyTo(configurableApplicationContext);
+        }
     }
 
 }

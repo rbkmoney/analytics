@@ -35,7 +35,8 @@ public class QueryUtils {
         return inList;
     }
 
-    public static String generateIdsSql(List<String> shopIds, List<Object> params, Function<List<String>, StringBuilder> generateListFunction) {
+    public static String generateIdsSql(List<String> shopIds, List<Object> params,
+                                        Function<List<String>, StringBuilder> generateListFunction) {
         String excludeShopIdsList;
         if (!CollectionUtils.isEmpty(shopIds)) {
             excludeShopIdsList = " and shopId " + generateListFunction.apply(shopIds).toString();
