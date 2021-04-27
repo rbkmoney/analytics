@@ -1,6 +1,5 @@
 package com.rbkmoney.analytics.dao.model;
 
-import com.rbkmoney.analytics.constant.PaymentToolType;
 import com.rbkmoney.analytics.domain.CashFlowResult;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -44,7 +43,7 @@ public class InvoiceBaseRow {
     private String paymentCountry;
     private String bankCountry;
 
-    private PaymentToolType paymentTool;
+    private String paymentTool;
     private String bankCardTokenProvider;
     private String bin;
 

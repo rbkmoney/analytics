@@ -63,7 +63,7 @@ public class ClickHousePaymentBatchPreparedStatementSetter implements BatchPrepa
         ps.setString(l++, row.getIp());
         ps.setString(l++, row.getBin());
         ps.setString(l++, row.getMaskedPan());
-        ps.setString(l++, row.getPaymentTool() != null ? row.getPaymentTool().name() : ClickHouseUtilsValue.UNKNOWN);
+        ps.setString(l++, row.getPaymentTool() != null ? row.getPaymentTool() : ClickHouseUtilsValue.UNKNOWN);
 
         ps.setString(l++, row.getFingerprint());
         ps.setString(l++, row.getCardToken());
