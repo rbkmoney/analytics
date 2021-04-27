@@ -438,7 +438,7 @@ public class InvoiceFlowGenerator {
         paymentTool.setBankCard(
                 new BankCard()
                         .setToken("477bba133c182267fe5f086924abdc5db71f77bfc27f01f2843f2cdc69d89f05")
-                        .setPaymentSystem(BankCardPaymentSystem.mastercard)
+                        .setPaymentSystem(new PaymentSystemRef("mastercard"))
                         .setBin(BIN)
                         .setLastDigits("4242")
                         .setIssuerCountry(Residence.RUS)
