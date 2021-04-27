@@ -100,7 +100,7 @@ public class InvoiceListenerTest extends KafkaAbstractTest {
         AtomicLong count = new AtomicLong();
 
         //check sum for captured payment
-        await().atMost(120, TimeUnit.SECONDS).until(() -> {
+        await().atMost(60, TimeUnit.SECONDS).until(() -> {
             Thread.sleep(MESSAGE_TIMEOUT);
 
             try {
