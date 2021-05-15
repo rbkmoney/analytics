@@ -6,7 +6,8 @@ public enum PaymentToolType {
     payment_terminal,
     digital_wallet,
     crypto_currency,
-    mobile_commerce
+    mobile_commerce,
+    crypto_currency_deprecated
 
 }
 

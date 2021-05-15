@@ -1,30 +1,17 @@
 package com.rbkmoney.analytics.listener.mapper.factory;
 
 import com.rbkmoney.analytics.constant.ClickHouseUtilsValue;
+import com.rbkmoney.analytics.constant.PaymentToolType;
 import com.rbkmoney.analytics.dao.model.InvoiceBaseRow;
 import com.rbkmoney.analytics.service.GeoProvider;
-import com.rbkmoney.analytics.utils.PaymentToolTypeUtil;
-import com.rbkmoney.damsel.domain.BankCard;
-import com.rbkmoney.damsel.domain.ClientInfo;
-import com.rbkmoney.damsel.domain.ContactInfo;
-import com.rbkmoney.damsel.domain.CustomerPayer;
-import com.rbkmoney.damsel.domain.DisposablePaymentResource;
-import com.rbkmoney.damsel.domain.Invoice;
-import com.rbkmoney.damsel.domain.Payer;
-import com.rbkmoney.damsel.domain.PaymentTool;
-import com.rbkmoney.damsel.domain.RecurrentPayer;
+import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.payment_processing.InvoicePayment;
+import com.rbkmoney.geck.common.util.TBaseUtil;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
-import com.rbkmoney.mamsel.CryptoCurrencyUtil;
-import com.rbkmoney.mamsel.DigitalWalletUtil;
-import com.rbkmoney.mamsel.MobileOperatorUtil;
-import com.rbkmoney.mamsel.PaymentSystemUtil;
-import com.rbkmoney.mamsel.TerminalPaymentUtil;
-import com.rbkmoney.mamsel.TokenProviderUtil;
+import com.rbkmoney.mamsel.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 @Slf4j
@@ -86,7 +73,7 @@ public abstract class InvoiceBaseRowFactory<T extends InvoiceBaseRow> implements
     }
 
     private void initCardData(T row, PaymentTool paymentTool) {
-        row.setPaymentTool(PaymentToolTypeUtil.getPaymentToolType(paymentTool));
+        row.setPaymentTool(TBaseUtil.unionFieldToEnum(paymentTool, PaymentToolType.class));
         if (paymentTool.isSetBankCard()) {
             BankCard bankCard = paymentTool.getBankCard();
             row.setBankCountry(bankCard.isSetIssuerCountry()
@@ -98,14 +85,11 @@ public abstract class InvoiceBaseRowFactory<T extends InvoiceBaseRow> implements
             row.setBin(bankCard.getBin());
             row.setMaskedPan(bankCard.getLastDigits());
             row.setPaymentSystem(PaymentSystemUtil.getPaymentSystemName(bankCard));
-            if (TokenProviderUtil.isSetTokenProvider(bankCard)) {
-                row.setBankCardTokenProvider(TokenProviderUtil.getTokenProviderName(bankCard));
-            }
-            if (paymentTool.isSetPaymentTerminal()) {
-                row.setPaymentTerminal(
-                        TerminalPaymentUtil.getTerminalPaymentProviderName(paymentTool.getPaymentTerminal())
-                );
-            }
+            row.setBankCardTokenProvider(TokenProviderUtil.getTokenProviderName(bankCard));
+        } else if (paymentTool.isSetPaymentTerminal()) {
+            row.setPaymentTerminal(
+                    TerminalPaymentUtil.getTerminalPaymentProviderName(paymentTool.getPaymentTerminal())
+            );
         } else if (paymentTool.isSetDigitalWallet()) {
             row.setDigitalWalletProvider(DigitalWalletUtil.getDigitalWalletName(paymentTool.getDigitalWallet()));
             row.setDigitalWalletToken(paymentTool.getDigitalWallet().getToken());
@@ -115,5 +99,4 @@ public abstract class InvoiceBaseRowFactory<T extends InvoiceBaseRow> implements
             row.setMobileOperator(MobileOperatorUtil.getMobileOperatorName(paymentTool.getMobileCommerce()));
         }
     }
-
 }
