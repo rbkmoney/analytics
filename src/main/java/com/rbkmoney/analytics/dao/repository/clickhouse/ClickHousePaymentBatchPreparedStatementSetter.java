@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 public class ClickHousePaymentBatchPreparedStatementSetter implements BatchPreparedStatementSetter {
@@ -63,7 +64,7 @@ public class ClickHousePaymentBatchPreparedStatementSetter implements BatchPrepa
         ps.setString(l++, row.getIp());
         ps.setString(l++, row.getBin());
         ps.setString(l++, row.getMaskedPan());
-        ps.setString(l++, row.getPaymentTool() != null ? row.getPaymentTool().name() : ClickHouseUtilsValue.UNKNOWN);
+        ps.setString(l++, Optional.ofNullable(row.getPaymentTool()).orElse(ClickHouseUtilsValue.UNKNOWN));
 
         ps.setString(l++, row.getFingerprint());
         ps.setString(l++, row.getCardToken());
