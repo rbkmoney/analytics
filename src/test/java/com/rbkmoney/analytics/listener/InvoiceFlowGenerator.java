@@ -442,7 +442,7 @@ public class InvoiceFlowGenerator {
                         .setPaymentSystem(new PaymentSystemRef(PAYMENT_SYSTEM))
                         .setBin(BIN)
                         .setLastDigits("4242")
-                        .setIssuerCountry(Residence.RUS)
+                        .setIssuerCountry(CountryCode.RUS)
         );
         return paymentTool;
     }
