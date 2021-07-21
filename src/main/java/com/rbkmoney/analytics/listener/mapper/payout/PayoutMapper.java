@@ -6,7 +6,6 @@ import com.rbkmoney.analytics.dao.repository.clickhouse.ClickHousePayoutReposito
 import com.rbkmoney.analytics.listener.mapper.Mapper;
 import com.rbkmoney.analytics.listener.mapper.factory.PayoutRowFactory;
 import com.rbkmoney.payout.manager.Event;
-import com.rbkmoney.payout.manager.Payout;
 import com.rbkmoney.payout.manager.PayoutChange;
 import com.rbkmoney.payout.manager.PayoutStatus;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +24,7 @@ public class PayoutMapper implements Mapper<PayoutChange, Event, PayoutRow> {
     public PayoutRow map(PayoutChange change, Event event) {
         String payoutId = event.getPayoutId();
         PayoutStatus payoutStatus = change.getStatusChanged().getStatus();
-        Payout payout = event.getPayout();
-        PayoutRow payoutRow = payoutRowFactory.create(event, payout, payoutId, payoutStatus);
+        PayoutRow payoutRow = payoutRowFactory.create(event, payoutId, payoutStatus);
         if (payoutStatus.isSetCancelled()) {
             String paidEvent = clickHousePayoutRepository.getPaidEvent(payoutId);
             payoutRow.setCancelledAfterBeingPaid(paidEvent != null);

@@ -14,22 +14,23 @@ public class PayoutRowFactory {
 
     public PayoutRow create(
             Event event,
-            Payout payoutCreated,
             String payoutId,
             PayoutStatus payoutStatus) {
+        Payout payout = event.getPayout();
         PayoutRow payoutRow = new PayoutRow();
         payoutRow.setPayoutId(payoutId);
+        payoutRow.setPayoutToolId(payout.getPayoutToolId());
         payoutRow.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
-        payoutRow.setPayoutId(payoutCreated.getPayoutId());
-        payoutRow.setPartyId(payoutCreated.getPartyId());
-        payoutRow.setShopId(payoutCreated.getShopId());
-        payoutRow.setPayoutTime(TypeUtil.stringToLocalDateTime(payoutCreated.getCreatedAt()));
+        payoutRow.setPayoutId(payout.getPayoutId());
+        payoutRow.setPartyId(payout.getPartyId());
+        payoutRow.setShopId(payout.getShopId());
+        payoutRow.setPayoutTime(TypeUtil.stringToLocalDateTime(payout.getCreatedAt()));
         payoutRow.setStatus(TBaseUtil.unionFieldToEnum(payoutStatus,
                 com.rbkmoney.analytics.constant.PayoutStatus.class)
         );
-        payoutRow.setAmount(payoutCreated.getAmount());
-        payoutRow.setFee(payoutCreated.getFee());
-        payoutRow.setCurrency(payoutCreated.getCurrency().getSymbolicCode());
+        payoutRow.setAmount(payout.getAmount());
+        payoutRow.setFee(payout.getFee());
+        payoutRow.setCurrency(payout.getCurrency().getSymbolicCode());
 
         if (payoutStatus.isSetCancelled()) {
             PayoutCancelled cancelled = payoutStatus.getCancelled();

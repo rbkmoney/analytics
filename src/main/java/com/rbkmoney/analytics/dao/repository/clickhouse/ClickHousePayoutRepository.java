@@ -4,6 +4,7 @@ import com.rbkmoney.analytics.dao.model.NumberModel;
 import com.rbkmoney.analytics.dao.model.PayoutRow;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -38,6 +39,10 @@ public class ClickHousePayoutRepository {
 
     public String getPaidEvent(String payoutId) {
         String selectSql = "select payoutId from analytic.events_sink_payout where payoutId = ? and status = 'paid'";
-        return clickHouseJdbcTemplate.queryForObject(selectSql, String.class, payoutId);
+        try {
+            return clickHouseJdbcTemplate.queryForObject(selectSql, String.class, payoutId);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 }
