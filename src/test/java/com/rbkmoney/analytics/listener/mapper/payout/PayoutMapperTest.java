@@ -33,7 +33,7 @@ public class PayoutMapperTest {
 
     @Before
     public void setUp() {
-        when(payoutRowFactory.create(any(), any(), any(), any()))
+        when(payoutRowFactory.create(any(), any(), any()))
                 .thenReturn(new PayoutRow());
 
         when(clickHousePayoutRepository.getPaidEvent(PAYOUT_ID)).thenReturn(PAYOUT_ID);
@@ -58,7 +58,7 @@ public class PayoutMapperTest {
 
         // Then
         verify(payoutRowFactory, only())
-                .create(event, payoutCreated, PAYOUT_ID, PayoutStatus.paid(new PayoutPaid()));
+                .create(event, PAYOUT_ID, PayoutStatus.paid(new PayoutPaid()));
     }
 
     @Test
@@ -80,7 +80,7 @@ public class PayoutMapperTest {
 
         // Then
         verify(payoutRowFactory, only())
-                .create(event, payoutCreated, PAYOUT_ID, PayoutStatus.cancelled(new PayoutCancelled()));
+                .create(event, PAYOUT_ID, PayoutStatus.cancelled(new PayoutCancelled()));
 
         assertTrue(row.isCancelledAfterBeingPaid());
     }
