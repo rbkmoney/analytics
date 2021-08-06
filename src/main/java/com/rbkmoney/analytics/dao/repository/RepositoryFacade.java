@@ -74,13 +74,13 @@ public class RepositoryFacade {
     }
 
     public void insertPayouts(List<PayoutRow> payoutRows) {
-        //List<PayoutRow> paidPayouts = payoutRows.stream()
-        //        .filter(payoutRow -> payoutRow.getStatus() == PayoutStatus.paid
-        //                || (payoutRow.getStatus() == PayoutStatus.cancelled && payoutRow.isCancelledAfterBeingPaid()))
-        //        .collect(toList());
+        List<PayoutRow> paidPayouts = payoutRows.stream()
+                .filter(payoutRow -> payoutRow.getStatus() == PayoutStatus.paid
+                        || (payoutRow.getStatus() == PayoutStatus.cancelled && payoutRow.isCancelledAfterBeingPaid()))
+                .collect(toList());
 
-        //postgresBalanceChangesRepository.insertPayouts(paidPayouts);
-        //log.info("RepositoryFacade PG inserted insertPayouts: {}", paidPayouts.size());
+        postgresBalanceChangesRepository.insertPayouts(paidPayouts);
+        log.info("RepositoryFacade PG inserted insertPayouts: {}", paidPayouts.size());
         clickHousePayoutRepository.insertBatch(payoutRows);
         log.info("RepositoryFacade CH inserted insertPayouts: {}", payoutRows.size());
     }
