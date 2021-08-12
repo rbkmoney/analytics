@@ -3,12 +3,14 @@ package com.rbkmoney.analytics.listener.handler.party.contract;
 import com.rbkmoney.analytics.converter.ContractorToCurrentContractorConverter;
 import com.rbkmoney.analytics.dao.repository.postgres.party.management.ContractDao;
 import com.rbkmoney.analytics.dao.repository.postgres.party.management.ContractorDao;
+import com.rbkmoney.analytics.domain.db.enums.ContractStatus;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Contract;
 import com.rbkmoney.analytics.listener.handler.party.AbstractClaimChangeHandler;
 import com.rbkmoney.damsel.domain.Contractor;
 import com.rbkmoney.damsel.payment_processing.ClaimEffect;
 import com.rbkmoney.damsel.payment_processing.ContractEffectUnit;
 import com.rbkmoney.damsel.payment_processing.PartyChange;
+import com.rbkmoney.geck.common.util.TBaseUtil;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import lombok.RequiredArgsConstructor;
@@ -63,6 +65,16 @@ public class ContractCreatedHandler extends AbstractClaimChangeHandler {
         contract.setPartyId(partyId);
         contract.setEventId(event.getEventId());
         contract.setEventTime(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
+        contract.setCreatedAt(TypeUtil.stringToLocalDateTime(contractCreated.getCreatedAt()));
+        contract.setValidSince(TypeUtil.stringToLocalDateTime(contractCreated.getValidSince()));
+        contract.setValidUntil(TypeUtil.stringToLocalDateTime(contractCreated.getValidUntil()));
+        contract.setStatus(TBaseUtil.unionFieldToEnum(contractCreated.getStatus(), ContractStatus.class));
+        contract.setStatusTerminatedAt(
+                TypeUtil.stringToLocalDateTime(contractCreated.getStatus().getTerminated().getTerminatedAt())
+        );
+        contract.setLegalAgreementId(contract.getLegalAgreementId());
+        contract.setLegalAgreementSignedAt(contract.getLegalAgreementSignedAt());
+        contract.setLegalAgreementValidUntil(contract.getLegalAgreementValidUntil());
 
         String contractorId = checkAndCreateContractor(event, partyId, contractCreated);
         contract.setContractorId(contractorId);

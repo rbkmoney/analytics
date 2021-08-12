@@ -7,13 +7,20 @@ import com.rbkmoney.analytics.dao.model.PaymentRow;
 import com.rbkmoney.analytics.dao.model.PayoutRow;
 import com.rbkmoney.analytics.dao.model.RefundRow;
 import com.rbkmoney.analytics.dao.repository.postgres.PostgresBalanceChangesRepository;
+import com.rbkmoney.analytics.dao.repository.postgres.party.management.CategoryDao;
+import com.rbkmoney.analytics.dao.repository.postgres.party.management.ContractDao;
 import com.rbkmoney.analytics.dao.repository.postgres.party.management.PartyDao;
 import com.rbkmoney.analytics.dao.repository.postgres.party.management.ShopDao;
+import com.rbkmoney.analytics.dao.repository.postgres.party.management.model.ContractFilter;
+import com.rbkmoney.analytics.dao.repository.postgres.party.management.model.PartyFilter;
+import com.rbkmoney.analytics.dao.repository.postgres.party.management.model.ShopFilter;
 import com.rbkmoney.analytics.domain.CashFlowResult;
+import com.rbkmoney.analytics.domain.db.tables.pojos.Category;
+import com.rbkmoney.analytics.domain.db.tables.pojos.Contract;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
+import com.rbkmoney.geck.common.util.TypeUtil;
 import io.github.benas.randombeans.api.EnhancedRandom;
-import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,13 +63,19 @@ public class PostgresRepositoryTest {
     private PostgresBalanceChangesRepository postgresBalanceChangesRepository;
 
     @Autowired
-    private PartyDao partyDao;
+    protected PartyDao partyDao;
 
     @Autowired
-    private ShopDao shopDao;
+    protected ShopDao shopDao;
 
     @Autowired
-    private JdbcTemplate postgresJdbcTemplate;
+    protected CategoryDao categoryDao;
+
+    @Autowired
+    protected ContractDao contractDao;
+
+    @Autowired
+    protected JdbcTemplate postgresJdbcTemplate;
 
     @Test
     public void testCount() {
@@ -83,7 +96,7 @@ public class PostgresRepositoryTest {
         Party party = EnhancedRandom.random(Party.class);
         partyDao.saveParty(party);
         Party savedParty = partyDao.getPartyById(party.getPartyId());
-        Assert.assertEquals(party, savedParty);
+        assertEquals(party, savedParty);
     }
 
     @Test
@@ -91,7 +104,7 @@ public class PostgresRepositoryTest {
         Shop shop = EnhancedRandom.random(Shop.class);
         shopDao.saveShop(shop);
         Shop savedShop = shopDao.getShopByPartyIdAndShopId(shop.getPartyId(), shop.getShopId());
-        Assert.assertEquals(shop, savedShop);
+        assertEquals(shop, savedShop);
     }
 
     @Test
@@ -102,7 +115,7 @@ public class PostgresRepositoryTest {
         secondParty.setPartyId(firstParty.getPartyId());
         partyDao.saveParty(secondParty);
         Party savedParty = partyDao.getPartyById(secondParty.getPartyId());
-        Assert.assertEquals(secondParty, savedParty);
+        assertEquals(secondParty, savedParty);
     }
 
     @Test
@@ -114,7 +127,100 @@ public class PostgresRepositoryTest {
         secondShop.setShopId(firstShop.getShopId());
         shopDao.saveShop(secondShop);
         Shop savedShop = shopDao.getShopByPartyIdAndShopId(secondShop.getPartyId(), secondShop.getShopId());
-        Assert.assertEquals(secondShop, savedShop);
+        assertEquals(secondShop, savedShop);
+    }
+
+    @Test
+    public void testSearchParty() {
+        String testEmail = "test@mail.com";
+        Party firstParty = EnhancedRandom.random(Party.class);
+        firstParty.setEmail(testEmail);
+        Party secondParty = EnhancedRandom.random(Party.class);
+        partyDao.saveParty(List.of(firstParty, secondParty));
+
+        PartyFilter filter = PartyFilter.builder().email(testEmail).build();
+        List<Party> parties = partyDao.getPartyByFilter(filter);
+        assertEquals(1, parties.size());
+        assertEquals(
+                parties.stream().filter(party -> party.getPartyId().equals(firstParty.getPartyId())).findFirst().get(),
+                firstParty
+        );
+    }
+
+    @Test
+    public void testSearchPartyByShop() {
+        String shopLocationUrl = "testLocationUrl";
+        Party firstParty = EnhancedRandom.random(Party.class);
+        Party secondParty = EnhancedRandom.random(Party.class);
+        Shop shop = EnhancedRandom.random(Shop.class);
+        shop.setPartyId(firstParty.getPartyId());
+        shop.setLocationUrl(shopLocationUrl);
+
+        partyDao.saveParty(List.of(firstParty, secondParty));
+        shopDao.saveShop(shop);
+        PartyFilter partyFilter = PartyFilter.builder()
+                .shopFilter(ShopFilter.builder().locationUrl(shopLocationUrl).build())
+                .build();
+        List<Party> parties = partyDao.getPartyByFilter(partyFilter);
+
+        assertEquals(1, parties.size());
+        assertEquals(
+                parties.stream().filter(party -> party.getPartyId().equals(firstParty.getPartyId())).findFirst().get(),
+                firstParty
+        );
+    }
+
+    @Test
+    public void testSearchPartyByCategory() {
+        String categoryName = "Kek clothes";
+        Party firstParty = EnhancedRandom.random(Party.class);
+        Party secondParty = EnhancedRandom.random(Party.class);
+        Category category = EnhancedRandom.random(Category.class);
+        category.setName(categoryName);
+        Shop shop = EnhancedRandom.random(Shop.class);
+        shop.setPartyId(firstParty.getPartyId());
+        shop.setCategoryId(category.getCategoryId());
+
+        partyDao.saveParty(List.of(firstParty, secondParty));
+        categoryDao.saveCategory(category);
+        shopDao.saveShop(shop);
+        PartyFilter partyFilter = PartyFilter.builder()
+                .shopFilter(ShopFilter.builder().categoryName(categoryName).build())
+                .build();
+        List<Party> parties = partyDao.getPartyByFilter(partyFilter);
+
+        assertEquals(1, parties.size());
+        assertEquals(
+                parties.stream().filter(party -> party.getPartyId().equals(firstParty.getPartyId())).findFirst().get(),
+                firstParty
+        );
+    }
+
+    @Test
+    public void testSearchPartyByContract() {
+        LocalDateTime legalAgreementSignedAt = LocalDateTime.now();
+        Party firstParty = EnhancedRandom.random(Party.class);
+        Party secondParty = EnhancedRandom.random(Party.class);
+        Contract contract = EnhancedRandom.random(Contract.class);
+        contract.setLegalAgreementSignedAt(legalAgreementSignedAt);
+        contract.setPartyId(firstParty.getPartyId());
+
+        partyDao.saveParty(List.of(firstParty, secondParty));
+        contractDao.saveContract(contract);
+        PartyFilter partyFilter = PartyFilter.builder()
+                .contractFilter(
+                        ContractFilter.builder()
+                                .legalAgreementSignedAt(TypeUtil.temporalToString(legalAgreementSignedAt))
+                                .build()
+                )
+                .build();
+        List<Party> parties = partyDao.getPartyByFilter(partyFilter);
+
+        assertEquals(1, parties.size());
+        assertEquals(
+                parties.stream().filter(party -> party.getPartyId().equals(firstParty.getPartyId())).findFirst().get(),
+                firstParty
+        );
     }
 
     private PaymentRow payment() {

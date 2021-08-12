@@ -73,6 +73,11 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
     }
 
     @Override
+    public AmountResponse getCreditingsAmount(FilterRequest filterRequest) throws TException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public AmountResponse getAveragePayment(FilterRequest filterRequest) {
         log.info("-> getAveragePayment filterRequest: {}", filterRequest);
 

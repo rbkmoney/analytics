@@ -23,7 +23,7 @@
         <dockerfile.registry>${env.REGISTRY}</dockerfile.registry>
         <clickhouse-jdbc.version>0.2.4</clickhouse-jdbc.version>
         <machinegun-proto.version>1.12-ebae56f</machinegun-proto.version>
-        <analytics-proto.version>1.25-2ec5116</analytics-proto.version>
+        <analytics-proto.version>1.29-67efe00</analytics-proto.version>
         <mg-event-sink-listener-spring-boot-starter.version>0.0.5-SNAPSHOT</mg-event-sink-listener-spring-boot-starter.version>
         <sink-common-lib.version>0.0.4</sink-common-lib.version>
         <schedlock.version>4.14.0</schedlock.version>
@@ -93,6 +93,7 @@
         <dependency>
             <groupId>com.rbkmoney</groupId>
             <artifactId>db-common-lib</artifactId>
+            <version>0.0.4</version>
         </dependency>
         <dependency>
             <groupId>com.rbkmoney</groupId>
@@ -317,7 +318,7 @@
             <plugin>
                 <groupId>com.rbkmoney.maven.plugins</groupId>
                 <artifactId>pg-embedded-plugin</artifactId>
-                <version>1.4</version>
+                <version>1.7</version>
                 <configuration>
                     <port>${db.port}</port>
                     <dbName>${db.name}</dbName>
