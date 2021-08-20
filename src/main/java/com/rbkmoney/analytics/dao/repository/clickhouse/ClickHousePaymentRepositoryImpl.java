@@ -40,10 +40,11 @@ public class ClickHousePaymentRepositoryImpl implements ClickHousePaymentReposit
     public static final String ADDITIONAL_PARAMETERS = " %1s %2s";
 
     public static final String SELECT_BALANCES_SQL = FileUtil.getFile("scripts/select_current_balance.sql");
-    public static final String SELECT_SHOP_BANALCES_SQL = FileUtil.getFile("scripts/select_current_shop_balance.sql");
+    public static final String SELECT_SHOP_BALANCES_SQL = FileUtil.getFile("scripts/select_current_shop_balance.sql");
     public static final String SELECT_ERROR_DESCRIPTION = FileUtil.getFile("scripts/select_error_description.sql");
     public static final String SELECT_PAYMENT_TOOL_DESCRIPTION =
             FileUtil.getFile("scripts/select_payment_tool_description.sql");
+    public static final String SELECT_CREDITINGS = FileUtil.getFile("scripts/select_creditings.sql");
 
     private final JdbcTemplate clickHouseJdbcTemplate;
 
@@ -247,7 +248,7 @@ public class ClickHousePaymentRepositoryImpl implements ClickHousePaymentReposit
         List<Object> params = new ArrayList<>();
         params.add(LocalDate.now());
         params.add(partyId);
-        String sql = String.format(SELECT_SHOP_BANALCES_SQL,
+        String sql = String.format(SELECT_SHOP_BALANCES_SQL,
                 QueryUtils.generateIdsSql(shopIds, params, QueryUtils::generateInList),
                 QueryUtils.generateIdsSql(excludeShopIds, params, QueryUtils::generateNotInList));
         params = Collections.nCopies(4, params).stream()
@@ -259,4 +260,19 @@ public class ClickHousePaymentRepositoryImpl implements ClickHousePaymentReposit
         return shopAmountModelCommonRowsMapper.map(rows);
     }
 
+    @Override
+    public List<NumberModel> getCreditings(String partyId,
+                                           List<String> shopIds,
+                                           List<String> excludeShopIds,
+                                           LocalDateTime from,
+                                           LocalDateTime to) {
+        List<Object> params = TimeParamUtils.generateTimeParams(from, to);
+        params.add(partyId);
+        String sql = String.format(SELECT_CREDITINGS,
+                QueryUtils.generateIdsSql(shopIds, params, QueryUtils::generateInList),
+                QueryUtils.generateIdsSql(excludeShopIds, params, QueryUtils::generateNotInList)
+        );
+        List<Map<String, Object>> rows = clickHouseJdbcTemplate.queryForList(sql, params.toArray());
+        return costCommonRowsMapper.map(rows);
+    }
 }

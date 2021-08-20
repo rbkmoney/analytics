@@ -38,7 +38,17 @@ VALUES ('2019-12-05', 1575556887, 1575554400000, 'ca2e9162-eda2-4d17-bbfa-dc5e39
         '1DkratTHbpc', '1', 28, '204.26.61.110', '546960', '3125', 'payment_terminal', '', '', '', ''),
        ('2019-12-07', 1575666000, 1575666000000, 'ca2e9162-eda2-4d17-bbfa-dc5e39b1772d',
         'ad8b7bfd-0760-4781-a400-51903ee8e509', 'test@example.com', 'RSB', 1000, 0, 0, 0, 0, 'RUB', 'captured', '', '',
-        '1DkratTHbpc', '1', 29, '204.26.61.110', '546960', '3125', 'payment_terminal', '', '', '', '');
+        '1DkratTHbpc', '1', 29, '204.26.61.110', '546960', '3125', 'payment_terminal', '', '', '', ''),
+       ('2019-12-05', 1575556887, 1575554400000, 'ca2e9162-eda2-4d17-bbfa-dc5e39b1772x',
+        'ad8b7bfd-0760-4781-a400-51903ee8e510', 'test_fee@example.com', 'RSB', 1000, 0, 100, 100, 100, 'RUB',
+        'captured', '', '', '1DkratTHbpx', '1', 27, '204.26.61.110', '546961', '3125', 'payment_terminal', '', '', '',
+        ''),
+       ('2019-12-06', 1575579600, 1575579600000, 'ca2e9162-eda2-4d17-bbfa-dc5e39b1772x',
+        'ad8b7bfd-0760-4781-a400-51903ee8e511', 'test_fee@example.com', 'RSB', 1000, 0, 100, 100, 0, 'RUB', 'captured',
+        '', '', '1DkratTHbpx', '1', 28, '204.26.61.110', '546961', '3125', 'payment_terminal', '', '', '', ''),
+       ('2019-12-07', 1575666000, 1575666000000, 'ca2e9162-eda2-4d17-bbfa-dc5e39b1772x',
+        'ad8b7bfd-0760-4781-a400-51903ee8e512', 'test_fee@example.com', 'RSB', 1000, 0, 100, 0, 0, 'RUB', 'captured',
+        '', '', '1DkratTHbpx', '1', 29, '204.26.61.110', '546961', '3125', 'payment_terminal', '', '', '', '');
 
 INSERT INTO analytic.events_sink_refund (timestamp, eventTime, eventTimeHour, partyId, shopId, email, providerName,
                                          amount, guaranteeDeposit, systemFee, providerFee, externalFee, currency,

@@ -63,4 +63,9 @@ public interface ClickHousePaymentRepository {
 
     List<ShopAmountModel> getShopBalances(String partyId, List<String> shopdIds, List<String> excludeShopIds);
 
+    List<NumberModel> getCreditings(String partyId,
+                                    List<String> shopIds,
+                                    List<String> excludeShopIds,
+                                    LocalDateTime from,
+                                    LocalDateTime to);
 }

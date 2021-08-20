@@ -9,6 +9,7 @@ import com.rbkmoney.analytics.dao.model.NumberModel;
 import com.rbkmoney.analytics.dao.model.SplitNumberModel;
 import com.rbkmoney.analytics.dao.model.SplitStatusNumberModel;
 import com.rbkmoney.analytics.dao.repository.clickhouse.ClickHousePaymentRepositoryImpl;
+import com.rbkmoney.analytics.utils.constant.PaymentsWithFeeConstants;
 import com.rbkmoney.damsel.analytics.SplitUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -359,4 +360,66 @@ public class ClickHousePaymentRepositoryTest extends ClickHouseAbstractTest {
         assertTrue(currentBalances.isEmpty());
     }
 
+    @Test
+    public void testGetCreditings() {
+        List<NumberModel> creditings = clickHousePaymentRepository.getCreditings(
+                PaymentsWithFeeConstants.PARTY_ID,
+                null,
+                null,
+                PaymentsWithFeeConstants.BEFORE_FIRST_TIMESTAMP,
+                PaymentsWithFeeConstants.AFTER_THIRD_TIMESTAMP
+        );
+        assertCreditings(2400L, creditings);
+
+        creditings = clickHousePaymentRepository.getCreditings(
+                PaymentsWithFeeConstants.PARTY_ID,
+                null,
+                List.of(PaymentsWithFeeConstants.FIRST_SHOP_ID, PaymentsWithFeeConstants.SECOND_SHOP_ID),
+                PaymentsWithFeeConstants.BEFORE_FIRST_TIMESTAMP,
+                PaymentsWithFeeConstants.AFTER_THIRD_TIMESTAMP
+        );
+        assertCreditings(900L, creditings);
+
+        creditings = clickHousePaymentRepository.getCreditings(
+                PaymentsWithFeeConstants.PARTY_ID,
+                List.of(PaymentsWithFeeConstants.SECOND_SHOP_ID, PaymentsWithFeeConstants.THIRD_SHOP_ID),
+                null,
+                PaymentsWithFeeConstants.BEFORE_FIRST_TIMESTAMP,
+                PaymentsWithFeeConstants.AFTER_THIRD_TIMESTAMP
+        );
+        assertCreditings(1700L, creditings);
+
+        creditings = clickHousePaymentRepository.getCreditings(
+                PaymentsWithFeeConstants.PARTY_ID,
+                List.of(PaymentsWithFeeConstants.FIRST_SHOP_ID),
+                List.of(PaymentsWithFeeConstants.FIRST_SHOP_ID, PaymentsWithFeeConstants.THIRD_SHOP_ID),
+                PaymentsWithFeeConstants.BEFORE_FIRST_TIMESTAMP,
+                PaymentsWithFeeConstants.AFTER_THIRD_TIMESTAMP
+        );
+        assertTrue(creditings.isEmpty());
+
+        creditings = clickHousePaymentRepository.getCreditings(
+                PaymentsWithFeeConstants.PARTY_ID,
+                null,
+                List.of(PaymentsWithFeeConstants.FIRST_SHOP_ID),
+                PaymentsWithFeeConstants.BEFORE_FIRST_TIMESTAMP,
+                PaymentsWithFeeConstants.BEFORE_THIRD_TIMESTAMP
+        );
+        assertCreditings(800L, creditings);
+
+        creditings = clickHousePaymentRepository.getCreditings(
+                PaymentsWithFeeConstants.PARTY_ID,
+                List.of(PaymentsWithFeeConstants.SECOND_SHOP_ID, PaymentsWithFeeConstants.THIRD_SHOP_ID),
+                null,
+                PaymentsWithFeeConstants.BEFORE_THIRD_TIMESTAMP,
+                PaymentsWithFeeConstants.AFTER_THIRD_TIMESTAMP
+        );
+        assertCreditings(900L, creditings);
+    }
+
+    private void assertCreditings(Long value, List<NumberModel> creditings) {
+        assertEquals(1, creditings.size());
+        assertEquals(value, creditings.get(0).getNumber());
+        assertEquals("RUB", creditings.get(0).getCurrency());
+    }
 }

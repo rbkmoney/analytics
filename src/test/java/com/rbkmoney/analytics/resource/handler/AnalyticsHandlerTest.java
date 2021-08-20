@@ -8,6 +8,7 @@ import com.rbkmoney.analytics.dao.repository.clickhouse.ClickHousePaymentReposit
 import com.rbkmoney.analytics.dao.repository.clickhouse.ClickHouseRefundRepository;
 import com.rbkmoney.analytics.repository.ClickHouseAbstractTest;
 import com.rbkmoney.analytics.repository.ClickHousePayoutRepositoryTest;
+import com.rbkmoney.analytics.utils.constant.PaymentsWithFeeConstants;
 import com.rbkmoney.damsel.analytics.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
@@ -302,4 +303,20 @@ public class AnalyticsHandlerTest extends ClickHouseAbstractTest {
         paymentsAmount.validate();
     }
 
+    @Test
+    public void getCreditingsAmount() throws TException {
+        AmountResponse amountResponse = analyticsHandler.getCreditingsAmount(new FilterRequest()
+                .setMerchantFilter(new MerchantFilter()
+                        .setPartyId(PaymentsWithFeeConstants.PARTY_ID)
+                        .setExcludeShopIds(List.of(PaymentsWithFeeConstants.THIRD_SHOP_ID))
+                )
+                .setTimeFilter(timeFilterDefault)
+        );
+        List<CurrencyGroupedAmount> groupsAmount = amountResponse.getGroupsAmount();
+
+        amountResponse.validate();
+        assertEquals(1, groupsAmount.size());
+        assertEquals(1500L, groupsAmount.get(0).amount);
+        assertEquals(RUB, groupsAmount.get(0).getCurrency());
+    }
 }

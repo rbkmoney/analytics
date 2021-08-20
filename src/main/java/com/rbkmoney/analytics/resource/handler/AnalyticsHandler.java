@@ -256,4 +256,21 @@ public class AnalyticsHandler implements AnalyticsServiceSrv.Iface {
 
         return amountResponse;
     }
+
+    @Override
+    @Cacheable(value = "getCreditingsAmount")
+    public AmountResponse getCreditingsAmount(FilterRequest filterRequest) throws TException {
+        log.info("-> getCreditingsAmount filterRequest: {}", filterRequest);
+        List<NumberModel> creditings = clickHousePaymentRepository.getCreditings(
+                filterRequest.getMerchantFilter().getPartyId(),
+                filterRequest.getMerchantFilter().getShopIds(),
+                filterRequest.getMerchantFilter().getExcludeShopIds(),
+                TypeUtil.stringToLocalDateTime(filterRequest.getTimeFilter().getFromTime()),
+                TypeUtil.stringToLocalDateTime(filterRequest.getTimeFilter().getToTime())
+        );
+        AmountResponse amountResponse = costToAmountResponseConverter.convertCurrency(creditings);
+        log.info("<- getCreditingsAmount amountResponse: {}", amountResponse);
+
+        return amountResponse;
+    }
 }
