@@ -20,7 +20,7 @@ public class SplitUtils {
 
     public static Long generateOffset(Map row, SplitUnit splitUnit) {
         switch (splitUnit) {
-            case MINUTE: {
+            case MINUTE -> {
                 Integer hour = (Integer) row.get(HOUR);
                 Integer minutes = (Integer) row.get(MINUTES);
                 Date date = (Date) row.get(DAY);
@@ -32,7 +32,7 @@ public class SplitUtils {
                         .atZone(UTC)
                         .toInstant().toEpochMilli();
             }
-            case HOUR: {
+            case HOUR -> {
                 Integer hour = (Integer) row.get(HOUR);
                 Date date = (Date) row.get(DAY);
                 LocalDateTime localDateTime = date.toLocalDate()
@@ -42,66 +42,50 @@ public class SplitUtils {
                         .atZone(UTC)
                         .toInstant().toEpochMilli();
             }
-            case DAY: {
+            case DAY -> {
                 Date date = (Date) row.get(DAY);
                 return date.toLocalDate()
                         .atStartOfDay()
                         .atZone(UTC)
                         .toInstant().toEpochMilli();
             }
-            case WEEK: {
+            case WEEK -> {
                 Date date = (Date) row.get(WEEK);
                 return date.toLocalDate()
                         .atStartOfDay()
                         .atZone(UTC)
                         .toInstant().toEpochMilli();
             }
-            case MONTH: {
+            case MONTH -> {
                 Integer date = (Integer) row.get(YEAR);
                 Integer months = (Integer) row.get(MONTHS);
-                return LocalDate.of(date.intValue(), months.intValue(), 1)
+                return LocalDate.of(date, months, 1)
                         .atStartOfDay()
                         .atZone(UTC)
                         .toInstant().toEpochMilli();
             }
-            case YEAR: {
+            case YEAR -> {
                 Integer date = (Integer) row.get(YEAR);
-                return LocalDate.of(date.intValue(), 1, 1)
+                return LocalDate.of(date, 1, 1)
                         .atStartOfDay()
                         .atZone(UTC)
                         .toInstant().toEpochMilli();
             }
-            default:
-                throw new RuntimeException();
+            default -> throw new RuntimeException();
         }
     }
 
     public static String initGroupByFunction(SplitUnit splitUnit) {
-        String groupBy;
-        switch (splitUnit) {
-            case MINUTE:
-                groupBy = "timestamp as day, toHour(toDateTime(eventTime, 'UTC')) as hour, " +
-                        "toMinute(toDateTime(eventTime, 'UTC')) as minutes";
-                break;
-            case HOUR:
-                groupBy = "timestamp as day, toHour(toDateTime(eventTime, 'UTC')) as hour";
-                break;
-            case DAY:
-                groupBy = "timestamp as day";
-                break;
-            case WEEK:
-                groupBy = "toStartOfWeek(timestamp, 1) as week";
-                break;
-            case MONTH:
-                groupBy = "toYear(timestamp) as year, toMonth(timestamp) as months";
-                break;
-            case YEAR:
-                groupBy = "toYear(timestamp) as year";
-                break;
-            default:
-                throw new RuntimeException();
-        }
-        return groupBy;
+        return switch (splitUnit) {
+            case MINUTE -> "timestamp as day, toHour(toDateTime(eventTime, 'UTC')) as hour, " +
+                    "toMinute(toDateTime(eventTime, 'UTC')) as minutes";
+            case HOUR -> "timestamp as day, toHour(toDateTime(eventTime, 'UTC')) as hour";
+            case DAY -> "timestamp as day";
+            case WEEK -> "toStartOfWeek(timestamp, 1) as week";
+            case MONTH -> "toYear(timestamp) as year, toMonth(timestamp) as months";
+            case YEAR -> "toYear(timestamp) as year";
+            default -> throw new RuntimeException();
+        };
     }
 
 
