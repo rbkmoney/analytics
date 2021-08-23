@@ -15,7 +15,7 @@ import static java.util.stream.Collectors.toList;
 public class GroupedCurCountToResponseConverter {
 
     private static final String CAPTURED_STATUS = "captured";
-    private static final String FAILED_STATS = "failed";
+    private static final String FAILED_STATUS = "failed";
     private static final String CANCELLED_STATUS = "cancelled";
 
     public SplitCountResponse convert(List<SplitStatusNumberModel> splitAmount) {
@@ -57,18 +57,12 @@ public class GroupedCurCountToResponseConverter {
     }
 
     private PaymentStatus mapStatus(Map.Entry<String, List<SplitStatusNumberModel>> entry) {
-        switch (entry.getKey()) {
-            case CAPTURED_STATUS -> {
-                return PaymentStatus.CAPTURED;
-            }
-            case FAILED_STATS -> {
-                return PaymentStatus.FAILED;
-            }
-            case CANCELLED_STATUS -> {
-                return PaymentStatus.CANCELLED;
-            }
+        return switch (entry.getKey()) {
+            case CAPTURED_STATUS -> PaymentStatus.CAPTURED;
+            case FAILED_STATUS -> PaymentStatus.FAILED;
+            case CANCELLED_STATUS -> PaymentStatus.CANCELLED;
             default -> throw new PaymentInfoRequestException();
-        }
+        };
     }
 
 }
