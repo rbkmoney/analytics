@@ -562,16 +562,14 @@ public class PartyFlowGenerator {
         ClaimAccepted claimAccepted = new ClaimAccepted();
         claimAccepted.setEffects(Collections.singletonList(claimEffect));
         ClaimStatus claimStatus = ClaimStatus.accepted(claimAccepted);
-        return new Claim(CLAIM_ID, claimStatus, Collections.emptyList(), REVISION_ID,
-                TypeUtil.temporalToString(LocalDateTime.now()));
+        return new Claim(CLAIM_ID, claimStatus, REVISION_ID, TypeUtil.temporalToString(LocalDateTime.now()));
     }
 
     public static Claim buildClaimChanged(List<ClaimEffect> claimEffects) {
         ClaimAccepted claimAccepted = new ClaimAccepted();
         claimAccepted.setEffects(claimEffects);
         ClaimStatus claimStatus = ClaimStatus.accepted(claimAccepted);
-        return new Claim(CLAIM_ID, claimStatus, Collections.emptyList(), REVISION_ID,
-                TypeUtil.temporalToString(LocalDateTime.now()));
+        return new Claim(CLAIM_ID, claimStatus, REVISION_ID, TypeUtil.temporalToString(LocalDateTime.now()));
     }
 
     public static Shop buildShopCreated(String contractId) throws IOException {
