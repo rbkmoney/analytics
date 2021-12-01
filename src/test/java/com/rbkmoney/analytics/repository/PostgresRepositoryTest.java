@@ -12,6 +12,7 @@ import com.rbkmoney.analytics.dao.repository.postgres.party.management.ShopDao;
 import com.rbkmoney.analytics.domain.CashFlowResult;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
+import com.rbkmoney.analytics.utils.Version;
 import io.github.benas.randombeans.api.EnhancedRandom;
 import org.junit.Assert;
 import org.junit.ClassRule;
@@ -46,7 +47,7 @@ public class PostgresRepositoryTest {
 
     @ClassRule
     @SuppressWarnings("rawtypes")
-    public static PostgreSQLContainer postgres = (PostgreSQLContainer) new PostgreSQLContainer("postgres:9.6")
+    public static PostgreSQLContainer postgres = (PostgreSQLContainer) new PostgreSQLContainer(Version.POSTGRES_VERSION)
             .withStartupTimeout(Duration.ofMinutes(5));
 
     @LocalServerPort

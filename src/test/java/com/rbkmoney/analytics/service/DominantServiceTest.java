@@ -4,6 +4,7 @@ import com.rbkmoney.analytics.AnalyticsApplication;
 import com.rbkmoney.analytics.dao.repository.postgres.party.management.DominantDao;
 import com.rbkmoney.analytics.utils.KafkaAbstractTest;
 import com.rbkmoney.analytics.utils.TestData;
+import com.rbkmoney.analytics.utils.Version;
 import com.rbkmoney.damsel.domain.CategoryType;
 import com.rbkmoney.damsel.domain_config.Commit;
 import com.rbkmoney.damsel.domain_config.RepositorySrv;
@@ -38,7 +39,7 @@ public class DominantServiceTest extends KafkaAbstractTest {
 
     @ClassRule
     @SuppressWarnings("rawtypes")
-    public static PostgreSQLContainer postgres = (PostgreSQLContainer) new PostgreSQLContainer("postgres:9.6")
+    public static PostgreSQLContainer postgres = (PostgreSQLContainer) new PostgreSQLContainer(Version.POSTGRES_VERSION)
             .withStartupTimeout(Duration.ofMinutes(5));
     @MockBean
     private RepositorySrv.Iface dominantClient;

@@ -11,6 +11,7 @@ import com.rbkmoney.analytics.domain.db.tables.pojos.Party;
 import com.rbkmoney.analytics.domain.db.tables.pojos.Shop;
 import com.rbkmoney.analytics.utils.KafkaAbstractTest;
 import com.rbkmoney.analytics.utils.PartyFlowGenerator;
+import com.rbkmoney.analytics.utils.Version;
 import com.rbkmoney.damsel.domain.PartyContractor;
 import com.rbkmoney.damsel.domain.RussianLegalEntity;
 import com.rbkmoney.machinegun.eventsink.SinkEvent;
@@ -50,7 +51,7 @@ public class PartyListenerTest extends KafkaAbstractTest {
 
     @ClassRule
     @SuppressWarnings("rawtypes")
-    public static PostgreSQLContainer postgres = (PostgreSQLContainer) new PostgreSQLContainer("postgres:9.6")
+    public static PostgreSQLContainer postgres = (PostgreSQLContainer) new PostgreSQLContainer(Version.POSTGRES_VERSION)
             .withStartupTimeout(Duration.ofMinutes(5));
     @Autowired
     private PartyDao partyDao;

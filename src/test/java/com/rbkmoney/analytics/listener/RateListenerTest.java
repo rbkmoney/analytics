@@ -3,6 +3,7 @@ package com.rbkmoney.analytics.listener;
 import com.rbkmoney.analytics.AnalyticsApplication;
 import com.rbkmoney.analytics.utils.KafkaAbstractTest;
 import com.rbkmoney.analytics.utils.RateSinkEventTestUtils;
+import com.rbkmoney.analytics.utils.Version;
 import com.rbkmoney.machinegun.eventsink.SinkEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.ClassRule;
@@ -35,7 +36,7 @@ public class RateListenerTest extends KafkaAbstractTest {
 
     @ClassRule
     @SuppressWarnings("rawtypes")
-    public static PostgreSQLContainer postgres = (PostgreSQLContainer) new PostgreSQLContainer("postgres:9.6")
+    public static PostgreSQLContainer postgres = (PostgreSQLContainer) new PostgreSQLContainer(Version.POSTGRES_VERSION)
             .withStartupTimeout(Duration.ofMinutes(5));
     @Value("${kafka.topic.rate.initial}")
     public String rateTopic;
